@@ -1,25 +1,21 @@
 const content = {
   brand: {
-    name: "DSys",
-    full: "UofT Decision Systems",
+    name: "UTDSYS",
+    full: "University of Toronto Decision Systems",
   },
-  landing: {
-    tagline: "UofT · Decision Systems",
-    scrollCue: "Scroll ↓",
-  },
-  // The single home/intro section revealed by the neural-network transition.
-  intro: {
-    headline:
-      "A student design team at UofT building intelligent decision systems.",
-    subhead:
-      "We design, prototype, and ship data-driven systems that help people make better decisions — and we teach each other how along the way.",
-    cta: { label: "Get Involved", href: "/get-involved" },
+  // The hero: a neural network builds itself on load and converges into the
+  // wordmark; the two CTAs are the site's primary paths.
+  hero: {
+    mission: "A student design team building intelligent decision systems.",
+    primary: { label: "Get involved", href: "/get-involved" },
+    secondary: { label: "Project gallery", href: "/projects" },
   },
   nav: {
     links: [
+      { label: "Projects", href: "/projects" },
       { label: "Team", href: "/team" },
       { label: "Blog", href: "/blog" },
-      { label: "Contact", href: "/get-involved" },
+      { label: "Contact", href: "/contact" },
       { label: "Get Involved", href: "/get-involved" },
     ],
   },
@@ -40,8 +36,51 @@ const content = {
       error: "Something went wrong. Please try again or email us directly.",
     },
   },
+  // The /projects gallery. Projects are commented out for now — the page
+  // shows a "coming soon" state (see pages.projects). Restore these items
+  // (and the gallery in app/projects/page.tsx) when the work is ready.
+  projects: {
+    eyebrow: "Selected work",
+    heading: "Projects",
+    intro:
+      "What the team builds: decision systems that turn messy, uncertain inputs into one confident call. A sample of current and past work.",
+    items: [
+      // {
+      //   name: "Aegis",
+      //   status: "Active",
+      //   summary:
+      //     "A Bayesian risk engine that scores live sensor streams and flags anomalies before they cascade.",
+      //   tags: ["Bayesian inference", "Streaming", "Rust"],
+      // },
+      // {
+      //   name: "Compass",
+      //   status: "Prototype",
+      //   summary:
+      //     "A planning agent that weighs cost, time, and uncertainty to recommend a single, explainable route.",
+      //   tags: ["Reinforcement learning", "Optimization"],
+      // },
+      // {
+      //   name: "Ledger",
+      //   status: "Research",
+      //   summary:
+      //     "An interpretable decision model that attaches a plain-language reason code to every outcome.",
+      //   tags: ["Interpretability", "Python"],
+      // },
+      // {
+      //   name: "Atlas",
+      //   status: "Archived",
+      //   summary:
+      //     "A simulation sandbox for stress-testing policies against thousands of synthetic futures.",
+      //   tags: ["Monte Carlo", "Simulation"],
+      // },
+    ],
+  },
   // "Coming soon" placeholder pages.
   pages: {
+    projects: {
+      title: "Projects",
+      body: "Case studies and project write-ups are on the way. We're heads-down building decision systems — check back soon.",
+    },
     team: {
       title: "Team",
       body: "Meet the people behind Decision Systems. Profiles are on the way — check back soon.",
@@ -52,11 +91,40 @@ const content = {
     },
   },
   contact: {
-    email: "hello@utdsys.ca",
+    email: "info@utdsys.com",
+    // Directories surfaced in the hero strip; the full set lives on /contact.
     socials: [
-      { label: "Instagram", href: "#" },
-      { label: "LinkedIn", href: "#" },
-      { label: "GitHub", href: "#" },
+      { label: "Discord", href: "https://discord.gg/FAA2fUpNnT" },
+      { label: "GitHub", href: "https://github.com/UTDSYS" },
+      { label: "LinkedIn", href: "https://www.linkedin.com/company/utdsys" },
+    ],
+  },
+  // The /contact directory: every way to reach the team, in one place.
+  contactPage: {
+    heading: "Find us",
+    intro:
+      "Questions, ideas, or just want to say hi? Reach the team through any of these — Discord is the fastest.",
+    channels: [
+      {
+        label: "Email",
+        value: "info@utdsys.com",
+        href: "mailto:info@utdsys.com",
+      },
+      {
+        label: "Discord",
+        value: "Join the server",
+        href: "https://discord.gg/FAA2fUpNnT",
+      },
+      {
+        label: "GitHub",
+        value: "github.com/UTDSYS",
+        href: "https://github.com/UTDSYS",
+      },
+      {
+        label: "LinkedIn",
+        value: "linkedin.com/company/utdsys",
+        href: "https://www.linkedin.com/company/utdsys",
+      },
     ],
   },
 } as const;

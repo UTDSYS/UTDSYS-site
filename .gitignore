@@ -5,3 +5,4 @@ out
 
 # local env files with secrets (keeps .env.local.example tracked)
 .env*.local
+.vercel

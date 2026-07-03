@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import content from "@/lib/content";
+import Button from "@/components/ui/Button";
 
 type Status = "idle" | "sending" | "success" | "error";
 
@@ -95,13 +96,9 @@ export default function ContactForm() {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={sending}
-        className="mt-2 inline-flex items-center justify-center rounded-full bg-navy px-8 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
-      >
+      <Button type="submit" disabled={sending} className="mt-2">
         {sending ? f.sending : f.submit}
-      </button>
+      </Button>
     </form>
   );
 }

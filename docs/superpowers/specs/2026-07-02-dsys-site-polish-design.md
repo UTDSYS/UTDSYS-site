@@ -43,9 +43,12 @@ to uwhpc's dark theme.
   buttons are unrelated. No shared `Button`.
 - No shared `Section`/`Container`; max-widths and padding are repeated ad hoc
   (`max-w-6xl` in Nav/Footer, `max-w-4xl`/`max-w-xl` in Intro).
-- System font stack only — nothing that reads as "designed."
-- `NeuralNetwork` morph is a single Landing→Intro fade over a `300vh` pinned
-  region; the canvas is underused as a scroll actor.
+- Fonts are Next's default Geist/Geist_Mono (`app/layout.tsx`) — functional but
+  generic; nothing that reads as a deliberate brand choice.
+- `NeuralNetwork` already has a `surge` (progress 0→1→0) with brighter edges,
+  faster pulses, and a mid-transition center pull — but only **two** formations
+  (`landing` → `settled` in `lib/network/model.ts`) and no depth. It's a single
+  disperse→settle morph, underused as a multi-stage scroll actor.
 - Nav is misleading: **Contact** and **Get Involved** both link to
   `/get-involved`; **Team** and **Blog** are "coming soon" placeholders.
 - Team/Blog pages render bare "coming soon" copy that looks broken, not

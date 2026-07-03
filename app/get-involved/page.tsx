@@ -12,7 +12,7 @@ export default function GetInvolvedPage() {
   return (
     <PageShell>
       <div className="w-full max-w-md">
-        <h1 className="text-4xl font-semibold tracking-tight text-navy">
+        <h1 className="font-display text-4xl font-bold tracking-tight text-ink">
           {content.getInvolved.heading}
         </h1>
         <p className="mt-5 text-base leading-relaxed text-navy/75">

@@ -2,15 +2,232 @@
 
 @theme {
   --color-navy: #1b2a4a;
+  --color-ink: #0e1830;
   --color-offwhite: #f7f8fa;
+  /* The one accent: reserved for the signals, node glow, and CTAs. */
+  --color-signal: #2d5bff;
+
+  --font-sans: var(--ff-body);
+  --font-display: var(--ff-display);
+  --font-mono: var(--ff-mono);
 }
 
 html {
   scroll-behavior: smooth;
+  /* Always reserve the vertical scrollbar track so page-transition motion
+     (which can momentarily add height) never toggles the scrollbar and
+     shifts the centered layout sideways. */
+  overflow-y: scroll;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 body {
   background-color: var(--color-offwhite);
+  /* Faint top-lit vignette so the surface reads as a surface, not a void. */
+  background-image: radial-gradient(
+    1200px 800px at 50% 0%,
+    #ffffff 0%,
+    var(--color-offwhite) 65%
+  );
   color: var(--color-navy);
+  font-family: var(--ff-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: #ffffff;
+}
+
+/* Route transition: app/template.tsx re-mounts on every navigation, so this
+   enter animation plays each time the page changes. Fade + a short rise. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.5s cubic-bezier(0.22, 0.7, 0.24, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-enter {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Neural-net hero                                                    */
+/* A self-building feed-forward network that converges into the        */
+/* wordmark. The stage (.nn-stage) receives --p (0..1 build progress)  */
+/* from useIntroSequence, which plays it on a timed tween on load;      */
+/* every phase below derives from it with calc()/clamp() so all         */
+/* animation stays on the compositor.                                   */
+/* ------------------------------------------------------------------ */
+
+.nn-stage {
+  --p: 0;
+  /* build phase windows — all derive from --p, which useIntroSequence plays
+     on a timed tween on load (no scroll, no camera, no telemetry). */
+  --fade: clamp(0, calc((var(--p) - 0.02) / 0.28), 1); /* network fades up */
+  --decide: clamp(0, calc((var(--p) - 0.56) / 0.08), 1); /* decision node blooms */
+  --word: clamp(0, calc((var(--p) - 0.64) / 0.1), 1); /* wordmark resolves */
+  --endcap: clamp(0, calc((var(--p) - 0.8) / 0.08), 1); /* CTAs resolve */
+}
+
+/* the overline frames the build early; the wordmark + mission land once the
+   signals converge on the decision node the network flows into */
+.nn-overline {
+  opacity: var(--fade);
+}
+
+.nn-word {
+  opacity: var(--word);
+  transform: translateY(calc((1 - var(--word)) * 14px));
+}
+
+.nn-endcap {
+  opacity: var(--endcap);
+  transform: translateY(calc((1 - var(--endcap)) * 16px));
+}
+
+.nn-stage[data-end="false"] .nn-endcap {
+  visibility: hidden;
+}
+
+/* --- the inline network ------------------------------------------- */
+
+.nn-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  opacity: calc(0.55 + 0.45 * var(--fade));
+}
+
+/* --- nodes --------------------------------------------------------- */
+
+.nn-node {
+  --bp: clamp(0, calc((var(--p) - var(--d)) / var(--w, 0.08)), 1);
+}
+
+.nn-node-base {
+  fill: #ffffff;
+  stroke: rgb(27 42 74 / 0.32);
+  stroke-width: 1.5;
+}
+
+.nn-node-lit {
+  opacity: var(--bp);
+  fill: rgb(45 91 255 / 0.1);
+  stroke: var(--color-signal);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 6px rgb(45 91 255 / 0.4));
+}
+
+/* the single output node: the payoff — bigger glow, brighter fill */
+.nn-node.is-decision .nn-node-lit {
+  fill: rgb(45 91 255 / 0.16);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 20px rgb(45 91 255 / 0.6));
+}
+
+.nn-ping-wrap {
+  opacity: calc(0.6 * var(--decide));
+}
+
+.nn-ping {
+  fill: none;
+  stroke: var(--color-signal);
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: nn-ping 2.8s ease-out infinite;
+}
+
+@keyframes nn-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+/* --- edges: drafted lines that flood with signal -------------------- */
+
+.nn-edge-group {
+  --tp: clamp(0, calc((var(--p) - var(--td)) / var(--tw, 0.12)), 1);
+}
+
+.nn-edge-base,
+.nn-edge,
+.nn-edge-pulse {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.nn-edge-base {
+  stroke: rgb(27 42 74 / 0.1);
+  stroke-width: var(--sw, 1.5);
+}
+
+.nn-edge {
+  stroke: var(--color-signal);
+  stroke-width: var(--sw, 1.5);
+  stroke-dasharray: 1;
+  stroke-dashoffset: calc(1 - var(--tp));
+  opacity: calc(0.7 * var(--tp));
+}
+
+/* light packets running along flooded edges */
+.nn-edge-pulse {
+  stroke: var(--color-signal);
+  stroke-width: calc(var(--sw, 1.5) + 0.5);
+  stroke-dasharray: 0.03 0.22;
+  animation: nn-pulse 2.2s linear infinite;
+  opacity: calc(0.55 * var(--tp));
+}
+
+.nn-edge-group:nth-child(even) .nn-edge-pulse {
+  animation-duration: 2.9s;
+}
+
+@keyframes nn-pulse {
+  to {
+    stroke-dashoffset: -0.25;
+  }
+}
+
+/* The nav is visible by default on every page. Only on the neural-net
+   home page does it start hidden and fade in as the wordmark resolves,
+   driven by --hero-title written to :root by useIntroSequence. */
+body:has(.nn-stage) .site-nav {
+  opacity: var(--hero-title, 0);
+}
+
+body:has(.nn-stage[data-end="false"]) .site-nav {
+  pointer-events: none;
 }
