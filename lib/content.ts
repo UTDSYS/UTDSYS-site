@@ -34,6 +34,14 @@ const content = {
       sending: "Sending…",
       success: "Thanks — your message is on its way. We'll reply soon.",
       error: "Something went wrong. Please try again or email us directly.",
+      // Shown in place of the form while the contact form is disabled
+      // (see CONTACT_FORM_ENABLED in lib/flags.ts).
+      disabled: {
+        discord: {
+          label: "Join our Discord",
+          href: "https://discord.gg/FAA2fUpNnT",
+        },
+      },
     },
   },
   // The /projects gallery. Projects are commented out for now — the page
@@ -103,7 +111,7 @@ const content = {
   contactPage: {
     heading: "Find us",
     intro:
-      "Questions, ideas, or just want to say hi? Reach the team through any of these — Discord is the fastest.",
+      "Questions, ideas, or just want to say hi? Reach the team through any of these.",
     channels: [
       {
         label: "Email",

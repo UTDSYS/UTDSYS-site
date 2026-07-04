@@ -18,7 +18,7 @@ export default function ContactPage() {
       <h1 className="font-display mt-5 text-5xl font-bold tracking-tight text-ink md:text-6xl">
         {heading}
       </h1>
-      <p className="mt-6 max-w-md text-base leading-relaxed text-navy/70">
+      <p className="mt-6 w-full max-w-md text-base leading-relaxed text-navy/70">
         {intro}
       </p>
 

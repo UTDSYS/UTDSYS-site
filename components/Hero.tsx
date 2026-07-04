@@ -18,14 +18,14 @@ export default function Hero() {
 
   return (
     <section ref={ref} className="nn-stage relative" data-end="false">
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-6 pt-16 sm:gap-10">
-        <p className="nn-overline font-mono text-[0.7rem] uppercase tracking-[0.45em] text-navy/55 sm:text-xs">
+      <div className="flex min-h-svh flex-col items-center justify-center gap-8 px-6 py-24 sm:gap-10">
+        <p className="nn-overline w-full text-center font-mono text-[0.7rem] uppercase tracking-[0.28em] text-navy/55 sm:text-xs sm:tracking-[0.45em]">
           {content.brand.name} · University of Toronto
         </p>
 
         {/* the network converges rightward, flush into the wordmark */}
         <div className="flex flex-col items-center gap-6 md:flex-row md:gap-7">
-          <div className="nn-net w-[min(76vw,340px)] shrink-0">
+          <div className="nn-net w-[min(70vw,340px)] shrink-0">
             <div className="relative aspect-[320/210] w-full">
               <NeuralNet />
             </div>
@@ -37,11 +37,11 @@ export default function Hero() {
           </h1>
         </div>
 
-        <p className="nn-word max-w-md text-center text-base text-navy/70 sm:text-lg">
+        <p className="nn-word w-full max-w-md text-center text-base text-navy/70 sm:text-lg">
           {content.hero.mission}
         </p>
 
-        <div className="nn-endcap flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+        <div className="nn-endcap flex w-full max-w-xs flex-col items-stretch gap-3 sm:w-auto sm:max-w-none sm:flex-row sm:justify-center">
           <Button href={content.hero.primary.href}>
             {content.hero.primary.label}
           </Button>

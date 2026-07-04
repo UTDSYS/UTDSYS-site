@@ -2,8 +2,17 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import content from "@/lib/content";
 import { validateContact } from "@/lib/contact";
+import { CONTACT_FORM_ENABLED } from "@/lib/flags";
 
 export async function POST(request: Request) {
+  // Contact form is disabled — don't attempt to send (see lib/flags.ts).
+  if (!CONTACT_FORM_ENABLED) {
+    return NextResponse.json(
+      { error: "The contact form is currently unavailable." },
+      { status: 503 },
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();

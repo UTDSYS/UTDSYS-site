@@ -18,6 +18,9 @@ html {
      (which can momentarily add height) never toggles the scrollbar and
      shifts the centered layout sideways. */
   overflow-y: scroll;
+  /* Guard against sub-pixel/glow overflow ever inducing a horizontal
+     scrollbar on narrow (mobile) viewports. */
+  overflow-x: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

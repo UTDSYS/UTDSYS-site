@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Schibsted_Grotesk, Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import Nav from "@/components/Nav";
@@ -27,6 +27,12 @@ export const metadata: Metadata = {
   title: "University of Toronto Decision Systems",
   description:
     "A student design team at the University of Toronto building intelligent decision systems.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#f7f8fa",
 };
 
 export default function RootLayout({

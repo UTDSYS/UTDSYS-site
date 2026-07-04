@@ -3,12 +3,32 @@
 import { useState } from "react";
 import content from "@/lib/content";
 import Button from "@/components/ui/Button";
+import { CONTACT_FORM_ENABLED } from "@/lib/flags";
 
 type Status = "idle" | "sending" | "success" | "error";
 
 const f = content.getInvolved.form;
 
+/** Shown in place of the form while CONTACT_FORM_ENABLED is off. */
+function ContactDisabled() {
+  const { discord } = f.disabled;
+  return (
+    <div className="flex flex-col items-center gap-5 text-center">
+      <div className="flex w-full max-w-xs flex-col items-stretch gap-3">
+        <Button href={discord.href}>{discord.label}</Button>
+        <Button href={`mailto:${content.contact.email}`} variant="secondary">
+          {content.contact.email}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export default function ContactForm() {
+  return CONTACT_FORM_ENABLED ? <ContactFormActive /> : <ContactDisabled />;
+}
+
+export function ContactFormActive() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState("");
 
