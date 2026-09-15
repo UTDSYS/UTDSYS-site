@@ -79,58 +79,146 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Neural-net hero                                                    */
-/* A self-building feed-forward network that converges into the        */
-/* wordmark. The stage (.nn-stage) receives --p (0..1 build progress)  */
-/* from useIntroSequence, which plays it on a timed tween on load;      */
-/* every phase below derives from it with calc()/clamp() so all         */
-/* animation stays on the compositor.                                   */
+/* Hero                                                                */
+/*                                                                     */
+/*   --p  0..1 build progress, played on a timed tween on load by      */
+/*        useIntroSequence. First the number rain falls away, then the  */
+/*        finished page resolves into place.                            */
+/*                                                                      */
+/*   --build  0..1 progress of the network's own assembly, derived from  */
+/*        --p. Each node and edge starts at its own offset inside it, so   */
+/*        the graph builds left to right instead of cross-fading in.       */
+/*                                                                      */
+/*   --a  0..1 activation, written per element every frame by           */
+/*        useQuotingNet from the real model in lib/quoting. It sets how  */
+/*        brightly a node burns and how thickly an edge carries, so the  */
+/*        decision visibly routes itself.                               */
 /* ------------------------------------------------------------------ */
 
 .nn-stage {
   --p: 0;
-  /* build phase windows — all derive from --p, which useIntroSequence plays
-     on a timed tween on load (no scroll, no camera, no telemetry). */
-  --fade: clamp(0, calc((var(--p) - 0.02) / 0.28), 1); /* network fades up */
-  --decide: clamp(0, calc((var(--p) - 0.56) / 0.08), 1); /* decision node blooms */
-  --word: clamp(0, calc((var(--p) - 0.64) / 0.1), 1); /* wordmark resolves */
-  --endcap: clamp(0, calc((var(--p) - 0.8) / 0.08), 1); /* CTAs resolve */
+
+  /* The page composes almost immediately, and the network is what builds
+     inside it. This ordering is load-bearing: everything here fades in place
+     inside a layout sized for the finished state, so anything still at
+     opacity 0 is holding a hole in the composition. Hiding the wordmark for
+     a second and a half doesn't read as "building" — it reads as a broken
+     page with a diagram stranded off-centre in it. */
+  --page: clamp(0, calc(var(--p) / 0.06), 1);
+  --word: clamp(0, calc((var(--p) - 0.04) / 0.14), 1);
+  --endcap: clamp(0, calc((var(--p) - 0.12) / 0.14), 1);
+
+  /* the long movement, and the only one that's really a performance */
+  --build: clamp(0, calc((var(--p) - 0.08) / 0.62), 1);
+  --rail: clamp(0, calc((var(--p) - 0.1) / 0.1), 1);
+
+  /* the convergence arrives, blooms, and the quote it produced goes live */
+  --decide: clamp(0, calc((var(--p) - 0.6) / 0.18), 1);
+  --live: clamp(0, calc((var(--p) - 0.7) / 0.18), 1);
+
+  --fade: var(--page);
 }
 
-/* the overline frames the build early; the wordmark + mission land once the
-   signals converge on the decision node the network flows into */
 .nn-overline {
-  opacity: var(--fade);
+  opacity: var(--page);
+  transform: translateY(calc((1 - var(--page)) * 10px));
+}
+
+/* No blur filter here. Animating one on an element this large is both
+   expensive and soft in a way that reads as unfinished; the graph earns its
+   entrance from the per-element build below instead. */
+.nn-net {
+  opacity: var(--page);
+  transform: translateY(calc((1 - var(--page)) * 12px));
 }
 
 .nn-word {
   opacity: var(--word);
-  transform: translateY(calc((1 - var(--word)) * 14px));
+  transform: translateY(calc((1 - var(--word)) * 18px));
 }
 
 .nn-endcap {
   opacity: var(--endcap);
-  transform: translateY(calc((1 - var(--endcap)) * 16px));
+  transform: translateY(calc((1 - var(--endcap)) * 24px));
 }
 
+/* opacity alone would leave the CTAs clickable through the whole intro, so
+   they stay visibility:hidden until they start fading in. The threshold
+   behind data-end is P_ENDCAP in useIntroSequence and must match the start
+   of the --endcap window above, or they snap in part-faded. */
 .nn-stage[data-end="false"] .nn-endcap {
   visibility: hidden;
 }
 
+/* --- the live layer: the quote the network is producing ------------- */
+
+.nn-quote,
+.nn-meta {
+  opacity: var(--live);
+}
+
+.nn-quote {
+  transform: translateY(calc((1 - var(--live)) * 18px));
+}
+
+/* a figure that just changed ticks through signal on its way back to ink */
+@keyframes nn-bump {
+  from {
+    color: var(--color-signal);
+  }
+  to {
+    color: var(--color-ink);
+  }
+}
+
+.nn-figure.is-bump {
+  animation: nn-bump 0.35s ease-out;
+}
+
+.nn-action {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.nn-action.is-flip {
+  border-color: rgb(45 91 255 / 0.18);
+  background-color: rgb(45 91 255 / 0.06);
+  color: var(--color-signal);
+}
+
 /* --- the inline network ------------------------------------------- */
+
+/* The convergence reaching the decision node, bloomed out past the graph and
+   gone again — a 0→1→0 hump off --decide. It's the reason the build reads at
+   arm's length and not only up close. Sits inside the SVG so it tracks the
+   node; .nn-svg is overflow:visible so it can bleed past the graph. */
+.nn-bloom {
+  opacity: calc(var(--decide) * (1 - var(--decide)) * 4);
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scale(calc(0.6 + var(--decide) * 0.55));
+}
 
 .nn-svg {
   display: block;
   width: 100%;
-  height: 100%;
+  height: auto;
   overflow: visible;
   opacity: calc(0.55 + 0.45 * var(--fade));
 }
 
 /* --- nodes --------------------------------------------------------- */
 
-.nn-node {
-  --bp: clamp(0, calc((var(--p) - var(--d)) / var(--w, 0.08)), 1);
+/* The graph doesn't arrive all at once — it assembles in reading order.
+   Each element carries its own start (--d) and span (--w), both measured in
+   --build units, so the rail fires top-to-bottom, its edges draw into the
+   hidden layer, and the convergence lands on the decision node last. */
+.nn-input,
+.nn-hidden,
+.nn-decision {
+  --bp: clamp(0, calc((var(--build) - var(--d, 0)) / var(--w, 0.16)), 1);
 }
 
 .nn-node-base {
@@ -139,8 +227,10 @@ body {
   stroke-width: 1.5;
 }
 
+/* the build gates it in; the model decides how hard it burns */
 .nn-node-lit {
-  opacity: var(--bp);
+  --a: 0;
+  opacity: calc(var(--bp) * (0.25 + 0.75 * var(--a)));
   fill: rgb(45 91 255 / 0.1);
   stroke: var(--color-signal);
   stroke-width: 2;
@@ -148,10 +238,30 @@ body {
 }
 
 /* the single output node: the payoff — bigger glow, brighter fill */
-.nn-node.is-decision .nn-node-lit {
+.nn-decision .nn-node-lit {
   fill: rgb(45 91 255 / 0.16);
   stroke-width: 2.5;
+  /* this is the payoff of the whole build — it gets the real glow */
   filter: drop-shadow(0 0 20px rgb(45 91 255 / 0.6));
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* the call changed — mark it */
+@keyframes nn-bloom {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.nn-decision.is-bloom .nn-node-lit {
+  animation: nn-bloom 0.6s cubic-bezier(0.22, 0.7, 0.24, 1);
 }
 
 .nn-ping-wrap {
@@ -179,10 +289,15 @@ body {
   }
 }
 
-/* --- edges: drafted lines that flood with signal -------------------- */
+/* --- edges: drafted lines that carry what the model routes ---------- */
 
 .nn-edge-group {
-  --tp: clamp(0, calc((var(--p) - var(--td)) / var(--tw, 0.12)), 1);
+  --tp: clamp(0, calc((var(--build) - var(--td, 0)) / var(--tw, 0.2)), 1);
+  /* A 0→1→0 hump that peaks halfway through the draw. It's what makes an
+     edge visibly flood with signal as it lands, rather than just arriving:
+     every edge is bright while it draws, then falls back to whatever it
+     actually carries. */
+  --flood: calc(var(--tp) * (1 - var(--tp)) * 4);
 }
 
 .nn-edge-base,
@@ -193,25 +308,39 @@ body {
 }
 
 .nn-edge-base {
-  stroke: rgb(27 42 74 / 0.1);
+  stroke: rgb(27 42 74 / 0.09);
   stroke-width: var(--sw, 1.5);
 }
 
+/* Width and brightness are |activation x weight|, so you can read which
+   paths are carrying the decision. Inhibitory weights run navy instead of
+   signal, which puts the sign of every contribution on the page. */
+/* The build draws the line on; the model decides what it carries after. The
+   two compose: --tp runs the dashoffset 1→0 so the edge grows from its input
+   toward its hidden node, and once it's drawn (--tp 1, offset 0) --a takes
+   over width and brightness for good. */
 .nn-edge {
+  --a: 0;
   stroke: var(--color-signal);
-  stroke-width: var(--sw, 1.5);
+  stroke-width: calc(var(--sw, 1.5) * (0.72 + 1.1 * var(--a) + var(--flood) * 0.7));
   stroke-dasharray: 1;
   stroke-dashoffset: calc(1 - var(--tp));
-  opacity: calc(0.7 * var(--tp));
+  opacity: calc(0.14 + 0.72 * var(--a) + var(--flood) * 0.5);
 }
 
-/* light packets running along flooded edges */
+.nn-edge.is-neg {
+  stroke: var(--color-navy);
+  opacity: calc(0.1 + 0.4 * var(--a) + var(--flood) * 0.4);
+}
+
+/* light packets running along the convergence */
 .nn-edge-pulse {
+  --a: 0;
   stroke: var(--color-signal);
   stroke-width: calc(var(--sw, 1.5) + 0.5);
   stroke-dasharray: 0.03 0.22;
   animation: nn-pulse 2.2s linear infinite;
-  opacity: calc(0.55 * var(--tp));
+  opacity: calc(var(--tp) * 0.75 * var(--a));
 }
 
 .nn-edge-group:nth-child(even) .nn-edge-pulse {
@@ -221,6 +350,127 @@ body {
 @keyframes nn-pulse {
   to {
     stroke-dashoffset: -0.25;
+  }
+}
+
+/* --- the input rail: labels, values, and the grab affordance -------- */
+
+.nn-rail-label,
+.nn-rail-value,
+.nn-hint {
+  font-family: var(--ff-mono), ui-monospace, monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+/* The rail is part of the build, not the payoff: the labels and their
+   scrambling values land early, because watching them settle onto real
+   numbers is what the intro is about. useQuotingNet drives the digits. */
+.nn-rail-label,
+.nn-rail-value {
+  opacity: var(--rail);
+}
+
+/* the affordance is the last thing to show up — it only means anything
+   once there is something settled to grab */
+.nn-hint {
+  opacity: var(--live);
+}
+
+.nn-rail-label {
+  fill: rgb(27 42 74 / 0.5);
+}
+
+.nn-rail-value {
+  fill: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* while its digits are still scrambling, a value is provisional — it sits
+   back in navy and steps up to ink on the frame it locks */
+.nn-rail-value.is-settling {
+  fill: rgb(27 42 74 / 0.38);
+}
+
+.nn-hint {
+  fill: rgb(27 42 74 / 0.4);
+  font-size: 8px;
+  letter-spacing: 0.2em;
+}
+
+.nn-input {
+  cursor: grab;
+}
+
+.nn-input.is-held {
+  cursor: grabbing;
+}
+
+.nn-input:hover .nn-rail-value,
+.nn-input.is-held .nn-rail-value {
+  fill: var(--color-signal);
+}
+
+.nn-input.is-held .nn-rail-label {
+  fill: rgb(45 91 255 / 0.7);
+}
+
+/* a generous, invisible target so the whole row is grabbable */
+.nn-hit {
+  fill: transparent;
+}
+
+/* the track and grip appear on approach — this is what says "drag me" */
+.nn-track {
+  stroke: rgb(27 42 74 / 0.16);
+  stroke-width: 1;
+  stroke-dasharray: 2 3;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.nn-grip {
+  stroke: var(--color-signal);
+  stroke-width: 1.2;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.nn-input:hover .nn-track,
+.nn-input.is-held .nn-track,
+.nn-input:focus-visible .nn-track {
+  opacity: 1;
+}
+
+.nn-input:hover .nn-grip,
+.nn-input.is-held .nn-grip,
+.nn-input:focus-visible .nn-grip {
+  opacity: 0.7;
+}
+
+.nn-input:focus {
+  outline: none;
+}
+
+.nn-input:focus-visible .nn-node-base {
+  stroke: var(--color-signal);
+  stroke-width: 2.5;
+}
+
+/* Reduced motion: the network still computes and still responds to input,
+   it just stops moving on its own. (useQuotingNet skips the drift clock and
+   parks the animation loop; these kill the ambient loops.) */
+@media (prefers-reduced-motion: reduce) {
+  .nn-edge-pulse,
+  .nn-ping,
+  .nn-action {
+    animation: none;
+  }
+
+  .nn-decision.is-bloom .nn-node-lit,
+  .nn-figure.is-bump {
+    animation: none;
   }
 }
 

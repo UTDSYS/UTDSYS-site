@@ -2,6 +2,8 @@ node_modules
 .next
 out
 .DS_Store
+*.tsbuildinfo
+*.log
 
 # local env files with secrets (keeps .env.local.example tracked)
 .env*.local

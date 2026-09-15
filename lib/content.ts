@@ -3,12 +3,38 @@ const content = {
     name: "UTDSYS",
     full: "University of Toronto Decision Systems",
   },
-  // The hero: a neural network builds itself on load and converges into the
-  // wordmark; the two CTAs are the site's primary paths.
+  // The hero opens with number rain, then reveals a live neural-network demo
+  // driven by the quoting model in lib/quoting. The two CTAs are the site's
+  // primary paths.
   hero: {
-    mission: "A student design team building intelligent decision systems.",
+    mission: "Using mathematics to make better decisions under uncertainty.",
     primary: { label: "Get involved", href: "/get-involved" },
     secondary: { label: "Project gallery", href: "/projects" },
+    net: {
+      description:
+        "A feed-forward network turning five live market features into one quoting decision.",
+      // Drawn top-to-bottom; the order matches the feature vector in lib/quoting.
+      features: ["Spread", "Imbalance", "Inventory", "Volatility", "Order flow"],
+      hint: {
+        pointer: "drag an input ↕",
+        keyboard: "focus an input, use ↑↓",
+      },
+      readout: { bid: "Bid", ask: "Ask", skew: "Skew" },
+      // Keyed by the Action union in lib/quoting.
+      actions: {
+        "quote-both": "Quote both sides",
+        "skew-bid": "Lean bid",
+        "skew-ask": "Lean ask",
+        "pull-bid": "Pull the bid",
+        "pull-ask": "Pull the ask",
+      },
+      // Announced to screen readers whenever the call changes.
+      statusPrefix: "Decision:",
+      loading: "—",
+      meta: {
+        decisions: "decisions evaluated",
+      },
+    },
   },
   nav: {
     links: [

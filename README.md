@@ -1,27 +1,31 @@
 # UofT Decision Systems
 
-Marketing site for UofT Decision Systems (DSys) — a student design team.
-Built with Next.js (App Router), Tailwind CSS v4, and Framer Motion. The
-landing screen renders an animated neural network (Canvas 2D) that surges and
-reorganizes into the home/intro page as you scroll.
+Marketing site for UofT Decision Systems (DSys) — a team using mathematics to
+make better decisions under uncertainty.
+Built with Next.js App Router and Tailwind CSS v4. The landing screen renders
+a lightweight SVG neural network that builds on load, then runs a throttled
+interactive quoting simulation.
 
 ## Develop
 
 ```bash
 npm install
 cp .env.local.example .env.local   # then add your RESEND_API_KEY
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:3000, uses webpack dev mode
 npm test         # Vitest unit + component tests
 npm run build    # production build
 ```
 
+`npm run dev` intentionally runs `next dev --webpack`. Turbopack dev mode was
+creating large `.next/dev` snapshots and could crash the laptop while compiling
+routes such as `/projects`.
+
 ## Pages
 
-- `/` — the DSys landing → neural-network transition → home/intro (mission +
-  Get Involved CTA), with a footer.
+- `/` — the DSys landing with an interactive neural-network hero.
 - `/get-involved` — email + a name/email/message form that sends a message.
-  The **Contact** nav link points here too.
-- `/team`, `/blog` — "coming soon" placeholder pages.
+- `/projects`, `/team`, `/blog` — "coming soon" placeholder pages.
+- `/contact` — contact/social directory.
 
 ## Contact form / email
 
@@ -45,19 +49,10 @@ page text, contact details — lives in `lib/content.ts`. Edit that one file.
 
 ## How it works
 
-- `lib/network/model.ts` — pure, unit-tested node/edge geometry.
-- `components/NeuralNetwork.tsx` — draws the network on a fixed canvas. A
-  scroll-driven "surge" (peaks mid-transition) brightens edges, multiplies and
-  speeds up the signal pulses, and pulls nodes toward the center. `progress` is
-  optional: sub-pages omit it and get a calm, settled backdrop.
-- `app/page.tsx` — derives `progress` (0→1) from scroll via Framer Motion
-  `useScroll` (offset `["start start", "end end"]`) over a 300vh sticky zone,
-  cross-fading the DSys landing into the intro.
-- `lib/scroll.ts` — `useScrollApply`, a hook that writes the overlays'
-  opacity/transform to the DOM imperatively on each `progress` change (Framer's
-  scroll-linked opacity desyncs onto its own accelerated timeline, so we drive
-  it ourselves).
+- `lib/quoting.ts` — pure, unit-tested quoting model for the hero network.
+- `components/NeuralNet.tsx` — SVG structure for the network.
+- `hooks/useIntroSequence.ts` — one-shot load choreography.
+- `hooks/useQuotingNet.ts` — throttled DOM updates for the live quote/readout.
 
-Accessibility: respects `prefers-reduced-motion` (static network — no drift,
-pulses, surge, or animation loop; the scroll morph still applies), caps node
-count, and pauses the animation when the tab is hidden.
+Accessibility: respects `prefers-reduced-motion`, supports keyboard adjustment
+for the hero inputs, and pauses live updates when the tab is hidden.

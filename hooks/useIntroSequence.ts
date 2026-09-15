@@ -3,26 +3,51 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Cinematic load sequence for the neural-net hero. On mount this plays the
- * whole assembly once, on a timed tween — input nodes fire, signals draw
- * along the edges, everything converges on the single DECISION node, and the
- * wordmark + CTAs resolve alongside it. You land on the finished page; there
- * is deliberately nothing to scroll to.
+ * Cinematic load sequence for the hero: the network assembling itself and
+ * taking its first decision. The scaffold draws as hairlines, the five market
+ * features scramble in their rail and lock onto real values, every edge draws
+ * itself on and floods with signal as it lands, the convergence arrives and
+ * the decision node blooms with the wordmark, and the quote it produces goes
+ * live. You land on the finished page; there is deliberately nothing to
+ * scroll to.
  *
  * It writes `--p` (0..1 build progress); every phase in the CSS derives from
  * it, so the whole choreography plays from this one value. Respects
  * prefers-reduced-motion by resolving to the finished frame instantly.
  */
 
-const P_END = 0.92; // resting progress: decision bloomed, wordmark + CTAs in
-const DURATION = 4400; // ms — the full build, paced to be watchable
-const SKIP_MS = 420; // fast-forward to the finished frame on scroll intent
+const P_END = 0.92; // resting progress: decision landed, wordmark + CTAs in
+const DURATION = 2400; // ms — scaffold, settle, converge, decide
+
+/**
+ * Where the CTAs stop being visibility:hidden. It must equal the start of the
+ * `--endcap` window in globals.css — flip it any later and they appear
+ * part-faded, because their opacity is already off zero by then.
+ */
+const P_ENDCAP = 0.12;
+
+/**
+ * The window in which each input's digits stop scrambling and lock onto their
+ * real value. useQuotingNet owns the rail text, so it reads `--p` back off the
+ * stage and uses these to decide how much of each value has resolved.
+ */
+export const RAIL_SETTLE_START = 0.14;
+export const RAIL_SETTLE_STAGGER = 0.04; // per input, so they lock top-down
+export const RAIL_SETTLE_SPAN = 0.22;
+export const RAIL_SETTLE_END =
+  RAIL_SETTLE_START + RAIL_SETTLE_STAGGER * 4 + RAIL_SETTLE_SPAN;
+
+const SKIP_MS = 260; // fast-forward to the finished frame on scroll intent
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
 
-/** Gentle S-curve for the overall timeline: eases in, settles softly. */
-const easeInOut = (t: number) =>
-  t < 0.5 ? Math.pow(2 * t, 1.35) / 2 : 1 - Math.pow(2 - 2 * t, 1.35) / 2;
+/**
+ * Mild ease-out. The scaffold wants to be up immediately, but the build is the
+ * long movement and the edges need real time on screen to read as drawing
+ * themselves — front-load any harder and the convergence collapses into the
+ * first few hundred milliseconds.
+ */
+const easeOutBuild = (t: number) => 1 - Math.pow(1 - t, 1.35);
 
 /** Ease-out for the skip fast-forward: quick, then settles. */
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
@@ -36,12 +61,12 @@ export function useIntroSequence<T extends HTMLElement = HTMLDivElement>() {
 
     const apply = (p: number) => {
       el.style.setProperty("--p", p.toFixed(4));
-      el.dataset.end = p > 0.78 ? "true" : "false";
+      el.dataset.end = p >= P_ENDCAP ? "true" : "false";
       // Exposed on :root so the Nav (outside the stage) fades in as the
       // wordmark resolves.
       document.documentElement.style.setProperty(
         "--hero-title",
-        clamp01((p - 0.64) / 0.1).toFixed(4),
+        clamp01((p - 0.04) / 0.12).toFixed(4),
       );
     };
 
@@ -70,7 +95,7 @@ export function useIntroSequence<T extends HTMLElement = HTMLDivElement>() {
       }
       if (!start) start = now;
       const u = clamp01((now - start) / DURATION);
-      cur = easeInOut(u) * P_END;
+      cur = easeOutBuild(u) * P_END;
       apply(cur);
       raf = u < 1 ? requestAnimationFrame(tick) : 0;
     };
