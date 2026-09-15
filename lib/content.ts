@@ -65,7 +65,7 @@ const content = {
       disabled: {
         discord: {
           label: "Join our Discord",
-          href: "https://discord.gg/FAA2fUpNnT",
+          href: "https://discord.gg/h2kX42dfdz",
         },
       },
     },
@@ -128,7 +128,7 @@ const content = {
     email: "info@utdsys.com",
     // Directories surfaced in the hero strip; the full set lives on /contact.
     socials: [
-      { label: "Discord", href: "https://discord.gg/FAA2fUpNnT" },
+      { label: "Discord", href: "https://discord.gg/h2kX42dfdz" },
       { label: "GitHub", href: "https://github.com/UTDSYS" },
       { label: "LinkedIn", href: "https://www.linkedin.com/company/utdsys" },
     ],
@@ -147,7 +147,7 @@ const content = {
       {
         label: "Discord",
         value: "Join the server",
-        href: "https://discord.gg/FAA2fUpNnT",
+        href: "https://discord.gg/h2kX42dfdz",
       },
       {
         label: "GitHub",
