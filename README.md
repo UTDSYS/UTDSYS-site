@@ -18,13 +18,15 @@ npm run build    # production build
 
 `npm run dev` intentionally runs `next dev --webpack`. Turbopack dev mode was
 creating large `.next/dev` snapshots and could crash the laptop while compiling
-routes such as `/projects`.
+routes such as `/quantitative-research`.
 
 ## Pages
 
 - `/` — the DSys landing with an interactive neural-network hero.
 - `/get-involved` — email + a name/email/message form that sends a message.
-- `/projects`, `/team`, `/blog` — "coming soon" placeholder pages.
+- `/quantitative-research` — live simulated market-making desk (`lib/marketMaker.ts`), the model, project pipeline, working papers.
+- `/fundamental-research` — equity research hub: featured report, coverage table, process, disclaimer.
+- `/team` — the org chart drawn as a network.
 - `/contact` — contact/social directory.
 
 ## Contact form / email

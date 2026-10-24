@@ -1,9 +1,11 @@
 /**
  * The hero's quoting model.
  *
- * The landing network isn't decorative: it's a real 5 → 3 → 1 feed-forward
- * net that turns five live market features into one quoting decision. The
- * bid, ask and skew shown beside the wordmark are this model's output.
+ * The landing network isn't decorative: it's a real 6 → 3 → 1 feed-forward
+ * net that combines both research desks into one quoting decision. Three
+ * inputs are market signals (the quantitative desk), three are company
+ * fundamentals (the fundamental desk). The fair value, bid and ask shown
+ * under the graph are this model's output.
  *
  * Everything here is pure and deterministic so it can be unit-tested and so
  * the page renders the same opening sequence for every visitor. The stateful
@@ -12,38 +14,44 @@
  */
 
 /** Feature vector, each component normalised to [-1, 1]. */
-export type Features = [number, number, number, number, number];
+export type Features = [number, number, number, number, number, number];
 export type Hidden = [number, number, number];
 
 /** Index into `Features`, in the order the input nodes are drawn top-to-bottom. */
-export const SPREAD = 0;
-export const IMBALANCE = 1;
+// quantitative desk: the market
+export const FLOW = 0;
+export const VOLATILITY = 1;
 export const INVENTORY = 2;
-export const VOLATILITY = 3;
-export const FLOW = 4;
+// fundamental desk: the company
+export const EARNINGS = 3;
+export const VALUATION = 4;
+export const LEVERAGE = 5;
 
-export const FEATURE_COUNT = 5;
+export const FEATURE_COUNT = 6;
 export const HIDDEN_COUNT = 3;
 
 /**
  * Hand-tuned weights. Negative (inhibitory) weights are drawn in navy rather
  * than signal blue, so the sign of every contribution is readable on the page.
- * The hidden units each stand for something:
- *   h0  "room to quote"          — wide spread and calm tape invite a quote
- *   h1  "which way is it going"  — book imbalance and order flow
- *   h2  "how exposed am I"       — inventory, amplified by volatility
+ * The hidden units each stand for something, and sit between the desks that
+ * feed them most:
+ *   h0  "market pressure" — order flow, sharpened by volatility  (quant)
+ *   h1  "how exposed am I" — inventory, volatility, and leverage (both)
+ *   h2  "what is it worth" — earnings up, valuation and leverage down
+ *                                                            (fundamental)
  */
 export const W1: readonly (readonly number[])[] = [
-  [0.85, -0.3, 0.25, -0.7, -0.45],
-  [-0.2, 0.95, -0.4, 0.35, 0.8],
-  [-0.35, 0.15, 1.1, 0.6, 0.3],
+  [0.95, 0.35, -0.2, 0.3, -0.15, 0.0],
+  [0.2, 0.55, 1.1, -0.1, 0.25, 0.5],
+  [0.15, -0.3, -0.1, 0.9, -0.85, -0.55],
 ];
-export const B1: readonly number[] = [0.1, -0.05, 0.0];
-export const W2: readonly number[] = [-0.55, -0.7, 1.05];
+export const B1: readonly number[] = [0.05, 0.0, -0.05];
+/** Buying pressure and a cheap company pull the quote up; exposure pushes it down. */
+export const W2: readonly number[] = [-0.6, 1.05, -0.7];
 export const B2 = 0.02;
 
 /** The starting feature vector — the frame the page opens on. */
-export const INITIAL_FEATURES: Features = [0.15, 0.35, -0.24, -0.1, 0.05];
+export const INITIAL_FEATURES: Features = [0.35, -0.1, -0.24, 0.2, 0.1, -0.15];
 
 /** Mid price the simulated book drifts around. */
 export const INITIAL_MID = 100;
@@ -53,7 +61,7 @@ export const TICK = 0.01;
 
 /**
  * Forward pass. `q` is the single decision scalar in (-1, 1): positive means
- * lean away from the bid (we're long and want to sell), negative the reverse.
+ * lean away from the bid (we'd rather sell), negative the reverse.
  * Volatility acts as a gain — the more uncertain the tape, the harder the
  * model leans on whatever edge it thinks it has.
  */
@@ -73,6 +81,14 @@ export function forward(x: Features): { hidden: Hidden; q: number } {
   return { hidden, q: Math.tanh(sum * gain) };
 }
 
+/**
+ * The fundamental desk's answer: what the company is worth, read off the
+ * value unit. It sits within a few percent of where the market trades.
+ */
+export function fairValue(hidden: Hidden): number {
+  return INITIAL_MID * (1 + 0.025 * hidden[2]);
+}
+
 /** The five calls the model can make. Labels live in `lib/content.ts`. */
 export type Action =
   | "pull-bid"
@@ -90,9 +106,9 @@ export function decide(q: number): Action {
   return "quote-both";
 }
 
-/** Half-spread in price units, from the spread feature (1–9 ticks wide). */
-export function halfSpread(spread: number): number {
-  return ((1 + (spread + 1) * 4) * TICK) / 2;
+/** Half-spread in price units: calm tape quotes 1 tick wide, wild tape 5. */
+export function halfSpread(volatility: number): number {
+  return ((1 + (volatility + 1) * 2) * TICK) / 2;
 }
 
 /** The two-sided quote the decision produces, skewed by `q`. */
@@ -101,7 +117,7 @@ export function quote(
   x: Features,
   q: number,
 ): { bid: number; ask: number } {
-  const half = halfSpread(x[SPREAD]);
+  const half = halfSpread(x[VOLATILITY]);
   const skew = q * 0.035;
   return { bid: mid - half - skew, ask: mid + half - skew };
 }
@@ -132,12 +148,16 @@ export function signed(value: number, digits: number): string {
 /** Each feature reads in its own natural units on the input rail. */
 export function formatFeature(index: number, value: number): string {
   switch (index) {
-    case SPREAD:
-      return (1 + (value + 1) * 4).toFixed(1) + "t";
-    case INVENTORY:
-      return signed(Math.round(value * 500), 0);
     case VOLATILITY:
       return ((value + 1) / 2).toFixed(2);
+    case INVENTORY:
+      return signed(Math.round(value * 500), 0);
+    case EARNINGS: // surprise vs consensus
+      return signed(value * 8, 1) + "%";
+    case VALUATION: // P/E
+      return (16 + value * 8).toFixed(1) + "x";
+    case LEVERAGE: // net debt / EBITDA
+      return (1.5 + value * 1.5).toFixed(1) + "x";
     default:
       return signed(value, 2);
   }

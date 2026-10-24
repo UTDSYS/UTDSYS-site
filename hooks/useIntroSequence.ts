@@ -4,8 +4,8 @@ import { useEffect, useRef } from "react";
 
 /**
  * Cinematic load sequence for the hero: the network assembling itself and
- * taking its first decision. The scaffold draws as hairlines, the five market
- * features scramble in their rail and lock onto real values, every edge draws
+ * taking its first decision. The scaffold draws as hairlines, the six inputs
+ * scramble in their rail and lock onto real values, every edge draws
  * itself on and floods with signal as it lands, the convergence arrives and
  * the decision node blooms with the wordmark, and the quote it produces goes
  * live. You land on the finished page; there is deliberately nothing to
@@ -32,10 +32,10 @@ const P_ENDCAP = 0.12;
  * stage and uses these to decide how much of each value has resolved.
  */
 export const RAIL_SETTLE_START = 0.14;
-export const RAIL_SETTLE_STAGGER = 0.04; // per input, so they lock top-down
+export const RAIL_SETTLE_STAGGER = 0.032; // per input, so they lock top-down
 export const RAIL_SETTLE_SPAN = 0.22;
 export const RAIL_SETTLE_END =
-  RAIL_SETTLE_START + RAIL_SETTLE_STAGGER * 4 + RAIL_SETTLE_SPAN;
+  RAIL_SETTLE_START + RAIL_SETTLE_STAGGER * 5 + RAIL_SETTLE_SPAN;
 
 const SKIP_MS = 260; // fast-forward to the finished frame on scroll intent
 

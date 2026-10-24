@@ -1,5 +1,5 @@
 /**
- * Shared shell for centered sub-pages (Team, Blog, Contact, Get Involved).
+ * Shared shell for centered sub-pages (Contact, Get Involved).
  * The nav is rendered globally in the root layout; this just centers content
  * on the plain offwhite surface.
  */

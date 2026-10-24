@@ -10,8 +10,8 @@ import content from "@/lib/content";
  * `body:has(.nn-stage)` rules in globals.css keep it hidden until the
  * hero's wordmark resolves (driven by --hero-title on :root).
  *
- * Desktop shows the links inline; on mobile they collapse behind a menu
- * toggle so the five links + wordmark never overflow a phone width.
+ * Desktop shows the links inline; below lg they collapse behind a menu
+ * toggle so the links + wordmark never overflow a narrow viewport.
  */
 export default function Nav() {
   const [open, setOpen] = useState(false);
@@ -37,18 +37,29 @@ export default function Nav() {
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden gap-8 md:flex">
-          {content.nav.links.map((l) => (
-            <Link
-              key={l.label}
-              href={l.href}
-              className={`font-mono text-[0.7rem] uppercase tracking-[0.18em] transition hover:text-signal ${
-                pathname === l.href ? "text-signal" : "text-navy/70"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
+        <div className="hidden items-center gap-8 lg:flex">
+          {content.nav.links.map((l) =>
+            "cta" in l ? (
+              <Link
+                key={l.label}
+                href={l.href}
+                aria-current={pathname === l.href ? "page" : undefined}
+                className="nav-cta rounded-full bg-signal-deep px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-white shadow-[0_6px_20px_-6px_rgb(29_63_184/0.6)] transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <Link
+                key={l.label}
+                href={l.href}
+                className={`font-mono text-[0.7rem] uppercase tracking-[0.18em] transition hover:text-signal ${
+                  pathname === l.href ? "text-signal" : "text-navy/70"
+                }`}
+              >
+                {l.label}
+              </Link>
+            ),
+          )}
         </div>
 
         {/* Mobile toggle */}
@@ -57,7 +68,7 @@ export default function Nav() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="relative z-30 flex h-9 w-9 items-center justify-center rounded-full text-navy transition hover:text-signal md:hidden"
+          className="relative z-30 flex h-9 w-9 items-center justify-center rounded-full text-navy transition hover:text-signal lg:hidden"
         >
           <span className="sr-only">Menu</span>
           <svg
@@ -97,27 +108,38 @@ export default function Nav() {
 
       {/* Mobile dropdown panel */}
       <div
-        className={`overflow-hidden border-navy/5 md:hidden ${
+        className={`overflow-hidden border-navy/5 lg:hidden ${
           open ? "border-t" : ""
         }`}
         style={{
-          maxHeight: open ? "20rem" : "0",
+          maxHeight: open ? "24rem" : "0",
           transition: "max-height 0.35s cubic-bezier(0.22,0.7,0.24,1)",
         }}
       >
         <div className="flex flex-col px-6 py-2">
-          {content.nav.links.map((l) => (
-            <Link
-              key={l.label}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className={`border-b border-navy/5 py-3.5 font-mono text-xs uppercase tracking-[0.18em] transition last:border-b-0 hover:text-signal ${
-                pathname === l.href ? "text-signal" : "text-navy/70"
-              }`}
-            >
-              {l.label}
-            </Link>
-          ))}
+          {content.nav.links.map((l) =>
+            "cta" in l ? (
+              <Link
+                key={l.label}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="my-3 rounded-full bg-signal-deep py-3 text-center font-mono text-xs uppercase tracking-[0.18em] text-white transition hover:bg-ink"
+              >
+                {l.label}
+              </Link>
+            ) : (
+              <Link
+                key={l.label}
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className={`border-b border-navy/5 py-3.5 font-mono text-xs uppercase tracking-[0.18em] transition hover:text-signal ${
+                  pathname === l.href ? "text-signal" : "text-navy/70"
+                }`}
+              >
+                {l.label}
+              </Link>
+            ),
+          )}
         </div>
       </div>
     </nav>

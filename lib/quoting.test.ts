@@ -3,20 +3,23 @@ import {
   createRandom,
   decide,
   driftStep,
+  EARNINGS,
+  fairValue,
   forward,
   formatFeature,
   INITIAL_FEATURES,
   INITIAL_MID,
   INVENTORY,
+  LEVERAGE,
   quote,
   signed,
-  SPREAD,
+  VALUATION,
   VOLATILITY,
   type Features,
 } from "./quoting";
 
 const at = (overrides: Partial<Record<number, number>>): Features => {
-  const x: Features = [0, 0, 0, 0, 0];
+  const x: Features = [0, 0, 0, 0, 0, 0];
   for (const [i, v] of Object.entries(overrides)) x[Number(i)] = v as number;
   return x;
 };
@@ -30,7 +33,7 @@ describe("forward", () => {
   });
 
   it("keeps every activation inside the tanh range", () => {
-    const x: Features = [1, -1, 1, 1, -1];
+    const x: Features = [1, -1, 1, 1, -1, 1];
     const { hidden, q } = forward(x);
     for (const h of hidden) expect(Math.abs(h)).toBeLessThan(1);
     expect(Math.abs(q)).toBeLessThan(1);
@@ -48,6 +51,31 @@ describe("forward", () => {
     const calm = forward(at({ [INVENTORY]: 0.5, [VOLATILITY]: -1 })).q;
     const wild = forward(at({ [INVENTORY]: 0.5, [VOLATILITY]: 1 })).q;
     expect(wild).toBeGreaterThan(calm);
+  });
+});
+
+describe("fundamentals", () => {
+  it("values the company higher on an earnings beat", () => {
+    const miss = fairValue(forward(at({ [EARNINGS]: -0.8 })).hidden);
+    const beat = fairValue(forward(at({ [EARNINGS]: 0.8 })).hidden);
+    expect(beat).toBeGreaterThan(miss);
+  });
+
+  it("values the company lower when it is expensive or levered", () => {
+    const base = fairValue(forward(at({})).hidden);
+    expect(fairValue(forward(at({ [VALUATION]: 0.8 })).hidden)).toBeLessThan(base);
+    expect(fairValue(forward(at({ [LEVERAGE]: 0.8 })).hidden)).toBeLessThan(base);
+  });
+
+  it("leans toward buying when the company looks cheap", () => {
+    expect(forward(at({ [EARNINGS]: 0.8, [VALUATION]: -0.8 })).q).toBeLessThan(0);
+  });
+
+  it("keeps fair value within a few percent of the market", () => {
+    for (const h of [-1, 1]) {
+      const v = fairValue([0, 0, h]);
+      expect(Math.abs(v - INITIAL_MID) / INITIAL_MID).toBeLessThanOrEqual(0.03);
+    }
   });
 });
 
@@ -77,9 +105,9 @@ describe("quote", () => {
     }
   });
 
-  it("widens as the spread feature grows", () => {
-    const tight = quote(INITIAL_MID, at({ [SPREAD]: -1 }), 0);
-    const wide = quote(INITIAL_MID, at({ [SPREAD]: 1 }), 0);
+  it("widens as volatility grows", () => {
+    const tight = quote(INITIAL_MID, at({ [VOLATILITY]: -1 }), 0);
+    const wide = quote(INITIAL_MID, at({ [VOLATILITY]: 1 }), 0);
     expect(wide.ask - wide.bid).toBeGreaterThan(tight.ask - tight.bid);
   });
 
@@ -98,9 +126,11 @@ describe("display", () => {
   });
 
   it("gives each feature its own natural units", () => {
-    expect(formatFeature(SPREAD, 0)).toBe("5.0t");
     expect(formatFeature(INVENTORY, 0.5)).toBe("+250");
     expect(formatFeature(VOLATILITY, 0)).toBe("0.50");
+    expect(formatFeature(EARNINGS, 0.5)).toBe("+4.0%");
+    expect(formatFeature(VALUATION, 0)).toBe("16.0x");
+    expect(formatFeature(LEVERAGE, -1)).toBe("0.0x");
   });
 });
 

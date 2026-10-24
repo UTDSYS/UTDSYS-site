@@ -6,6 +6,8 @@
   --color-offwhite: #f7f8fa;
   /* The one accent: reserved for the signals, node glow, and CTAs. */
   --color-signal: #2d5bff;
+  /* A deeper shade of the same accent, for the team network. */
+  --color-signal-deep: #1d3fb8;
 
   --font-sans: var(--ff-body);
   --font-display: var(--ff-display);
@@ -45,6 +47,9 @@ body {
     #ffffff 0%,
     var(--color-offwhite) 65%
   );
+  /* html is viewport-height, so the canvas would tile this every screen on
+     a page that scrolls. Paint it once, at the top. */
+  background-repeat: no-repeat;
   color: var(--color-navy);
   font-family: var(--ff-body), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -387,6 +392,13 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* which desk a group of inputs comes from */
+.nn-desk-label {
+  fill: var(--color-signal);
+  font-size: 7.5px;
+  letter-spacing: 0.26em;
+}
+
 /* while its digits are still scrambling, a value is provisional — it sits
    back in navy and steps up to ink on the frame it locks */
 .nn-rail-value.is-settling {
@@ -483,4 +495,301 @@ body:has(.nn-stage) .site-nav {
 
 body:has(.nn-stage[data-end="false"]) .site-nav {
   pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Team: the org chart as a network, in the deeper accent. It builds   */
+/* outside-in (timed off --delay) once the stage has measured itself,  */
+/* then signal runs toward the decision; hover traces one path.        */
+/* ------------------------------------------------------------------ */
+
+.team-stage[data-ready="false"] {
+  visibility: hidden;
+}
+
+.team-stage[data-ready="true"] .team-member,
+.team-stage[data-ready="true"] .team-output {
+  animation: team-pop 0.6s cubic-bezier(0.22, 0.7, 0.24, 1) var(--delay) both;
+}
+
+.team-member {
+  cursor: default;
+}
+
+a.team-member {
+  cursor: pointer;
+}
+
+/* --- nodes ---------------------------------------------------------- */
+
+.team-node {
+  border-color: rgb(27 42 74 / 0.16);
+  box-shadow: 0 0 0 6px var(--color-offwhite);
+  transition:
+    border-color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 0.7, 0.24, 1);
+}
+
+.team-member.is-lead .team-node {
+  border-color: rgb(29 63 184 / 0.55);
+  box-shadow:
+    0 0 0 7px var(--color-offwhite),
+    0 0 0 8px rgb(29 63 184 / 0.1),
+    0 12px 36px -8px rgb(29 63 184 / 0.28);
+}
+
+.team-member.is-open .team-node {
+  border-color: rgb(29 63 184 / 0.4);
+}
+
+.team-member[data-state="linked"] .team-node {
+  border-color: rgb(29 63 184 / 0.7);
+}
+
+.team-member[data-state="active"] .team-node {
+  border-color: var(--color-signal-deep);
+  box-shadow:
+    0 0 0 6px var(--color-offwhite),
+    0 0 0 7px rgb(29 63 184 / 0.25),
+    0 14px 40px -6px rgb(29 63 184 / 0.4);
+  transform: scale(1.04);
+}
+
+.team-label,
+.team-node > * {
+  transition: opacity 0.3s ease;
+}
+
+/* dim the label and contents, never the disc — it masks the wiring */
+.team-member[data-state="dim"] .team-label,
+.team-member[data-state="dim"] .team-node > * {
+  opacity: 0.35;
+}
+
+.team-member[data-state="dim"] .team-node {
+  border-color: rgb(27 42 74 / 0.08);
+}
+
+/* labels sit over the wiring, so give them a quiet ground */
+.team-label {
+  border-radius: 4px;
+  background: rgb(247 248 250 / 0.9);
+}
+
+/* --- edges: drawn on, then carrying signal --------------------------- */
+
+.team-edge,
+.team-pulse {
+  fill: none;
+  stroke-linecap: round;
+}
+
+.team-edge {
+  stroke: var(--color-signal-deep);
+  stroke-width: var(--sw, 1.4);
+  opacity: 0.38;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition:
+    opacity 0.3s ease,
+    stroke-width 0.3s ease;
+}
+
+.team-edge-group[data-open="true"] .team-edge {
+  opacity: 0.16;
+}
+
+.team-stage[data-ready="true"] .team-edge {
+  animation: team-draw 0.7s cubic-bezier(0.22, 0.7, 0.24, 1) var(--delay) forwards;
+}
+
+.team-pulse {
+  stroke: var(--color-signal-deep);
+  stroke-width: calc(var(--sw, 1.4) + 1.2);
+  stroke-dasharray: 0.018 0.982;
+  opacity: 0;
+}
+
+.team-edge-group[data-open="true"] .team-pulse {
+  display: none;
+}
+
+.team-stage[data-ready="true"] .team-pulse {
+  animation: team-pulse var(--pulse, 3s) linear var(--pulse-delay, 2s) infinite both;
+}
+
+/* tracing someone: their path carries, everything else recedes */
+.team-stage[data-active="true"] .team-edge-group:not([data-lit="true"]) .team-edge {
+  opacity: 0.07;
+}
+
+.team-stage[data-active="true"] .team-edge-group:not([data-lit="true"]) .team-pulse {
+  visibility: hidden;
+}
+
+.team-stage[data-active="true"] .team-edge-group[data-lit="true"] .team-edge {
+  stroke-width: calc(var(--sw, 1.4) + 0.8);
+  opacity: 0.95;
+}
+
+.team-stage[data-active="true"] .team-edge-group[data-lit="true"] .team-pulse {
+  animation-duration: 1.2s;
+}
+
+/* --- the decision node ---------------------------------------------- */
+
+.team-decision,
+.team-ping {
+  width: 44px;
+  height: 44px;
+}
+
+.team-decision {
+  background: var(--color-signal-deep);
+  box-shadow:
+    inset 0 0 0 9px #fff,
+    0 0 0 1px rgb(29 63 184 / 0.3),
+    0 0 28px rgb(29 63 184 / 0.4);
+  transition:
+    box-shadow 0.3s ease,
+    scale 0.3s ease;
+}
+
+.team-output[data-hot="true"] .team-decision {
+  box-shadow:
+    inset 0 0 0 9px #fff,
+    0 0 0 1px rgb(29 63 184 / 0.5),
+    0 0 44px rgb(29 63 184 / 0.6);
+  scale: 1.1;
+}
+
+.team-ping {
+  border: 1.5px solid var(--color-signal-deep);
+  opacity: 0;
+  animation: team-ping 3.2s ease-out calc(var(--delay) + 0.5s) infinite;
+}
+
+.team-bloom {
+  opacity: 0;
+}
+
+.team-stage[data-ready="true"] .team-bloom {
+  animation: team-fade 1.2s ease 1.4s forwards;
+}
+
+@keyframes team-pop {
+  from {
+    opacity: 0;
+    scale: 0.85;
+  }
+}
+
+@keyframes team-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes team-pulse {
+  0% {
+    stroke-dashoffset: 1.018;
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 0.7;
+  }
+  100% {
+    stroke-dashoffset: 0.018;
+    opacity: 0;
+  }
+}
+
+@keyframes team-ping {
+  0% {
+    opacity: 0.45;
+    scale: 1;
+  }
+  70%,
+  100% {
+    opacity: 0;
+    scale: 2.6;
+  }
+}
+
+@keyframes team-fade {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .team-stage[data-ready="true"] .team-member,
+  .team-stage[data-ready="true"] .team-output,
+  .team-stage[data-ready="true"] .team-pulse,
+  .team-ping {
+    animation: none;
+  }
+
+  .team-stage[data-ready="true"] .team-edge {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .team-stage[data-ready="true"] .team-bloom {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Quant desk                                                          */
+/* ------------------------------------------------------------------ */
+
+.quant-live {
+  animation: quant-live 1.6s ease-in-out infinite;
+}
+
+@keyframes quant-live {
+  50% {
+    opacity: 0.25;
+  }
+}
+
+.quant-range {
+  appearance: none;
+  height: 2px;
+  border-radius: 1px;
+  background: rgb(27 42 74 / 0.15);
+  cursor: pointer;
+}
+
+.quant-range::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-signal-deep);
+  box-shadow: 0 0 0 3px rgb(29 63 184 / 0.15);
+}
+
+.quant-range::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-signal-deep);
+  box-shadow: 0 0 0 3px rgb(29 63 184 / 0.15);
+}
+
+.quant-range:focus-visible {
+  outline: 2px solid var(--color-signal);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quant-live {
+    animation: none;
+  }
 }

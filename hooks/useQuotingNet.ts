@@ -7,6 +7,7 @@ import {
   createRandom,
   decide,
   driftMid,
+  fairValue,
   driftStep,
   FEATURE_COUNT,
   forward,
@@ -17,7 +18,6 @@ import {
   INITIAL_MID,
   inputWeight,
   quote,
-  signed,
   type Action,
   type Features,
 } from "@/lib/quoting";
@@ -44,12 +44,12 @@ import {
  *
  * Every frame this runs the real quoting model (lib/quoting) and writes the
  * result straight to the DOM: node positions follow their own activations,
- * edges thicken with whatever they're carrying, and the bid/ask beside the
- * wordmark is the model's actual output. React never re-renders for any of
+ * edges thicken with whatever they're carrying, and the fair value and
+ * bid/ask under the graph are the model's actual output. React never re-renders for any of
  * it — at 60fps that would be a state update per frame, so we drive the
  * elements imperatively, the same way the intro sequence drives `--p`.
  *
- * The five input nodes are grabbable. Drag one (or focus it and use the
+ * The six input nodes are grabbable. Drag one (or focus it and use the
  * arrow keys) and the whole graph re-routes around the change; let go and it
  * resumes drifting after a beat. That's the point of the thing: a visitor's
  * first interaction with the team is making a decision come out differently.
@@ -134,7 +134,7 @@ export function useQuotingNet(ref: RefObject<HTMLElement | null>) {
     const svg = root.querySelector<SVGSVGElement>(".nn-svg");
     const elBid = one("bid");
     const elAsk = one("ask");
-    const elSkew = one("skew");
+    const elFair = one("fair");
     const elAction = one("action");
     const elActionText = one("action-text");
     const elCount = one("count");
@@ -171,6 +171,7 @@ export function useQuotingNet(ref: RefObject<HTMLElement | null>) {
     let lastAction: Action | null = null;
     let lastBid = "";
     let lastAsk = "";
+    let lastValue = "";
 
     const clamp01 = (v: number) => (v < 0 ? 0 : v > 1 ? 1 : v);
     const yIn = (i: number) => IN_Y[i] + x[i] * IN_SWING;
@@ -257,7 +258,13 @@ export function useQuotingNet(ref: RefObject<HTMLElement | null>) {
         lastAsk = askText;
         flash(elAsk);
       }
-      if (elSkew) elSkew.textContent = signed(q, 2);
+      // what the fundamental desk says it's worth
+      const valueText = fairValue(hidden).toFixed(2);
+      if (elFair && valueText !== lastValue) {
+        elFair.textContent = valueText;
+        lastValue = valueText;
+        flash(elFair);
+      }
 
       const action = decide(q);
       if (action !== lastAction) {

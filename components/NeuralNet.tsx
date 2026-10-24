@@ -4,9 +4,10 @@ import { FEATURE_COUNT, HIDDEN_COUNT, W1, W2 } from "@/lib/quoting";
 
 /**
  * The hero's inline network: a compact feed-forward graph that reads left to
- * right as a sentence — a rail of live market features flows through a hidden
- * layer and converges, thickening, onto a single glowing DECISION node that
- * sits flush against the wordmark.
+ * right as a sentence — both research desks, as two labelled groups on one
+ * rail (market signals above, company fundamentals below), flow through a
+ * hidden layer and converge, thickening, onto a single glowing DECISION node
+ * that sits flush against the wordmark.
  *
  * Two things drive it, and they compose:
  *
@@ -36,15 +37,19 @@ import { FEATURE_COUNT, HIDDEN_COUNT, W1, W2 } from "@/lib/quoting";
  */
 
 export const VB_W = 470;
-export const VB_H = 232;
+export const VB_H = 298;
 
 export const IN_X = 128;
 export const HID_X = 288;
 export const DEC_X = 416;
-export const DEC_Y = 116;
+export const DEC_Y = 152;
 
-export const IN_Y = [28, 72, 116, 160, 204];
-export const HID_Y = [70, 116, 162];
+/** Two groups of three, with room above each for its desk label. */
+export const IN_Y = [36, 76, 116, 188, 228, 268];
+export const HID_Y = [100, 152, 204];
+
+/** Desk labels sit above the first input of each group. */
+const DESK_Y = [12, 164];
 
 /** How far a node travels across the full range of its activation. */
 export const IN_SWING = 13;
@@ -58,7 +63,8 @@ function varStyle(vars: Record<string, string | number>) {
 }
 
 export default function NeuralNet() {
-  const { features, hint } = content.hero.net;
+  const { desks, hint } = content.hero.net;
+  const features = desks.flatMap((d) => d.features);
 
   return (
     <svg
@@ -98,7 +104,7 @@ export default function NeuralNet() {
               <g
                 key={`ih-${i}-${j}`}
                 className="nn-edge-group"
-                style={varStyle({ "--td": 0.16 + i * 0.045, "--tw": 0.2, "--sw": 1.3 })}
+                style={varStyle({ "--td": 0.16 + i * 0.038, "--tw": 0.2, "--sw": 1.3 })}
               >
                 <path className="nn-edge-base" d={d} data-qn="edge-base" />
                 <path
@@ -143,6 +149,13 @@ export default function NeuralNet() {
         })}
       </g>
 
+      {/* one label per desk, over its group of inputs */}
+      {desks.map((d, k) => (
+        <text key={d.label} className="nn-rail-label nn-desk-label" x={6} y={DESK_Y[k]}>
+          {d.label}
+        </text>
+      ))}
+
       {/* input layer: each node is a live feature you can grab */}
       <g className="nn-nodes">
         {features.map((label, i) => (
@@ -151,7 +164,7 @@ export default function NeuralNet() {
             className="nn-input"
             data-qn="input"
             data-index={i}
-            style={varStyle({ "--d": i * 0.06, "--w": 0.16 })}
+            style={varStyle({ "--d": i * 0.05, "--w": 0.16 })}
             role="slider"
             tabIndex={0}
             aria-label={label}
