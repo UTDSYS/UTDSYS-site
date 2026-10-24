@@ -5,9 +5,9 @@
  */
 
 /**
- * The Get Involved contact form is powered by Resend (/api/contact). While
- * it's off, the form is replaced by direct-contact links and the API route
- * short-circuits instead of attempting to send. Set to `true` (and provide
- * RESEND_API_KEY) to re-enable.
+ * The Get Involved contact form, powered by Resend (/api/contact). Needs
+ * RESEND_API_KEY (and optionally RESEND_FROM) in the environment. Set to
+ * `false` to replace the form with direct-contact links; the API route then
+ * short-circuits instead of attempting to send.
  */
-export const CONTACT_FORM_ENABLED = false;
+export const CONTACT_FORM_ENABLED = true;

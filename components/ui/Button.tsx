@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps } from "react";
 
-type Variant = "primary" | "secondary" | "signal";
+type Variant = "primary" | "secondary" | "signal" | "deep" | "outline-light";
 
 const base =
   "inline-flex items-center justify-center rounded-full px-7 py-3 text-sm font-medium tracking-tight transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-signal focus-visible:ring-offset-2 focus-visible:ring-offset-offwhite disabled:opacity-60";
@@ -11,6 +11,9 @@ const variants: Record<Variant, string> = {
   secondary:
     "border border-navy/25 text-navy hover:border-signal hover:text-signal",
   signal: "bg-signal text-white hover:brightness-110",
+  deep: "bg-signal-deep text-white hover:bg-ink",
+  // for navy grounds
+  "outline-light": "border border-white/35 text-white hover:border-white",
 };
 
 type Props = {
@@ -20,7 +23,8 @@ type Props = {
   className?: string;
 } & Omit<ComponentProps<"button">, "className" | "children">;
 
-/** Shared CTA. Renders a Link when `href` is given, a button otherwise. */
+/** Shared CTA. Renders a Link when `href` is given (a new-tab anchor for
+ *  external URLs), a button otherwise. */
 export default function Button({
   variant = "primary",
   href,
@@ -29,6 +33,13 @@ export default function Button({
   ...rest
 }: Props) {
   const cls = `${base} ${variants[variant]} ${className}`;
+  if (href && /^https?:/.test(href)) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={cls}>
+        {children}
+      </a>
+    );
+  }
   if (href) {
     return (
       <Link href={href} className={cls}>

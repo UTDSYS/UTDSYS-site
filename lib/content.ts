@@ -1,9 +1,8 @@
 export type TeamMember = {
-  name: string | null;
+  name: string;
   role: string;
   photo: string | null;
 };
-export type TeamDivision = { name: string; lead: TeamMember; members: TeamMember[] };
 
 export type Rating = "Buy" | "Hold" | "Sell";
 export type ResearchReport = {
@@ -34,50 +33,26 @@ const content = {
     name: "UTDSYS",
     full: "University of Toronto Decision Systems",
   },
-  // The hero is a live neural network driven by the model in lib/quoting:
-  // both research desks feeding one decision. The two CTAs are the site's
-  // primary paths.
+  // The hero: the group crest on a navy panel, and the wordmark beside it,
+  // whose "i" is lit by a network firing into its dot. `desks` are the two
+  // research desks, each linking to its page.
   hero: {
     eyebrow: "University of Toronto",
-    mission: "Using mathematics to make better decisions under uncertainty.",
+    lede: "A student research group using mathematics to make better decisions under uncertainty.",
+    desks: [
+      {
+        name: "Quantitative desk",
+        body: "Models, markets and the literature behind them.",
+        href: "/quantitative-research",
+      },
+      {
+        name: "Fundamental desk",
+        body: "Bottom-up research on public companies.",
+        href: "/fundamental-research",
+      },
+    ],
     primary: { label: "Get involved", href: "/get-involved" },
-    secondary: { label: "Our research", href: "/quantitative-research" },
-    net: {
-      description:
-        "A feed-forward network combining three market signals and three company fundamentals into one quoting decision.",
-      // Shown under the network, which is presented as a figure.
-      caption: {
-        label: "Fig. 1",
-        body: "Both desks, one call. Market signals from quantitative research and company fundamentals from fundamental research feed a single model that sets the quote. Drag any input.",
-        note: "Simulated data",
-      },
-      // Drawn top-to-bottom, one group per desk; the flattened order matches
-      // the feature vector in lib/quoting.
-      desks: [
-        { label: "Quantitative", features: ["Order flow", "Volatility", "Inventory"] },
-        { label: "Fundamental", features: ["Earnings", "Valuation", "Leverage"] },
-      ],
-      hint: {
-        pointer: "drag an input ↕",
-        keyboard: "focus an input, use ↑↓",
-      },
-      // Fair value is the fundamental desk's answer; bid and ask are the quote.
-      readout: { fair: "Fair value", bid: "Bid", ask: "Ask" },
-      // Keyed by the Action union in lib/quoting.
-      actions: {
-        "quote-both": "Quote both sides",
-        "skew-bid": "Lean bid",
-        "skew-ask": "Lean ask",
-        "pull-bid": "Pull the bid",
-        "pull-ask": "Pull the ask",
-      },
-      // Announced to screen readers whenever the call changes.
-      statusPrefix: "Decision:",
-      loading: "—",
-      meta: {
-        decisions: "decisions evaluated",
-      },
-    },
+    secondary: { label: "Join the Discord", href: "https://discord.gg/h2kX42dfdz" },
   },
   nav: {
     links: [
@@ -89,10 +64,38 @@ const content = {
       { label: "Get Involved", href: "/get-involved", cta: true },
     ],
   },
+  // /get-involved: how to join (a real sequence), the two desks to pick
+  // from, and the join panel (the Discord and email while the form is off;
+  // see CONTACT_FORM_ENABLED in lib/flags.ts).
   getInvolved: {
+    eyebrow: "University of Toronto Decision Systems",
     heading: "Get involved",
     intro:
-      "Decision Systems is open to students across every faculty — whether you build models, design interfaces, or just like hard problems. No experience required. Send us a message and we'll be in touch.",
+      "Open to students in every faculty. No experience required, just an interest in hard problems and in making decisions with numbers.",
+    steps: {
+      heading: "How to join",
+      items: [
+        { name: "Join the Discord", body: "It's where the group talks, shares papers and plans meetings." },
+        { name: "Introduce yourself", body: "Say what you study and which desk interests you." },
+        { name: "Pick up a first task", body: "Present a paper on the quantitative desk, or help cover a company on the fundamental desk." },
+      ],
+    },
+    // Two doors, one action each: students join through the Discord,
+    // sponsors and partners write to the team.
+    doors: {
+      students: {
+        label: "For students",
+        heading: "Join the group",
+        body: "Any faculty, any year. Three steps get you from new member to your first piece of work.",
+        action: "Join the Discord",
+      },
+      partners: {
+        label: "For sponsors and partners",
+        heading: "Work with us",
+        body: "Sponsorship, a speaker, a dataset, or a problem worth studying. Write to the team and we'll reply.",
+      },
+    },
+    desksPrompt: "Not sure where you'd fit? Read about the",
     form: {
       name: { label: "Name", placeholder: "Ada Lovelace" },
       email: { label: "Email", placeholder: "you@mail.utoronto.ca" },
@@ -100,9 +103,13 @@ const content = {
         label: "Message",
         placeholder: "Tell us what you're interested in…",
       },
+      topic: { label: "Topic" },
       submit: "Send message",
       sending: "Sending…",
-      success: "Thanks — your message is on its way. We'll reply soon.",
+      note: "Goes to info@utdsys.com. We reply to the address you give.",
+      successHeading: "Message sent",
+      success: "It's in the team's inbox, and we'll reply to the address you gave.",
+      another: "Send another message",
       error: "Something went wrong. Please try again or email us directly.",
       // Shown in place of the form while the contact form is disabled
       // (see CONTACT_FORM_ENABLED in lib/flags.ts).
@@ -114,40 +121,22 @@ const content = {
       },
     },
   },
-  // The /team page. Drop headshots in public/team/ and set `photo` to
-  // "/team/<file>"; members without a photo show their initials.
-  // The /team page: the org chart drawn as a network. Each desk's people
-  // feed their lead, and both leads converge on one decision. Drop headshots
-  // in public/team/ and set `photo` to "/team/<file>". A member with
-  // `name: null` renders as an open seat linking to /get-involved.
+  // /team: one roster, everyone at the same size, in org order (the two
+  // desk leads, then officers). Drop headshots in public/team/ and set
+  // `photo` to "/team/<file>"; without one, a member shows their initials.
+  // A "\n" in `role` starts a new line on the card.
   team: {
-    eyebrow: "People",
+    eyebrow: "University of Toronto Decision Systems",
     heading: "Team",
     intro:
-      "Two research desks, one call. Quantitative and fundamental research each run their own branch, and both converge on every decision we make.",
-    hint: "Hover anyone to trace their path to the decision",
-    output: "Decision",
-    openSeat: "Open seat",
-    divisions: [
-      {
-        name: "Quantitative",
-        lead: { name: "Name", role: "Founder · Head of Quant", photo: null },
-        members: [
-          { name: "Name", role: "VP, Internal", photo: null },
-          { name: "Name", role: "VP, External", photo: null },
-          { name: "Name", role: "CTO", photo: null },
-        ],
-      },
-      {
-        name: "Fundamental",
-        lead: { name: "Name", role: "Lead Fundamentals Researcher", photo: null },
-        members: [
-          { name: null, role: "Fundamentals Analyst", photo: null },
-          { name: null, role: "Fundamentals Analyst", photo: null },
-          { name: null, role: "Fundamentals Analyst", photo: null },
-        ],
-      },
-    ] as TeamDivision[],
+      "Two research desks, quantitative and fundamental. Every call the group makes goes through both.",
+    members: [
+      { name: "Name", role: "Founder\nLead Quantitative Researcher", photo: null },
+      { name: "Name", role: "Lead Fundamentals Researcher", photo: null },
+      { name: "Name", role: "VP, Internal", photo: null },
+      { name: "Name", role: "VP, External", photo: null },
+      { name: "Name", role: "CTO", photo: null },
+    ] as TeamMember[],
   },
   // /fundamental-research: an equity research hub. The newest report is
   // featured; the rest fill the coverage table. To publish, add an entry to
@@ -285,102 +274,133 @@ const content = {
       },
     ] as ResearchReport[],
   },
-  // /quantitative-research: a live, simulated market-making desk (the
-  // engine in lib/marketMaker), the model behind it, the project pipeline,
-  // and working papers. Add papers to `papers`; set `project.stage` to the
-  // pipeline step the engine has actually reached.
+  // /quantitative-research: the desk's projects first (the main work), then
+  // how it reviews papers, the annotated reading list, and written reviews.
+  // References are numbered in the order listed; a project's `reading` and a
+  // review's `ref` point at those numbers. Set each project's `stage` to
+  // where the work actually is.
   quantResearch: {
-    eyebrow: "Quantitative Research",
     heading: "Quantitative research",
     intro:
-      "We build models that make trading decisions under uncertainty. Our first is a market maker: a program that always offers to buy a little below the market price and sell a little above it, earning the gap while trying not to get stuck holding too much.",
-    // Three steps that teach a visitor how to read the desk below.
-    explainer: [
-      {
-        title: "Quote both sides",
-        body: "The shaded band is our offer: the bottom edge is the price we'll buy at, the top edge the price we'll sell at.",
-      },
-      {
-        title: "Earn the gap",
-        body: "When someone trades with us (a dot), we pocket part of that gap. Do it thousands of times and it adds up.",
-      },
-      {
-        title: "Don't get stuck",
-        body: "Holding a pile of stock is risky, so the band leans away from whatever we already hold to unload it.",
-      },
-    ],
-    desk: {
-      title: "A live market maker",
-      simulated: "Simulated",
-      note: "Synthetic market with informed traders. No real market data or money.",
-      labels: {
-        ask: "We sell",
-        mid: "Market",
-        bid: "We buy",
-        bought: "We bought",
-        sold: "We sold",
-        profit: "Profit",
-        position: "Position",
-        trades: "Trades",
-        spread: "Gap we charge",
-        positionChart: "Shares held",
-        profitChart: "Profit over time",
-        flat: "Flat",
-        long: "long",
-        short: "short",
-      },
-      controls: {
-        gamma: { name: "Caution", hint: "How hard it avoids holding a position" },
-        sigma: { name: "Volatility", hint: "How wildly the market moves" },
-      },
-      underTheHood: "Under the hood",
-    },
-    model: {
-      heading: "The math",
-      intro:
-        "For the curious: the desk is the Avellaneda–Stoikov model, the standard starting point for market making. These three equations are everything it does.",
-      terms: [
+      "The quantitative desk builds projects and reads the literature behind them. Each project starts from published work, is implemented by members from scratch, and is tested against data before we trust it.",
+    projects: {
+      heading: "Projects",
+      readingLabel: "Builds on",
+      items: [
         {
-          name: "Reservation price",
-          formula: "r = S − q·γ·σ²·τ",
-          body: "Where the desk is indifferent to trading. Long inventory shades it down so the desk sells more readily.",
-        },
-        {
-          name: "Optimal spread",
-          formula: "δ = γσ²τ + (2/γ)·ln(1 + γ/k)",
-          body: "Wider when risk aversion or volatility rise; the second term prices how quickly fill probability decays.",
-        },
-        {
-          name: "Order arrival",
-          formula: "λ(d) = A·e^(−k·d)",
-          body: "Quotes further from mid fill less often. Every fill also moves the mid against us: adverse selection.",
+          name: "Quoting engine",
+          summary:
+            "A market-making engine: it quotes a price to buy and a price to sell, and adjusts both for inventory and volatility so the desk isn't left holding risk. The first version implements a closed-form model from the literature exactly, so we have a baseline we fully understand before adding anything learned from data.",
+          reading: [5, 6, 2],
+          stages: [
+            { name: "Literature review", detail: "Avellaneda–Stoikov and its extensions" },
+            { name: "Model specification", detail: "Quoting rule, inventory limits, parameter estimation" },
+            { name: "Backtest", detail: "Historical order-book data, with fill assumptions written down" },
+            { name: "Paper trading", detail: "Live data, simulated execution" },
+          ],
+          stage: "Model specification",
         },
       ],
-    },
-    project: {
-      label: "Current project",
-      name: "Quoting engine",
-      summary:
-        "A production-grade market maker: a quoting model, an inventory and risk layer, and a backtester on historical order-book data.",
-      stages: ["Research", "Model", "Backtest", "Paper trading", "Live"],
-      stage: "Model",
-    },
-    focus: {
-      heading: "Focus areas",
-      areas: [
-        { name: "Market microstructure", body: "Order books, queue dynamics, and how prices actually form tick by tick." },
-        { name: "Stochastic control", body: "Optimal quoting and execution as decisions under a model of uncertainty." },
-        { name: "Statistical learning", body: "Short-horizon signals, fit carefully and tested out of sample." },
-        { name: "Risk", body: "Inventory limits, drawdown control, and knowing when not to trade." },
-      ],
-    },
-    papers: {
-      heading: "Working papers",
-      empty: "First notes are in progress.",
-      items: [] as { title: string; authors: string[]; date: string; abstract: string; pdf: string | null }[],
     },
     disclaimer:
-      "All desk data on this page is simulated for illustration. It is not a record of trading, backtested or live, and nothing here is investment advice.",
+      "Student research for educational purposes. Nothing here is investment advice.",
+    method: {
+      heading: "How we review a paper",
+      // A real sequence: every paper goes through these in order.
+      steps: [
+        {
+          name: "Read",
+          body: "One member takes the paper and writes a one-page summary: the question, the method, the result, and every assumption it rests on.",
+        },
+        {
+          name: "Present",
+          body: "They walk the desk through it. The job of everyone else is to find where the argument is weakest.",
+        },
+        {
+          name: "Replicate",
+          body: "Where the data or a simulation allows, we rebuild the key result ourselves before we rely on it.",
+        },
+        {
+          name: "Write up",
+          body: "The summary, the objections raised, and any replication code go into a written review.",
+        },
+      ],
+    },
+    reading: {
+      heading: "Reading list",
+      groups: [
+        {
+          name: "Market microstructure",
+          items: [
+            {
+              cite: "Kyle, A. S. (1985). Continuous auctions and insider trading. Econometrica 53(6), 1315–1335.",
+              note: "How an informed trader hides in noise, and where price impact comes from.",
+            },
+            {
+              cite: "Glosten, L. R. and Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. Journal of Financial Economics 14(1), 71–100.",
+              note: "The bid–ask spread as the price of trading against better-informed counterparties.",
+            },
+            {
+              cite: "Cont, R., Kukanov, A. and Stoikov, S. (2014). The price impact of order book events. Journal of Financial Econometrics 12(1), 47–88.",
+              note: "Order-flow imbalance at the top of the book explains short-horizon price moves.",
+            },
+          ],
+        },
+        {
+          name: "Optimal control and execution",
+          items: [
+            {
+              cite: "Almgren, R. and Chriss, N. (2001). Optimal execution of portfolio transactions. Journal of Risk 3(2), 5–39.",
+              note: "Trading off market impact against price risk when unwinding a position.",
+            },
+            {
+              cite: "Avellaneda, M. and Stoikov, S. (2008). High-frequency trading in a limit order book. Quantitative Finance 8(3), 217–224.",
+              note: "Quoting as a stochastic control problem, solved in closed form.",
+            },
+            {
+              cite: "Cartea, Á., Jaimungal, S. and Penalva, J. (2015). Algorithmic and High-Frequency Trading. Cambridge University Press.",
+              note: "The standard textbook treatment of the whole area, from a University of Toronto author.",
+            },
+          ],
+        },
+        {
+          name: "Statistical learning and testing",
+          items: [
+            {
+              cite: "Harvey, C. R., Liu, Y. and Zhu, H. (2016). … and the cross-section of expected returns. Review of Financial Studies 29(1), 5–68.",
+              note: "Why most published return factors are likely false, and how high the bar should be.",
+            },
+            {
+              cite: "Bailey, D. H. and López de Prado, M. (2014). The deflated Sharpe ratio: correcting for selection bias, backtest overfitting, and non-normality. Journal of Portfolio Management 40(5), 94–107.",
+              note: "Adjusting a backtest's Sharpe ratio for the number of strategies that were tried.",
+            },
+            {
+              cite: "Gu, S., Kelly, B. and Xiu, D. (2020). Empirical asset pricing via machine learning. Review of Financial Studies 33(5), 2223–2273.",
+              note: "A careful comparison of learning methods for predicting returns, tested out of sample.",
+            },
+          ],
+        },
+        {
+          name: "Portfolios and risk",
+          items: [
+            {
+              cite: "Markowitz, H. (1952). Portfolio selection. Journal of Finance 7(1), 77–91.",
+              note: "Where mean–variance optimisation starts.",
+            },
+            {
+              cite: "Ledoit, O. and Wolf, M. (2004). Honey, I shrunk the sample covariance matrix. Journal of Portfolio Management 30(4), 110–119.",
+              note: "Why the sample covariance matrix fails in practice, and a simple estimator that holds up.",
+            },
+          ],
+        },
+      ],
+    },
+    reviews: {
+      heading: "Reviews",
+      empty: "Written reviews will be published here as they're finished.",
+      items: [] as { title: string; reviewer: string; date: string; ref: number; pdf: string | null }[],
+    },
+    join: { text: "Want to present a paper?", label: "Get involved", href: "/get-involved" },
   },
   contact: {
     email: "info@utdsys.com",
@@ -393,9 +413,14 @@ const content = {
   },
   // The /contact directory: every way to reach the team, in one place.
   contactPage: {
-    heading: "Find us",
+    eyebrow: "University of Toronto Decision Systems",
+    heading: "Contact",
     intro:
-      "Questions, ideas, or just want to say hi? Reach the team through any of these.",
+      "Questions, ideas, or partnership enquiries. Reach the team through any of these.",
+    joinPrompt: { text: "Want to join the group?", label: "Get involved", href: "/get-involved" },
+    // The message form (lib/flags CONTACT_FORM_ENABLED); it emails info@.
+    form: { heading: "Send a message" },
+    direct: { heading: "Or reach us directly" },
     channels: [
       {
         label: "Email",

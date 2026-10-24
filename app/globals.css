@@ -8,6 +8,8 @@
   --color-signal: #2d5bff;
   /* A deeper shade of the same accent, for the team network. */
   --color-signal-deep: #1d3fb8;
+  /* The crest's ground: the group's navy. */
+  --color-crest: #0a1838;
 
   --font-sans: var(--ff-body);
   --font-display: var(--ff-display);
@@ -84,712 +86,265 @@ body {
 }
 
 /* ------------------------------------------------------------------ */
-/* Hero                                                                */
-/*                                                                     */
-/*   --p  0..1 build progress, played on a timed tween on load by      */
-/*        useIntroSequence. First the number rain falls away, then the  */
-/*        finished page resolves into place.                            */
-/*                                                                      */
-/*   --build  0..1 progress of the network's own assembly, derived from  */
-/*        --p. Each node and edge starts at its own offset inside it, so   */
-/*        the graph builds left to right instead of cross-fading in.       */
-/*                                                                      */
-/*   --a  0..1 activation, written per element every frame by           */
-/*        useQuotingNet from the real model in lib/quoting. It sets how  */
-/*        brightly a node burns and how thickly an edge carries, so the  */
-/*        decision visibly routes itself.                               */
+/* Hero: the crest panel, and the wordmark whose dot is a decision     */
 /* ------------------------------------------------------------------ */
 
-.nn-stage {
-  --p: 0;
-
-  /* The page composes almost immediately, and the network is what builds
-     inside it. This ordering is load-bearing: everything here fades in place
-     inside a layout sized for the finished state, so anything still at
-     opacity 0 is holding a hole in the composition. Hiding the wordmark for
-     a second and a half doesn't read as "building" — it reads as a broken
-     page with a diagram stranded off-centre in it. */
-  --page: clamp(0, calc(var(--p) / 0.06), 1);
-  --word: clamp(0, calc((var(--p) - 0.04) / 0.14), 1);
-  --endcap: clamp(0, calc((var(--p) - 0.12) / 0.14), 1);
-
-  /* the long movement, and the only one that's really a performance */
-  --build: clamp(0, calc((var(--p) - 0.08) / 0.62), 1);
-  --rail: clamp(0, calc((var(--p) - 0.1) / 0.1), 1);
-
-  /* the convergence arrives, blooms, and the quote it produced goes live */
-  --decide: clamp(0, calc((var(--p) - 0.6) / 0.18), 1);
-  --live: clamp(0, calc((var(--p) - 0.7) / 0.18), 1);
-
-  --fade: var(--page);
+.hero-panel {
+  background-color: var(--color-crest);
+  /* a faint lift behind the seal, so the panel reads as a surface */
+  background-image: radial-gradient(closest-side, rgb(45 91 255 / 0.16), transparent);
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: min(120%, 760px) min(120%, 760px);
 }
 
-.nn-overline {
-  opacity: var(--page);
-  transform: translateY(calc((1 - var(--page)) * 10px));
-}
-
-/* No blur filter here. Animating one on an element this large is both
-   expensive and soft in a way that reads as unfinished; the graph earns its
-   entrance from the per-element build below instead. */
-.nn-net {
-  opacity: var(--page);
-  transform: translateY(calc((1 - var(--page)) * 12px));
-}
-
-.nn-word {
-  opacity: var(--word);
-  transform: translateY(calc((1 - var(--word)) * 18px));
-}
-
-.nn-endcap {
-  opacity: var(--endcap);
-  transform: translateY(calc((1 - var(--endcap)) * 24px));
-}
-
-/* opacity alone would leave the CTAs clickable through the whole intro, so
-   they stay visibility:hidden until they start fading in. The threshold
-   behind data-end is P_ENDCAP in useIntroSequence and must match the start
-   of the --endcap window above, or they snap in part-faded. */
-.nn-stage[data-end="false"] .nn-endcap {
-  visibility: hidden;
-}
-
-/* --- the live layer: the quote the network is producing ------------- */
-
-.nn-quote,
-.nn-meta {
-  opacity: var(--live);
-}
-
-.nn-quote {
-  transform: translateY(calc((1 - var(--live)) * 18px));
-}
-
-/* a figure that just changed ticks through signal on its way back to ink */
-@keyframes nn-bump {
+/* The copy and crest compose first; the network then builds inside the
+   finished layout. One short staggered rise, nothing scroll-triggered. */
+@keyframes hero-in {
   from {
-    color: var(--color-signal);
-  }
-  to {
-    color: var(--color-ink);
-  }
-}
-
-.nn-figure.is-bump {
-  animation: nn-bump 0.35s ease-out;
-}
-
-.nn-action {
-  transition:
-    background-color 0.35s ease,
-    border-color 0.35s ease,
-    color 0.35s ease;
-}
-
-.nn-action.is-flip {
-  border-color: rgb(45 91 255 / 0.18);
-  background-color: rgb(45 91 255 / 0.06);
-  color: var(--color-signal);
-}
-
-/* --- the inline network ------------------------------------------- */
-
-/* The convergence reaching the decision node, bloomed out past the graph and
-   gone again — a 0→1→0 hump off --decide. It's the reason the build reads at
-   arm's length and not only up close. Sits inside the SVG so it tracks the
-   node; .nn-svg is overflow:visible so it can bleed past the graph. */
-.nn-bloom {
-  opacity: calc(var(--decide) * (1 - var(--decide)) * 4);
-  transform-box: fill-box;
-  transform-origin: center;
-  transform: scale(calc(0.6 + var(--decide) * 0.55));
-}
-
-.nn-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  overflow: visible;
-  opacity: calc(0.55 + 0.45 * var(--fade));
-}
-
-/* --- nodes --------------------------------------------------------- */
-
-/* The graph doesn't arrive all at once — it assembles in reading order.
-   Each element carries its own start (--d) and span (--w), both measured in
-   --build units, so the rail fires top-to-bottom, its edges draw into the
-   hidden layer, and the convergence lands on the decision node last. */
-.nn-input,
-.nn-hidden,
-.nn-decision {
-  --bp: clamp(0, calc((var(--build) - var(--d, 0)) / var(--w, 0.16)), 1);
-}
-
-.nn-node-base {
-  fill: #ffffff;
-  stroke: rgb(27 42 74 / 0.32);
-  stroke-width: 1.5;
-}
-
-/* the build gates it in; the model decides how hard it burns */
-.nn-node-lit {
-  --a: 0;
-  opacity: calc(var(--bp) * (0.25 + 0.75 * var(--a)));
-  fill: rgb(45 91 255 / 0.1);
-  stroke: var(--color-signal);
-  stroke-width: 2;
-  filter: drop-shadow(0 0 6px rgb(45 91 255 / 0.4));
-}
-
-/* the single output node: the payoff — bigger glow, brighter fill */
-.nn-decision .nn-node-lit {
-  fill: rgb(45 91 255 / 0.16);
-  stroke-width: 2.5;
-  /* this is the payoff of the whole build — it gets the real glow */
-  filter: drop-shadow(0 0 20px rgb(45 91 255 / 0.6));
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-/* the call changed — mark it */
-@keyframes nn-bloom {
-  0% {
-    transform: scale(1);
-  }
-  40% {
-    transform: scale(1.18);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.nn-decision.is-bloom .nn-node-lit {
-  animation: nn-bloom 0.6s cubic-bezier(0.22, 0.7, 0.24, 1);
-}
-
-.nn-ping-wrap {
-  opacity: calc(0.6 * var(--decide));
-}
-
-.nn-ping {
-  fill: none;
-  stroke: var(--color-signal);
-  stroke-width: 2;
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: nn-ping 2.8s ease-out infinite;
-}
-
-@keyframes nn-ping {
-  0% {
-    transform: scale(1);
-    opacity: 0.7;
-  }
-  70%,
-  100% {
-    transform: scale(2.6);
     opacity: 0;
+    transform: translateY(14px);
   }
 }
 
-/* --- edges: drafted lines that carry what the model routes ---------- */
+.hero-in {
+  animation: hero-in 0.6s cubic-bezier(0.22, 0.7, 0.24, 1) both;
+}
+.hero-in:nth-child(2) { animation-delay: 0.06s; }
+.hero-in:nth-child(3) { animation-delay: 0.14s; }
+.hero-in:nth-child(4) { animation-delay: 0.2s; }
+.hero-in:nth-child(5) { animation-delay: 0.26s; }
 
-.nn-edge-group {
-  --tp: clamp(0, calc((var(--build) - var(--td, 0)) / var(--tw, 0.2)), 1);
-  /* A 0→1→0 hump that peaks halfway through the draw. It's what makes an
-     edge visibly flood with signal as it lands, rather than just arriving:
-     every edge is bright while it draws, then falls back to whatever it
-     actually carries. */
-  --flood: calc(var(--tp) * (1 - var(--tp)) * 4);
+/* The dot on the dotless ı: the crest's decision node, set in the word.
+   It pops in once the copy has risen, then breathes like the crest's. */
+.hero-tittle {
+  position: absolute;
+  /* measured off the font's own "i" dot: 0.215em across, centred 0.285em
+     below the top of the line box. The heading's -0.04em tracking trims the
+     ı's box on the right, so its centre sits left of the stem; push back. */
+  left: calc(50% + 0.025em);
+  top: 0.1775em;
+  width: 0.215em;
+  height: 0.215em;
+  margin-left: -0.1075em;
+  border-radius: 50%;
+  background: var(--color-signal);
+  box-shadow: 0 0 22px 4px rgb(45 91 255 / 0.45);
+  animation:
+    crest-pop 0.6s cubic-bezier(0.2, 0.7, 0.3, 1.4) 0.5s both,
+    hero-glow 3.2s ease-in-out 1.1s infinite;
 }
 
-.nn-edge-base,
-.nn-edge,
-.nn-edge-pulse {
-  fill: none;
-  stroke-linecap: round;
-}
-
-.nn-edge-base {
-  stroke: rgb(27 42 74 / 0.09);
-  stroke-width: var(--sw, 1.5);
-}
-
-/* Width and brightness are |activation x weight|, so you can read which
-   paths are carrying the decision. Inhibitory weights run navy instead of
-   signal, which puts the sign of every contribution on the page. */
-/* The build draws the line on; the model decides what it carries after. The
-   two compose: --tp runs the dashoffset 1→0 so the edge grows from its input
-   toward its hidden node, and once it's drawn (--tp 1, offset 0) --a takes
-   over width and brightness for good. */
-.nn-edge {
-  --a: 0;
-  stroke: var(--color-signal);
-  stroke-width: calc(var(--sw, 1.5) * (0.72 + 1.1 * var(--a) + var(--flood) * 0.7));
-  stroke-dasharray: 1;
-  stroke-dashoffset: calc(1 - var(--tp));
-  opacity: calc(0.14 + 0.72 * var(--a) + var(--flood) * 0.5);
-}
-
-.nn-edge.is-neg {
-  stroke: var(--color-navy);
-  opacity: calc(0.1 + 0.4 * var(--a) + var(--flood) * 0.4);
-}
-
-/* light packets running along the convergence */
-.nn-edge-pulse {
-  --a: 0;
-  stroke: var(--color-signal);
-  stroke-width: calc(var(--sw, 1.5) + 0.5);
-  stroke-dasharray: 0.03 0.22;
-  animation: nn-pulse 2.2s linear infinite;
-  opacity: calc(var(--tp) * 0.75 * var(--a));
-}
-
-.nn-edge-group:nth-child(even) .nn-edge-pulse {
-  animation-duration: 2.9s;
-}
-
-@keyframes nn-pulse {
-  to {
-    stroke-dashoffset: -0.25;
+@keyframes hero-glow {
+  50% {
+    box-shadow: 0 0 40px 10px rgb(45 91 255 / 0.6);
   }
 }
 
-/* --- the input rail: labels, values, and the grab affordance -------- */
-
-.nn-rail-label,
-.nn-rail-value,
-.nn-hint {
-  font-family: var(--ff-mono), ui-monospace, monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
+/* the second dot lights once the net has drawn across to it */
+.hero-tittle-out {
+  animation:
+    crest-pop 0.6s cubic-bezier(0.2, 0.7, 0.3, 1.4) 1.55s both,
+    hero-glow 3.2s ease-in-out 2.15s infinite;
 }
 
-/* The rail is part of the build, not the payoff: the labels and their
-   scrambling values land early, because watching them settle onto real
-   numbers is what the intro is about. useQuotingNet drives the digits. */
-.nn-rail-label,
-.nn-rail-value {
-  opacity: var(--rail);
-}
-
-/* the affordance is the last thing to show up — it only means anything
-   once there is something settled to grab */
-.nn-hint {
-  opacity: var(--live);
-}
-
-.nn-rail-label {
-  fill: rgb(27 42 74 / 0.5);
-}
-
-.nn-rail-value {
-  fill: var(--color-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-/* which desk a group of inputs comes from */
-.nn-desk-label {
-  fill: var(--color-signal);
-  font-size: 7.5px;
-  letter-spacing: 0.26em;
-}
-
-/* while its digits are still scrambling, a value is provisional — it sits
-   back in navy and steps up to ink on the frame it locks */
-.nn-rail-value.is-settling {
-  fill: rgb(27 42 74 / 0.38);
-}
-
-.nn-hint {
-  fill: rgb(27 42 74 / 0.4);
-  font-size: 8px;
-  letter-spacing: 0.2em;
-}
-
-.nn-input {
-  cursor: grab;
-}
-
-.nn-input.is-held {
-  cursor: grabbing;
-}
-
-.nn-input:hover .nn-rail-value,
-.nn-input.is-held .nn-rail-value {
-  fill: var(--color-signal);
-}
-
-.nn-input.is-held .nn-rail-label {
-  fill: rgb(45 91 255 / 0.7);
-}
-
-/* a generous, invisible target so the whole row is grabbable */
-.nn-hit {
-  fill: transparent;
-}
-
-/* the track and grip appear on approach — this is what says "drag me" */
-.nn-track {
-  stroke: rgb(27 42 74 / 0.16);
-  stroke-width: 1;
-  stroke-dasharray: 2 3;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.nn-grip {
-  stroke: var(--color-signal);
-  stroke-width: 1.2;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.nn-input:hover .nn-track,
-.nn-input.is-held .nn-track,
-.nn-input:focus-visible .nn-track {
-  opacity: 1;
-}
-
-.nn-input:hover .nn-grip,
-.nn-input.is-held .nn-grip,
-.nn-input:focus-visible .nn-grip {
-  opacity: 0.7;
-}
-
-.nn-input:focus {
-  outline: none;
-}
-
-.nn-input:focus-visible .nn-node-base {
-  stroke: var(--color-signal);
-  stroke-width: 2.5;
-}
-
-/* Reduced motion: the network still computes and still responds to input,
-   it just stops moving on its own. (useQuotingNet skips the drift clock and
-   parks the animation loop; these kill the ambient loops.) */
-@media (prefers-reduced-motion: reduce) {
-  .nn-edge-pulse,
-  .nn-ping,
-  .nn-action {
-    animation: none;
-  }
-
-  .nn-decision.is-bloom .nn-node-lit,
-  .nn-figure.is-bump {
-    animation: none;
-  }
-}
-
-/* The nav is visible by default on every page. Only on the neural-net
-   home page does it start hidden and fade in as the wordmark resolves,
-   driven by --hero-title written to :root by useIntroSequence. */
-body:has(.nn-stage) .site-nav {
-  opacity: var(--hero-title, 0);
-}
-
-body:has(.nn-stage[data-end="false"]) .site-nav {
+/* The miniature net between the two dots: 1 → 3 → 1, drawn in em so it
+   scales with the type. It draws on layer by layer after the first dot,
+   then a spark runs dot to dot every 2.4s. */
+.hero-net {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.1em;
+  height: 0.45em;
+  overflow: visible;
   pointer-events: none;
 }
 
-/* ------------------------------------------------------------------ */
-/* Team: the org chart as a network, in the deeper accent. It builds   */
-/* outside-in (timed off --delay) once the stage has measured itself,  */
-/* then signal runs toward the decision; hover traces one path.        */
-/* ------------------------------------------------------------------ */
-
-.team-stage[data-ready="false"] {
-  visibility: hidden;
-}
-
-.team-stage[data-ready="true"] .team-member,
-.team-stage[data-ready="true"] .team-output {
-  animation: team-pop 0.6s cubic-bezier(0.22, 0.7, 0.24, 1) var(--delay) both;
-}
-
-.team-member {
-  cursor: default;
-}
-
-a.team-member {
-  cursor: pointer;
-}
-
-/* --- nodes ---------------------------------------------------------- */
-
-.team-node {
-  border-color: rgb(27 42 74 / 0.16);
-  box-shadow: 0 0 0 6px var(--color-offwhite);
-  transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.35s cubic-bezier(0.22, 0.7, 0.24, 1);
-}
-
-.team-member.is-lead .team-node {
-  border-color: rgb(29 63 184 / 0.55);
-  box-shadow:
-    0 0 0 7px var(--color-offwhite),
-    0 0 0 8px rgb(29 63 184 / 0.1),
-    0 12px 36px -8px rgb(29 63 184 / 0.28);
-}
-
-.team-member.is-open .team-node {
-  border-color: rgb(29 63 184 / 0.4);
-}
-
-.team-member[data-state="linked"] .team-node {
-  border-color: rgb(29 63 184 / 0.7);
-}
-
-.team-member[data-state="active"] .team-node {
-  border-color: var(--color-signal-deep);
-  box-shadow:
-    0 0 0 6px var(--color-offwhite),
-    0 0 0 7px rgb(29 63 184 / 0.25),
-    0 14px 40px -6px rgb(29 63 184 / 0.4);
-  transform: scale(1.04);
-}
-
-.team-label,
-.team-node > * {
-  transition: opacity 0.3s ease;
-}
-
-/* dim the label and contents, never the disc — it masks the wiring */
-.team-member[data-state="dim"] .team-label,
-.team-member[data-state="dim"] .team-node > * {
-  opacity: 0.35;
-}
-
-.team-member[data-state="dim"] .team-node {
-  border-color: rgb(27 42 74 / 0.08);
-}
-
-/* labels sit over the wiring, so give them a quiet ground */
-.team-label {
-  border-radius: 4px;
-  background: rgb(247 248 250 / 0.9);
-}
-
-/* --- edges: drawn on, then carrying signal --------------------------- */
-
-.team-edge,
-.team-pulse {
-  fill: none;
+.hero-net-edge {
+  stroke: var(--color-signal);
+  stroke-opacity: 0.45;
+  stroke-width: 16;
   stroke-linecap: round;
-}
-
-.team-edge {
-  stroke: var(--color-signal-deep);
-  stroke-width: var(--sw, 1.4);
-  opacity: 0.38;
   stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  transition:
-    opacity 0.3s ease,
-    stroke-width 0.3s ease;
+  animation: crest-draw 0.4s cubic-bezier(0.22, 0.7, 0.24, 1) both;
+  animation-delay: calc(0.9s + var(--layer) * 0.35s + var(--i) * 0.05s);
 }
 
-.team-edge-group[data-open="true"] .team-edge {
-  opacity: 0.16;
+.hero-net-node {
+  fill: var(--color-signal);
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 6px rgb(45 91 255 / 0.7));
+  animation:
+    crest-pop 0.4s cubic-bezier(0.2, 0.7, 0.3, 1.4) calc(1.2s + var(--i) * 0.05s) both,
+    hero-net-flash 2.4s ease-out calc(2.4s + var(--i) * 0.05s) infinite;
 }
 
-.team-stage[data-ready="true"] .team-edge {
-  animation: team-draw 0.7s cubic-bezier(0.22, 0.7, 0.24, 1) var(--delay) forwards;
-}
-
-.team-pulse {
-  stroke: var(--color-signal-deep);
-  stroke-width: calc(var(--sw, 1.4) + 1.2);
-  stroke-dasharray: 0.018 0.982;
+.hero-net-spark {
+  stroke: var(--color-signal);
+  stroke-width: 24;
+  stroke-linecap: round;
+  stroke-dasharray: 0.16 2;
+  stroke-dashoffset: 0.16;
   opacity: 0;
+  filter: drop-shadow(0 0 5px rgb(45 91 255 / 0.9));
+  animation: hero-net-spark 2.4s ease-in calc(2.1s + var(--layer) * 0.3s + var(--i) * 0.05s) infinite;
 }
 
-.team-edge-group[data-open="true"] .team-pulse {
-  display: none;
+@keyframes hero-net-spark {
+  0% {
+    stroke-dashoffset: 0.16;
+    opacity: 1;
+  }
+  12.5% {
+    stroke-dashoffset: -1;
+    opacity: 1;
+  }
+  12.6%,
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0;
+  }
 }
 
-.team-stage[data-ready="true"] .team-pulse {
-  animation: team-pulse var(--pulse, 3s) linear var(--pulse-delay, 2s) infinite both;
+/* a hidden node flares as the first-layer spark reaches it */
+@keyframes hero-net-flash {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  6% {
+    transform: scale(1.7);
+  }
+  20% {
+    transform: scale(1);
+  }
 }
 
-/* tracing someone: their path carries, everything else recedes */
-.team-stage[data-active="true"] .team-edge-group:not([data-lit="true"]) .team-edge {
-  opacity: 0.07;
+/* --- the crest ---------------------------------------------------- */
+
+.crest {
+  height: auto;
+  overflow: visible;
 }
 
-.team-stage[data-active="true"] .team-edge-group:not([data-lit="true"]) .team-pulse {
-  visibility: hidden;
+.crest-rule {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.32);
+  stroke-width: 1.5;
 }
 
-.team-stage[data-active="true"] .team-edge-group[data-lit="true"] .team-edge {
-  stroke-width: calc(var(--sw, 1.4) + 0.8);
-  opacity: 0.95;
+.crest-text {
+  font-family: var(--ff-display), system-ui, sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  fill: #ffffff;
 }
 
-.team-stage[data-active="true"] .team-edge-group[data-lit="true"] .team-pulse {
-  animation-duration: 1.2s;
+.crest-ring {
+  transform-origin: 200px 200px;
+  animation:
+    crest-fade 0.9s ease 0.1s both,
+    crest-turn 120s linear infinite;
 }
 
-/* --- the decision node ---------------------------------------------- */
-
-.team-decision,
-.team-ping {
-  width: 44px;
-  height: 44px;
-}
-
-.team-decision {
-  background: var(--color-signal-deep);
-  box-shadow:
-    inset 0 0 0 9px #fff,
-    0 0 0 1px rgb(29 63 184 / 0.3),
-    0 0 28px rgb(29 63 184 / 0.4);
-  transition:
-    box-shadow 0.3s ease,
-    scale 0.3s ease;
-}
-
-.team-output[data-hot="true"] .team-decision {
-  box-shadow:
-    inset 0 0 0 9px #fff,
-    0 0 0 1px rgb(29 63 184 / 0.5),
-    0 0 44px rgb(29 63 184 / 0.6);
-  scale: 1.1;
-}
-
-.team-ping {
-  border: 1.5px solid var(--color-signal-deep);
-  opacity: 0;
-  animation: team-ping 3.2s ease-out calc(var(--delay) + 0.5s) infinite;
-}
-
-.team-bloom {
-  opacity: 0;
-}
-
-.team-stage[data-ready="true"] .team-bloom {
-  animation: team-fade 1.2s ease 1.4s forwards;
-}
-
-@keyframes team-pop {
+@keyframes crest-fade {
   from {
     opacity: 0;
-    scale: 0.85;
   }
 }
 
-@keyframes team-draw {
+@keyframes crest-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the mark draws itself on, then the decision lands */
+.crest-edges line {
+  stroke: #ffffff;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  animation: crest-draw 0.7s cubic-bezier(0.22, 0.7, 0.24, 1) 0.25s both;
+}
+
+@keyframes crest-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
   to {
     stroke-dashoffset: 0;
   }
 }
 
-@keyframes team-pulse {
-  0% {
-    stroke-dashoffset: 1.018;
-    opacity: 0;
-  }
-  15%,
-  85% {
-    opacity: 0.7;
-  }
-  100% {
-    stroke-dashoffset: 0.018;
-    opacity: 0;
+.crest-inputs circle {
+  fill: #ffffff;
+  animation: crest-fade 0.4s ease 0.15s both;
+}
+
+.crest-decision {
+  fill: var(--color-signal);
+  filter: drop-shadow(0 0 14px rgb(45 91 255 / 0.7));
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    crest-pop 0.6s cubic-bezier(0.2, 0.7, 0.3, 1.4) 0.8s both,
+    crest-breathe 3.2s ease-in-out 1.4s infinite;
+}
+
+@keyframes crest-pop {
+  from {
+    transform: scale(0);
   }
 }
 
-@keyframes team-ping {
-  0% {
-    opacity: 0.45;
-    scale: 1;
-  }
-  70%,
-  100% {
-    opacity: 0;
-    scale: 2.6;
-  }
-}
-
-@keyframes team-fade {
-  to {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .team-stage[data-ready="true"] .team-member,
-  .team-stage[data-ready="true"] .team-output,
-  .team-stage[data-ready="true"] .team-pulse,
-  .team-ping {
-    animation: none;
-  }
-
-  .team-stage[data-ready="true"] .team-edge {
-    animation: none;
-    stroke-dashoffset: 0;
-  }
-
-  .team-stage[data-ready="true"] .team-bloom {
-    animation: none;
-    opacity: 1;
-  }
-}
-
-/* ------------------------------------------------------------------ */
-/* Quant desk                                                          */
-/* ------------------------------------------------------------------ */
-
-.quant-live {
-  animation: quant-live 1.6s ease-in-out infinite;
-}
-
-@keyframes quant-live {
+@keyframes crest-breathe {
   50% {
-    opacity: 0.25;
+    transform: scale(1.12);
   }
-}
-
-.quant-range {
-  appearance: none;
-  height: 2px;
-  border-radius: 1px;
-  background: rgb(27 42 74 / 0.15);
-  cursor: pointer;
-}
-
-.quant-range::-webkit-slider-thumb {
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--color-signal-deep);
-  box-shadow: 0 0 0 3px rgb(29 63 184 / 0.15);
-}
-
-.quant-range::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--color-signal-deep);
-  box-shadow: 0 0 0 3px rgb(29 63 184 / 0.15);
-}
-
-.quant-range:focus-visible {
-  outline: 2px solid var(--color-signal);
-  outline-offset: 4px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .quant-live {
+  .hero-in,
+  .crest-ring,
+  .crest-edges line,
+  .crest-inputs circle,
+  .crest-decision,
+  .hero-tittle,
+  .hero-net-edge,
+  .hero-net-node,
+  .hero-net-spark {
     animation: none;
   }
+}
+
+/* On the home page the nav sits over the crest panel and scrolls away with
+   the hero instead of floating over the copy. */
+.site-nav[data-home="true"] {
+  position: absolute;
+  background: transparent;
+  border-color: transparent;
+  backdrop-filter: none;
+}
+
+/* the links can start over the navy panel, so they get their own ground */
+.site-nav[data-home="true"] .nav-links {
+  padding: 0.4rem 0.4rem 0.4rem 1.5rem;
+  border-radius: 999px;
+  background: rgb(247 248 250 / 0.92);
+  box-shadow: 0 10px 30px -18px rgb(10 24 56 / 0.6);
+}
+
+/* ------------------------------------------------------------------ */
+/* Team: a navy masthead with the crest, then one even roster          */
+/* ------------------------------------------------------------------ */
+
+.team-masthead {
+  background-color: var(--color-crest);
+  background-image: radial-gradient(closest-side, rgb(45 91 255 / 0.16), transparent);
+  background-repeat: no-repeat;
+  background-position: 85% 55%;
+  background-size: 640px 640px;
 }

@@ -1,14 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import { Schibsted_Grotesk, Instrument_Sans, IBM_Plex_Mono } from "next/font/google";
-import SmoothScroll from "@/components/SmoothScroll";
 import Nav from "@/components/Nav";
 import "./globals.css";
 
 // Distinct var names (`--ff-*`) so the Tailwind @theme tokens can reference
 // them without circular `--font-display: var(--font-display)` definitions.
+// latin-ext carries the dotless ı the hero wordmark uses for its lit dot.
 const display = Schibsted_Grotesk({
   variable: "--ff-display",
-  subsets: ["latin"],
+  subsets: ["latin", "latin-ext"],
   weight: ["500", "600", "700", "800", "900"],
 });
 
@@ -46,7 +46,6 @@ export default function RootLayout({
       className={`${display.variable} ${body.variable} ${mono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <SmoothScroll />
         {/* Nav lives here (not per-page) so route transitions can animate the
             page content without disturbing the fixed nav. */}
         <Nav />

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import content from "@/lib/content";
+import { CrestBadge } from "@/components/Crest";
 
 /**
- * Fixed site nav. Visible by default; on the home page the
- * `body:has(.nn-stage)` rules in globals.css keep it hidden until the
- * hero's wordmark resolves (driven by --hero-title on :root).
+ * Fixed site nav. On the home page it sits over the hero instead
+ * (`data-home`, styled in globals.css), with a white brand over the crest.
  *
  * Desktop shows the links inline; below lg they collapse behind a menu
  * toggle so the links + wordmark never overflow a narrow viewport.
@@ -16,6 +16,8 @@ import content from "@/lib/content";
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  // Home sits the brand and menu toggle over the navy crest panel.
+  const home = pathname === "/";
 
   // Close the menu when Escape is pressed. (Tapping a link closes it via the
   // link's own onClick.)
@@ -27,17 +29,30 @@ export default function Nav() {
   }, [open]);
 
   return (
-    <nav className="site-nav fixed inset-x-0 top-0 z-30 border-b border-navy/5 bg-offwhite/75 backdrop-blur-md">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4 sm:py-5">
+    <nav
+      data-home={home ? "true" : undefined}
+      className="site-nav fixed inset-x-0 top-0 z-30 border-b border-navy/5 bg-offwhite/75 backdrop-blur-md"
+    >
+      {/* Home runs edge to edge so the link pill can sit wholly in the light
+          field, clear of the crest panel's edge; it only fits from 1440px, so
+          below that the home page uses the menu toggle. */}
+      <div
+        className={`mx-auto flex items-center justify-between px-6 py-4 sm:py-5 ${
+          home ? "max-w-none lg:px-10" : "max-w-6xl"
+        }`}
+      >
         <Link
           href="/"
-          className="font-display text-lg font-bold tracking-tight text-ink transition hover:text-signal"
+          className={`flex items-center gap-3 font-display text-lg font-bold tracking-tight transition ${
+            home ? "text-white hover:text-white/75" : "text-ink hover:text-signal-deep"
+          }`}
         >
+          <CrestBadge className="h-9 w-9 shrink-0" />
           {content.brand.name}
         </Link>
 
         {/* Desktop links */}
-        <div className="hidden items-center gap-8 lg:flex">
+        <div className={`nav-links hidden items-center gap-8 ${home ? "min-[1440px]:flex" : "lg:flex"}`}>
           {content.nav.links.map((l) =>
             "cta" in l ? (
               <Link
@@ -68,7 +83,11 @@ export default function Nav() {
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
           onClick={() => setOpen((v) => !v)}
-          className="relative z-30 flex h-9 w-9 items-center justify-center rounded-full text-navy transition hover:text-signal lg:hidden"
+          className={`relative z-30 flex h-9 w-9 items-center justify-center rounded-full transition ${
+            home
+              ? "text-white hover:text-white/75 lg:text-navy lg:hover:text-signal min-[1440px]:hidden"
+              : "text-navy hover:text-signal lg:hidden"
+          }`}
         >
           <span className="sr-only">Menu</span>
           <svg
@@ -108,8 +127,8 @@ export default function Nav() {
 
       {/* Mobile dropdown panel */}
       <div
-        className={`overflow-hidden border-navy/5 lg:hidden ${
-          open ? "border-t" : ""
+        className={`overflow-hidden border-navy/5 ${open ? "border-t" : ""} ${
+          home ? "bg-offwhite min-[1440px]:hidden" : "lg:hidden"
         }`}
         style={{
           maxHeight: open ? "24rem" : "0",

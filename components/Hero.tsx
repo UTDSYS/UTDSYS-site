@@ -1,110 +1,105 @@
-"use client";
-
-import { useIntroSequence } from "@/hooks/useIntroSequence";
-import { useQuotingNet } from "@/hooks/useQuotingNet";
-import NeuralNet from "@/components/NeuralNet";
+import Link from "next/link";
+import Crest from "@/components/Crest";
 import Button from "@/components/ui/Button";
 import content from "@/lib/content";
 
+/* Coordinates are thousandths of an em from the left of the first ı, so the
+   net scales with the wordmark. The dots sit 0.7775em apart (measured off
+   the set type, tracking included); the hidden layer stays above the "s". */
+const IN = { x: 155.5, y: 285 };
+const OUT = { x: 933, y: 285 };
+const HIDDEN = [45, 165, 285].map((y) => ({ x: 544, y }));
+
+/** A 1 → 3 → 1 net strung between the two lit dots of "Decision". */
+function TittleNet() {
+  const edges = HIDDEN.flatMap((h, i) => [
+    { a: IN, b: h, layer: 0, i },
+    { a: h, b: OUT, layer: 1, i },
+  ]);
+  return (
+    <svg className="hero-net" viewBox="0 0 1100 450" aria-hidden="true">
+      {edges.map(({ a, b, layer, i }) => (
+        <g key={`${layer}-${i}`} style={{ "--layer": layer, "--i": i } as React.CSSProperties}>
+          <line className="hero-net-edge" x1={a.x} y1={a.y} x2={b.x} y2={b.y} pathLength={1} />
+          <line className="hero-net-spark" x1={a.x} y1={a.y} x2={b.x} y2={b.y} pathLength={1} />
+        </g>
+      ))}
+      {HIDDEN.map((h, i) => (
+        <circle key={i} className="hero-net-node" cx={h.x} cy={h.y} r="30" style={{ "--i": i } as React.CSSProperties} />
+      ))}
+    </svg>
+  );
+}
+
 /**
- * The home page is one immersive screen, and the intro is the model taking
- * its first decision — not a curtain that plays in front of one.
- *
- * The scaffold draws as hairlines; both desks' inputs scramble in their
- * rail and settle onto real values; every edge draws itself on, flooding with
- * signal as it lands; the convergence arrives and the decision node blooms
- * with the wordmark; the quote it produces goes live. One continuous idea,
- * about 2.4s, then it keeps running.
- *
- * Both hooks share one ref. useIntroSequence writes `--p` to it and every CSS
- * phase derives from that; useQuotingNet reads `--p` back off the same inline
- * style to know how far the rail has settled. The intro and the computation
- * compose instead of fighting.
+ * The home page is one screen: the group crest on a navy panel, and the
+ * wordmark beside it. Both dots on the i's in "Decision" are lit in the
+ * accent, joined by a miniature net: the first lands with the copy, the net
+ * draws across, the second lights, then signal keeps running between them.
  */
-
 export default function Hero() {
-  const ref = useIntroSequence<HTMLElement>();
-  useQuotingNet(ref);
-
-  const { net } = content.hero;
+  const { eyebrow, lede, desks, primary, secondary } = content.hero;
 
   return (
-    <section ref={ref} className="nn-stage relative overflow-hidden" data-end="false">
-      <div className="relative z-10 mx-auto flex min-h-svh max-w-6xl items-center px-6 pb-10 pt-20 sm:pb-14 sm:pt-28">
-        {/* Figure left, wordmark right: the network converges rightward,
-            flush into the name. Stacked, it converges down into it. */}
-        <div className="grid w-full items-center gap-8 sm:gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:gap-16">
-          <figure className="mx-auto w-full max-w-[520px] lg:mx-0">
-            <div className="nn-net">
-              <NeuralNet />
-            </div>
+    <section className="hero grid min-h-svh lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      {/* Mobile: the panel is held to about a quarter of the first screen
+          (below the nav), so the wordmark and buttons land above the fold. */}
+      <div className="hero-panel flex min-h-[calc(4.25rem+min(240px,28svh))] items-center justify-center px-6 pb-5 pt-[4.75rem] sm:min-h-0 sm:pb-12 sm:pt-28 lg:p-0">
+        <Crest className="w-[156px] sm:w-[260px] lg:w-[min(27.5vw,396px)]" />
+      </div>
 
-            {/* the quote the network is producing right now */}
-            <div className="nn-quote mt-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-t border-navy/10 pt-4 font-mono tabular-nums">
-              <div className="flex gap-5 text-[0.95rem] sm:gap-8 sm:text-lg">
-                {(["fair", "bid", "ask"] as const).map((key) => (
-                  <div key={key} className="flex flex-col gap-0.5">
-                    <span className="text-[0.6rem] uppercase tracking-[0.22em] text-navy/45">
-                      {net.readout[key]}
-                    </span>
-                    <span className="nn-figure font-medium text-ink" data-qn={key}>
-                      {net.loading}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <span
-                className="nn-action inline-flex items-center rounded-full border border-navy/10 bg-white/45 px-3.5 py-1.5 text-[0.66rem] uppercase tracking-[0.18em] text-navy/70"
-                data-qn="action"
-              >
-                <span data-qn="action-text">{net.actions["quote-both"]}</span>
+      <div className="flex flex-col justify-center px-6 pb-12 pt-8 sm:px-10 sm:py-14 lg:py-0 lg:pb-[8svh] lg:pl-24 lg:pr-16">
+        <div className="max-w-[40rem]">
+          <p className="hero-in font-display text-[0.9375rem] font-semibold tracking-tight text-navy/70 sm:text-base">
+            {eyebrow}
+          </p>
+          <h1 className="hero-in hero-word font-display mt-4 text-[clamp(3.75rem,9vw,7.5rem)] sm:mt-6 font-extrabold leading-[0.9] tracking-[-0.04em] text-ink">
+            <span className="sr-only">Decision Systems</span>
+            <span aria-hidden="true">
+              Dec
+              <span className="relative">
+                ı<span className="hero-tittle" />
+                <TittleNet />
               </span>
-            </div>
-
-            <figcaption className="nn-meta mt-3 flex flex-col gap-2 sm:mt-4">
-              <p className="hidden max-w-md text-xs leading-relaxed text-navy/55 sm:block">
-                <span className="font-mono text-navy/80">{net.caption.label}</span>
-                {"\u2002"}
-                {net.caption.body}
-              </p>
-              <p className="font-mono text-[0.62rem] uppercase tracking-[0.16em] text-navy/45">
-                {net.caption.note} ·{" "}
-                <b className="font-medium text-navy" data-qn="count">
-                  0
-                </b>{" "}
-                {net.meta.decisions}
-              </p>
-            </figcaption>
-          </figure>
-
-          <div className="flex flex-col items-start">
-            <p className="nn-overline font-mono text-[0.7rem] uppercase tracking-[0.32em] text-signal sm:text-xs">
-              {content.hero.eyebrow}
-            </p>
-            <h1 className="nn-word font-display mt-4 text-5xl font-extrabold sm:mt-5 sm:text-6xl md:text-7xl leading-[0.9] tracking-tight text-ink xl:text-8xl">
-              Decision
+              s
+              <span className="relative">
+                ı<span className="hero-tittle hero-tittle-out" />
+              </span>
+              on
               <br />
               Systems
-            </h1>
-            <p className="nn-word mt-4 max-w-md text-lg leading-relaxed sm:mt-6 text-navy/70 sm:text-xl">
-              {content.hero.mission}
-            </p>
+            </span>
+          </h1>
+          <p className="hero-in mt-5 max-w-[34rem] text-balance text-[1.0625rem] leading-[1.45] text-navy/75 sm:mt-8 sm:text-xl">
+            {lede}
+          </p>
 
-            <div className="nn-endcap mt-7 flex flex-wrap gap-3 sm:mt-9">
-              <Button href={content.hero.primary.href}>
-                {content.hero.primary.label}
-              </Button>
-              <Button href={content.hero.secondary.href} variant="secondary">
-                {content.hero.secondary.label}
-              </Button>
-            </div>
+          <ul className="hero-in mt-6 grid max-w-[38rem] gap-x-10 border-t sm:mt-10 border-navy/12 sm:grid-cols-2">
+            {desks.map((d) => (
+              <li key={d.name} className="pt-4 max-sm:pb-3">
+                <Link
+                  href={d.href}
+                  className="group block rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+                >
+                  <span className="font-display text-lg font-bold tracking-tight text-ink transition group-hover:text-signal-deep">
+                    {d.name}
+                  </span>
+                  <span className="mt-1 block text-base leading-relaxed text-navy/70">{d.body}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+
+          <div className="hero-in mt-6 flex flex-wrap gap-3 sm:mt-10">
+            <Button href={primary.href} variant="deep">
+              {primary.label}
+            </Button>
+            <Button href={secondary.href} variant="secondary">
+              {secondary.label}
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* the current call, for screen readers */}
-      <p className="sr-only" aria-live="polite" data-qn="status" />
     </section>
   );
 }

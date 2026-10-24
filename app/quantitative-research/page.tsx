@@ -1,178 +1,220 @@
+import Link from "next/link";
 import content from "@/lib/content";
-import MarketMakerDesk from "@/components/quant/MarketMakerDesk";
 
 export const metadata = {
   title: "Quantitative Research — UofT Decision Systems",
   description:
-    "Quantitative research from UofT Decision Systems: a live, simulated market-making desk, the model behind it, and our working papers.",
+    "The UofT Decision Systems quantitative desk: its projects, how it reviews the literature, and the annotated reading list it works from.",
 };
 
-const { eyebrow, heading, intro, explainer, desk, model, project, focus, papers, disclaimer } =
-  content.quantResearch;
+const { heading, intro, disclaimer, projects, method, reading, reviews, join } = content.quantResearch;
+
+// References are numbered continuously across groups, in the order listed,
+// so a review can point at one by number.
+type Ref = { cite: string; note: string };
+
+const groups = reading.groups.reduce<{ name: string; start: number; items: readonly Ref[] }[]>(
+  (acc, g) => {
+    const prev = acc[acc.length - 1];
+    acc.push({ ...g, start: prev ? prev.start + prev.items.length : 1 });
+    return acc;
+  },
+  [],
+);
+
+// "Cartea, Á., Jaimungal, S. and Penalva, J. (2015). …" → "Cartea et al. (2015)":
+// drop the initials, then name one or two authors and abbreviate three or more.
+// References are flattened in reading-list order, matching their numbers.
+const refs: Ref[] = reading.groups.flatMap((g): readonly Ref[] => g.items);
+const shortCite = (n: number) => {
+  const cite = refs[n - 1]?.cite ?? "";
+  const [authors, rest = ""] = cite.split(" (");
+  const names = authors.replace(/,\s*(?:[A-ZÀ-Ý]\.(?:-|\s(?=[A-ZÀ-Ý]\.))?)+/g, "").split(/, | and /);
+  const who = names.length === 1 ? names[0] : names.length === 2 ? names.join(" and ") : `${names[0]} et al.`;
+  return `${who} (${rest.slice(0, 4)})`;
+};
+
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={id}
+      className="grid gap-6 border-t border-navy/12 py-12 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12 lg:py-14"
+    >
+      <h2 id={id} className="font-display text-xl font-bold tracking-tight text-ink">
+        {title}
+      </h2>
+      <div className="min-w-0">{children}</div>
+    </section>
+  );
+}
 
 export default function QuantitativeResearchPage() {
-  const current = project.stages.indexOf(project.stage);
-
   return (
     <main className="relative min-h-screen">
-      <div className="mx-auto max-w-7xl px-6 pb-28 pt-36">
-        {/* masthead */}
-        <header className="max-w-3xl pb-12">
-          <p className="font-mono text-xs uppercase tracking-[0.35em] text-signal-deep">{eyebrow}</p>
-          <h1 className="font-display mt-5 text-5xl font-bold tracking-tight text-ink md:text-6xl">
+      <div className="mx-auto max-w-6xl px-6 pb-24 pt-36">
+        <header className="max-w-3xl pb-14">
+          <h1 className="font-display text-5xl font-bold tracking-tight text-ink md:text-6xl">
             {heading}
           </h1>
-          <p className="mt-6 text-base leading-relaxed text-navy/70 md:text-lg">{intro}</p>
+          <p className="mt-6 text-lg leading-relaxed text-navy/75">{intro}</p>
         </header>
 
-        {/* how to read the desk */}
-        <ol className="mb-8 grid gap-6 sm:grid-cols-3">
-          {explainer.map((e, i) => (
-            <li key={e.title} className="flex gap-4">
-              <span className="font-display flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-signal-deep/30 text-sm font-semibold text-signal-deep">
-                {i + 1}
-              </span>
-              <div>
-                <h2 className="font-display text-base font-semibold tracking-tight text-ink">{e.title}</h2>
-                <p className="mt-1 text-sm leading-relaxed text-navy/65">{e.body}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
+        <Section id="projects" title={projects.heading}>
+          <div className="space-y-12">
+            {projects.items.map((p) => {
+              const current = p.stages.findIndex((s) => s.name === p.stage);
+              const status = (i: number) =>
+                i < current ? "Complete" : i === current ? "In progress" : i === current + 1 ? "Next" : "Planned";
+              return (
+                <article key={p.name} className="grid gap-10 xl:grid-cols-[minmax(0,1fr)_22rem]">
+                  <div className="max-w-[38rem]">
+                    <h3 className="font-display text-2xl font-bold tracking-tight text-ink">{p.name}</h3>
+                    <p className="mt-3 text-base leading-relaxed text-navy/75">{p.summary}</p>
+                    <p className="mt-5 text-sm text-navy/55">
+                      {projects.readingLabel}{" "}
+                      {p.reading.map((n, i) => (
+                        <span key={n}>
+                          {i > 0 && ", "}
+                          <a
+                            href={`#ref-${n}`}
+                            className="text-signal-deep underline decoration-signal-deep/25 underline-offset-4 transition hover:decoration-signal-deep"
+                          >
+                            {shortCite(n)} [{n}]
+                          </a>
+                        </span>
+                      ))}
+                    </p>
+                  </div>
 
-        <MarketMakerDesk {...desk} />
-
-        {/* the model */}
-        <section aria-labelledby="model" className="mt-24">
-          <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-            <div>
-              <h2 id="model" className="font-display text-2xl font-bold tracking-tight text-ink">
-                {model.heading}
-              </h2>
-              <p className="mt-3 max-w-sm text-sm leading-relaxed text-navy/65">{model.intro}</p>
-            </div>
-            <ol className="grid gap-px overflow-hidden rounded-xl border border-navy/10 bg-navy/10 sm:grid-cols-3">
-              {model.terms.map((t, i) => (
-                <li key={t.name} className="bg-offwhite p-5">
-                  <span className="font-mono text-[0.6rem] tracking-[0.2em] text-signal-deep">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <h3 className="font-display mt-2 text-base font-semibold tracking-tight text-ink">
-                    {t.name}
-                  </h3>
-                  <p className="mt-3 rounded-md bg-white/70 px-3 py-2 font-mono text-[0.72rem] text-ink">
-                    {t.formula}
-                  </p>
-                  <p className="mt-3 text-sm leading-relaxed text-navy/60">{t.body}</p>
-                </li>
-              ))}
-            </ol>
+                  <div>
+                    <h4 className="text-sm font-medium text-navy/55">Status</h4>
+                    <ol className="mt-3 border-t border-navy/12">
+                      {p.stages.map((s, i) => {
+                        const here = i === current;
+                        return (
+                          <li
+                            key={s.name}
+                            aria-current={here ? "step" : undefined}
+                            className="grid grid-cols-[1fr_auto] gap-x-4 border-b border-navy/12 py-3"
+                          >
+                            <span className={`text-sm font-medium ${i <= current ? "text-ink" : "text-navy/50"}`}>
+                              {s.name}
+                            </span>
+                            <span
+                              className={`text-xs ${
+                                here
+                                  ? "font-medium text-signal-deep"
+                                  : i < current
+                                    ? "text-navy/60"
+                                    : "text-navy/40"
+                              }`}
+                            >
+                              {status(i)}
+                            </span>
+                            <span className="col-span-2 mt-0.5 text-xs leading-relaxed text-navy/50">{s.detail}</span>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  </div>
+                </article>
+              );
+            })}
           </div>
-        </section>
+        </Section>
 
-        {/* current project + pipeline */}
-        <section aria-labelledby="project" className="mt-24 border-t border-navy/12 pt-10">
-          <p className="font-mono text-[0.65rem] uppercase tracking-[0.25em] text-navy/45">
-            {project.label}
-          </p>
-          <div className="mt-3 grid gap-8 lg:grid-cols-[1fr_1.4fr] lg:items-end">
-            <div>
-              <h2 id="project" className="font-display text-3xl font-bold tracking-tight text-ink">
-                {project.name}
-              </h2>
-              <p className="mt-3 max-w-md text-sm leading-relaxed text-navy/65">{project.summary}</p>
-            </div>
-            <ol className="flex items-start">
-              {project.stages.map((s, i) => {
-                const done = i < current;
-                const here = i === current;
-                return (
-                  <li key={s} className="relative flex flex-1 flex-col items-center text-center">
-                    {i > 0 && (
-                      <span
-                        className={`absolute right-1/2 top-[7px] h-px w-full ${
-                          i <= current ? "bg-signal-deep" : "bg-navy/15"
-                        }`}
-                        aria-hidden="true"
-                      />
-                    )}
-                    <span
-                      className={`relative z-10 block h-[15px] w-[15px] rounded-full border-2 ${
-                        here
-                          ? "border-signal-deep bg-white shadow-[0_0_0_4px_rgb(29_63_184/0.15)]"
-                          : done
-                            ? "border-signal-deep bg-signal-deep"
-                            : "border-navy/20 bg-offwhite"
-                      }`}
-                    />
-                    <span
-                      className={`mt-3 font-mono text-[0.58rem] uppercase tracking-[0.12em] sm:text-[0.62rem] ${
-                        here ? "text-signal-deep" : done ? "text-ink" : "text-navy/40"
-                      }`}
-                    >
-                      {s}
-                    </span>
-                    {here && <span className="sr-only">(current stage)</span>}
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-        </section>
-
-        {/* focus areas */}
-        <section aria-labelledby="focus" className="mt-24">
-          <h2 id="focus" className="font-display text-2xl font-bold tracking-tight text-ink">
-            {focus.heading}
-          </h2>
-          <ul className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {focus.areas.map((a) => (
-              <li key={a.name} className="border-t border-navy/15 pt-5">
-                <h3 className="font-display text-lg font-semibold tracking-tight text-ink">{a.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-navy/65">{a.body}</p>
+        <Section id="method" title={method.heading}>
+          <ol className="max-w-[40rem] border-t border-navy/12">
+            {method.steps.map((s, i) => (
+              <li key={s.name} className="grid grid-cols-[2rem_1fr] border-b border-navy/12 py-4">
+                <span className="text-sm tabular-nums text-signal-deep">{i + 1}</span>
+                <div>
+                  <h3 className="text-base font-medium text-ink">{s.name}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-navy/65">{s.body}</p>
+                </div>
               </li>
             ))}
-          </ul>
-        </section>
+          </ol>
+        </Section>
 
-        {/* working papers */}
-        <section aria-labelledby="papers" className="mt-24">
-          <h2 id="papers" className="font-display text-2xl font-bold tracking-tight text-ink">
-            {papers.heading}
-          </h2>
-          {papers.items.length === 0 ? (
-            <p className="mt-6 border-y border-navy/10 py-8 font-mono text-xs uppercase tracking-[0.18em] text-navy/40">
-              {papers.empty}
-            </p>
+        <Section id="reading" title={reading.heading}>
+          <div className="space-y-10">
+            {groups.map((g) => (
+              <div key={g.name}>
+                <h3 className="font-display text-base font-semibold tracking-tight text-ink">{g.name}</h3>
+                <ol className="mt-3 max-w-[44rem] divide-y divide-navy/10 border-y border-navy/10">
+                  {g.items.map((it, i) => (
+                    <li
+                      key={it.cite}
+                      id={`ref-${g.start + i}`}
+                      className="grid grid-cols-[2.25rem_1fr] py-4"
+                    >
+                      <span className="text-sm tabular-nums text-navy/40">[{g.start + i}]</span>
+                      <div>
+                        <p className="text-sm leading-relaxed text-ink">{it.cite}</p>
+                        <p className="mt-1 text-sm leading-relaxed text-navy/55">{it.note}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section id="reviews" title={reviews.heading}>
+          {reviews.items.length === 0 ? (
+            <p className="max-w-[38rem] text-base leading-relaxed text-navy/60">{reviews.empty}</p>
           ) : (
-            <ul className="mt-6 divide-y divide-navy/10 border-y border-navy/10">
-              {papers.items.map((p) => (
-                <li key={p.title} className="grid gap-2 py-6 md:grid-cols-[8rem_1fr_auto] md:gap-6">
-                  <span className="font-mono text-xs text-navy/50">{p.date}</span>
+            <ul className="max-w-[44rem] divide-y divide-navy/10 border-y border-navy/10">
+              {reviews.items.map((r) => (
+                <li key={r.title} className="grid gap-2 py-5 md:grid-cols-[7rem_1fr_auto] md:gap-6">
+                  <span className="text-sm tabular-nums text-navy/50">{r.date}</span>
                   <div>
-                    <h3 className="font-display text-lg font-semibold tracking-tight text-ink">{p.title}</h3>
-                    <p className="mt-1 font-mono text-[0.65rem] uppercase tracking-[0.14em] text-navy/50">
-                      {p.authors.join(" · ")}
+                    <h3 className="font-display text-base font-semibold tracking-tight text-ink">{r.title}</h3>
+                    <p className="mt-1 text-sm text-navy/55">
+                      {r.reviewer}, on{" "}
+                      <a href={`#ref-${r.ref}`} className="text-signal-deep">
+                        [{r.ref}]
+                      </a>
                     </p>
-                    <p className="mt-2 max-w-2xl text-sm leading-relaxed text-navy/65">{p.abstract}</p>
                   </div>
-                  {p.pdf && (
+                  {r.pdf && (
                     <a
-                      href={p.pdf}
+                      href={r.pdf}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="self-start font-mono text-[0.65rem] uppercase tracking-[0.16em] text-signal-deep underline decoration-signal-deep/30 underline-offset-4 hover:decoration-signal-deep"
+                      className="self-start text-sm font-medium text-signal-deep underline decoration-signal-deep/30 underline-offset-4 hover:decoration-signal-deep"
                     >
-                      PDF ↗
+                      PDF
                     </a>
                   )}
                 </li>
               ))}
             </ul>
           )}
-        </section>
+        </Section>
 
-        <p className="mt-16 max-w-3xl text-xs leading-relaxed text-navy/45">{disclaimer}</p>
+        <footer className="grid gap-6 border-t border-navy/12 pt-10 lg:grid-cols-[14rem_minmax(0,1fr)] lg:gap-12">
+          <p className="text-sm text-navy/60">
+            {join.text}{" "}
+            <Link
+              href={join.href}
+              className="font-medium text-signal-deep underline decoration-signal-deep/30 underline-offset-4 transition hover:decoration-signal-deep"
+            >
+              {join.label}
+            </Link>
+          </p>
+          <p className="max-w-[40rem] text-xs leading-relaxed text-navy/45">{disclaimer}</p>
+        </footer>
       </div>
     </main>
   );
