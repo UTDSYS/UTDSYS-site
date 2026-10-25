@@ -3,6 +3,7 @@
 import { useState } from "react";
 import content from "@/lib/content";
 import Button from "@/components/ui/Button";
+import TopicSelect from "@/components/TopicSelect";
 import { CONTACT_FORM_ENABLED } from "@/lib/flags";
 import { LIMITS, TOPICS, type Topic } from "@/lib/contact";
 
@@ -20,19 +21,17 @@ const styles = {
   light: {
     label: "text-sm font-medium text-navy",
     field:
-      "w-full border border-navy/20 bg-white px-3.5 py-2.5 text-base text-ink placeholder:text-navy/40 outline-none transition focus:border-signal-deep focus:ring-2 focus:ring-signal/20",
+      "w-full border border-navy/20 bg-white px-3.5 py-2.5 text-base text-ink outline-none transition focus:border-signal-deep focus:ring-2 focus:ring-signal/20",
     submit: "deep" as const,
-    note: "text-sm text-navy/60",
     success: "border border-navy/20 bg-white text-ink",
     error: "text-red-700",
   },
   dark: {
     label: "text-sm font-medium text-white/85",
     field:
-      "w-full border border-white/20 bg-white/[0.06] px-3.5 py-2.5 text-base text-white placeholder:text-white/40 outline-none transition focus:border-[#9db3ff] focus:ring-2 focus:ring-[#9db3ff]/25 [&>option]:text-ink",
+      "w-full border border-white/20 bg-white/[0.06] px-3.5 py-2.5 text-base text-white outline-none transition focus:border-[#9db3ff] focus:ring-2 focus:ring-[#9db3ff]/25",
     // quiet on purpose: on Get involved, "Join the Discord" is the one bright button
     submit: "outline-light" as const,
-    note: "text-sm text-white/60",
     success: "border border-white/20 bg-white/[0.06] text-white",
     error: "text-[#ffb4b4]",
   },
@@ -164,7 +163,6 @@ export function ContactFormActive({
             required
             maxLength={LIMITS.name}
             autoComplete="name"
-            placeholder={f.name.placeholder}
             className={s.field}
           />
         </div>
@@ -179,32 +177,19 @@ export function ContactFormActive({
             required
             maxLength={LIMITS.email}
             autoComplete="email"
-            placeholder={f.email.placeholder}
             className={s.field}
           />
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label htmlFor={id("topic")} className={s.label}>
-          {f.topic.label}
-        </label>
-        <select
-          id={id("topic")}
-          name="topic"
-          defaultValue={defaultTopic}
-          className={`${s.field} appearance-none bg-[length:12px] bg-[right_0.9rem_center] bg-no-repeat pr-10`}
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5 6 6.5l5-5' fill='none' stroke='${tone === "dark" ? "%23ffffff" : "%231b2a4a"}' stroke-width='1.6'/%3E%3C/svg%3E")`,
-          }}
-        >
-          {TOPICS.map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </select>
-      </div>
+      <TopicSelect
+        id={id("topic")}
+        name="topic"
+        label={f.topic.label}
+        options={TOPICS}
+        defaultValue={defaultTopic}
+        tone={tone}
+      />
 
       <div className="flex flex-col gap-1.5">
         <label htmlFor={id("message")} className={s.label}>
@@ -216,7 +201,6 @@ export function ContactFormActive({
           required
           rows={6}
           maxLength={LIMITS.message}
-          placeholder={f.message.placeholder}
           className={`${s.field} resize-y`}
         />
       </div>
@@ -227,8 +211,7 @@ export function ContactFormActive({
         </p>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 pt-1">
-        <p className={s.note}>{f.note}</p>
+      <div className="pt-1">
         <Button
           type="submit"
           variant={s.submit}

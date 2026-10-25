@@ -31,7 +31,7 @@ export default function Nav() {
   return (
     <nav
       data-home={home ? "true" : undefined}
-      className="site-nav fixed inset-x-0 top-0 z-30 border-b border-navy/5 bg-offwhite/75 backdrop-blur-md"
+      className="site-nav fixed inset-x-0 top-0 z-30 border-b border-navy/5 bg-offwhite"
     >
       {/* Home runs edge to edge so the link pill can sit wholly in the light
           field, clear of the crest panel's edge; it only fits from 1440px, so

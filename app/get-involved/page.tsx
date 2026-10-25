@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Crest from "@/components/Crest";
 import Button from "@/components/ui/Button";
+import ChannelIcon from "@/components/ChannelIcon";
 import ContactForm from "@/components/ContactForm";
+import CopyButton from "@/components/CopyButton";
 import content from "@/lib/content";
 
 export const metadata = {
@@ -10,13 +12,28 @@ export const metadata = {
     "Join UofT Decision Systems, or work with us as a sponsor or partner. Open to students in every faculty.",
 };
 
-const { eyebrow, heading, intro, steps, doors, desksPrompt, form } =
+const { eyebrow, heading, steps, doors, desksPrompt, form } =
   content.getInvolved;
+const { channels } = content.contactPage;
+
+/** Long addresses may wrap after a slash, never mid-word. */
+const breakable = (value: string) =>
+  value.split("/").map((part, i) => (
+    <span key={i}>
+      {i > 0 && (
+        <>
+          /<wbr />
+        </>
+      )}
+      {part}
+    </span>
+  ));
 
 /**
  * The site's one dark page. Two doors, one action each: students on the
- * left with the only bright button on the page, sponsors and partners on
- * the right with a quiet outline one. Contrast does the directing.
+ * left with the only bright button on the page, sponsors, partners and
+ * questions on the right with the message form. Contrast does the
+ * directing. Below the navy, a white band holds every direct channel.
  */
 export default function GetInvolvedPage() {
   return (
@@ -32,9 +49,11 @@ export default function GetInvolvedPage() {
               <h1 className="font-display mt-4 text-[clamp(3.25rem,9vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] sm:mt-5">
                 {heading}
               </h1>
-              <p className="mt-6 max-w-[34rem] text-balance text-[1.0625rem] leading-[1.45] text-white/75 sm:text-xl">
-                {intro}
-              </p>
+              {/* two thick bars set off to the side, the second shorter */}
+              <div aria-hidden="true" className="mt-8 flex flex-col gap-2 sm:mt-10">
+                <div className="h-2 w-40 bg-white sm:w-56" />
+                <div className="h-2 w-20 bg-signal sm:w-28" />
+              </div>
             </div>
             <Crest className="hidden w-[min(22vw,260px)] md:block" />
           </header>
@@ -77,6 +96,16 @@ export default function GetInvolvedPage() {
                   </li>
                 ))}
               </ol>
+              <p className="mt-4 text-base text-white/70">
+                {steps.missed.text}{" "}
+                <a
+                  href={`mailto:${steps.missed.email}`}
+                  className="select-all font-semibold text-white underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
+                >
+                  {steps.missed.email}
+                </a>
+                .
+              </p>
 
               <div className="mt-auto pt-9">
                 <Button
@@ -136,6 +165,52 @@ export default function GetInvolvedPage() {
           </p>
         </div>
       </div>
+
+      {/* Every direct channel, on a white band below the navy. This is what
+          used to be the Contact page; /contact redirects here. */}
+      <section
+        id="contact"
+        aria-label="Direct contact"
+        className="scroll-mt-24 border-t border-navy/10 bg-white"
+      >
+        <div className="mx-auto max-w-6xl px-6 py-14 sm:py-16">
+          <ul className="grid border-t-2 border-ink sm:grid-cols-2 lg:grid-cols-4">
+            {channels.map((c, i) => {
+              const isEmail = c.label === "Email";
+              return (
+                <li
+                  key={c.label}
+                  className={`border-b border-navy/12 py-6 sm:pr-6 lg:border-b-0 lg:px-6 lg:first:pl-0 ${i > 0 ? "lg:border-l" : ""} ${i % 2 ? "sm:border-l sm:pl-6 lg:pl-6" : ""}`}
+                >
+                  <span className="flex items-center gap-2.5 text-sm font-medium text-navy/70">
+                    <ChannelIcon
+                      label={c.label}
+                      className="h-5 w-5 text-signal-deep"
+                    />
+                    {c.label}
+                  </span>
+                  <a
+                    id={isEmail ? "direct-email" : undefined}
+                    href={c.href}
+                    {...(isEmail
+                      ? {}
+                      : { target: "_blank", rel: "noopener noreferrer" })}
+                    className="font-display mt-3 block text-lg font-bold tracking-tight text-ink transition hover:text-signal-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+                  >
+                    {breakable(c.value)}
+                  </a>
+                  {/* a mailto link doesn't open a mail app for everyone */}
+                  {isEmail && (
+                    <div className="mt-3">
+                      <CopyButton value={c.value} targetId="direct-email" />
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
     </main>
   );
 }

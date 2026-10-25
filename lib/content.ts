@@ -38,7 +38,7 @@ const content = {
   // research desks, each linking to its page.
   hero: {
     eyebrow: "University of Toronto",
-    lede: "A student research group using mathematics to make better decisions under uncertainty.",
+    lede: "A student research group in quantitative and fundamental research.",
     desks: [
       {
         name: "Quantitative desk",
@@ -59,7 +59,6 @@ const content = {
       { label: "Quantitative Research", href: "/quantitative-research" },
       { label: "Fundamental Research", href: "/fundamental-research" },
       { label: "Team", href: "/team" },
-      { label: "Contact", href: "/contact" },
       // Rendered as the nav's call to action rather than a plain link.
       { label: "Get Involved", href: "/get-involved", cta: true },
     ],
@@ -70,43 +69,45 @@ const content = {
   getInvolved: {
     eyebrow: "University of Toronto Decision Systems",
     heading: "Get involved",
-    intro:
-      "Open to students in every faculty. No experience required, just an interest in hard problems and in making decisions with numbers.",
     steps: {
       heading: "How to join",
       items: [
-        { name: "Join the Discord", body: "It's where the group talks, shares papers and plans meetings." },
-        { name: "Introduce yourself", body: "Say what you study and which desk interests you." },
-        { name: "Pick up a first task", body: "Present a paper on the quantitative desk, or help cover a company on the fundamental desk." },
+        {
+          name: "Join the Discord",
+          body: "Recruiting is announced there first, so you'll know as soon as it opens.",
+        },
+        {
+          name: "Introduce yourself",
+          body: "Tell us a bit about yourself, and share your research or an interesting paper you've read.",
+        },
       ],
+      // A fallback, not a third step, so it sits under the list unnumbered.
+      missed: { text: "We're always looking for eager people. Send us an email at", email: "info@utdsys.com" },
     },
-    // Two doors, one action each: students join through the Discord,
+    // Two doors, one action each: students join the Discord (announcements,
+    // introductions, shared research),
     // sponsors and partners write to the team.
     doors: {
       students: {
         label: "For students",
         heading: "Join the group",
-        body: "Any faculty, any year. Three steps get you from new member to your first piece of work.",
+        body: "Any faculty, any year. Recruiting announcements go out on our Discord.",
         action: "Join the Discord",
       },
       partners: {
-        label: "For sponsors and partners",
+        label: "Sponsors, partners and questions",
         heading: "Work with us",
         body: "Sponsorship, a speaker, a dataset, or a problem worth studying. Write to the team and we'll reply.",
       },
     },
     desksPrompt: "Not sure where you'd fit? Read about the",
     form: {
-      name: { label: "Name", placeholder: "Ada Lovelace" },
-      email: { label: "Email", placeholder: "you@mail.utoronto.ca" },
-      message: {
-        label: "Message",
-        placeholder: "Tell us what you're interested in…",
-      },
+      name: { label: "Name" },
+      email: { label: "Email" },
+      message: { label: "Message" },
       topic: { label: "Topic" },
       submit: "Send message",
       sending: "Sending…",
-      note: "Goes to info@utdsys.com. We reply to the address you give.",
       successHeading: "Message sent",
       success: "It's in the team's inbox, and we'll reply to the address you gave.",
       another: "Send another message",
@@ -404,14 +405,15 @@ const content = {
   },
   contact: {
     email: "info@utdsys.com",
-    // Directories surfaced in the hero strip; the full set lives on /contact.
+    // The full set of channels lives in contactPage.channels.
     socials: [
       { label: "Discord", href: "https://discord.gg/h2kX42dfdz" },
       { label: "GitHub", href: "https://github.com/UTDSYS" },
       { label: "LinkedIn", href: "https://www.linkedin.com/company/utdsys" },
     ],
   },
-  // The /contact directory: every way to reach the team, in one place.
+  // Direct channels, shown in the white band at the foot of /get-involved
+  // (the old /contact page now redirects there).
   contactPage: {
     eyebrow: "University of Toronto Decision Systems",
     heading: "Contact",
@@ -420,7 +422,6 @@ const content = {
     joinPrompt: { text: "Want to join the group?", label: "Get involved", href: "/get-involved" },
     // The message form (lib/flags CONTACT_FORM_ENABLED); it emails info@.
     form: { heading: "Send a message" },
-    direct: { heading: "Or reach us directly" },
     channels: [
       {
         label: "Email",

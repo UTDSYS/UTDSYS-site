@@ -26,7 +26,7 @@ const mono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "University of Toronto Decision Systems",
   description:
-    "University of Toronto Decision Systems uses mathematics to make better decisions under uncertainty.",
+    "University of Toronto Decision Systems is a student research group in quantitative and fundamental research.",
 };
 
 export const viewport: Viewport = {

@@ -32,10 +32,10 @@ describe("ContactFormActive", () => {
   it("renders the fields and submit button from content", () => {
     render(<ContactFormActive />);
     expect(
-      screen.getByPlaceholderText(content.getInvolved.form.name.placeholder),
+      screen.getByLabelText(content.getInvolved.form.name.label),
     ).toBeInTheDocument();
     expect(
-      screen.getByPlaceholderText(content.getInvolved.form.email.placeholder),
+      screen.getByLabelText(content.getInvolved.form.email.label),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: content.getInvolved.form.submit }),
@@ -51,15 +51,15 @@ describe("ContactFormActive", () => {
 
     render(<ContactFormActive />);
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.name.placeholder),
+      screen.getByLabelText(content.getInvolved.form.name.label),
       { target: { value: "Ada" } },
     );
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.email.placeholder),
+      screen.getByLabelText(content.getInvolved.form.email.label),
       { target: { value: "ada@utoronto.ca" } },
     );
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.message.placeholder),
+      screen.getByLabelText(content.getInvolved.form.message.label),
       { target: { value: "I'd love to join." } },
     );
     fireEvent.click(
@@ -86,15 +86,15 @@ describe("ContactFormActive", () => {
 
     render(<ContactFormActive />);
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.name.placeholder),
+      screen.getByLabelText(content.getInvolved.form.name.label),
       { target: { value: "Ada" } },
     );
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.email.placeholder),
+      screen.getByLabelText(content.getInvolved.form.email.label),
       { target: { value: "ada@utoronto.ca" } },
     );
     fireEvent.change(
-      screen.getByPlaceholderText(content.getInvolved.form.message.placeholder),
+      screen.getByLabelText(content.getInvolved.form.message.label),
       { target: { value: "hello there" } },
     );
     fireEvent.click(
@@ -106,5 +106,60 @@ describe("ContactFormActive", () => {
         "Email isn't configured yet.",
       ),
     );
+  });
+});
+
+describe("Topic dropdown", () => {
+  it("opens, picks with the mouse, and sends the chosen topic", async () => {
+    const fetchMock = vi
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ ok: true }), { status: 200 }),
+      );
+
+    render(<ContactFormActive />);
+    const box = screen.getByRole("combobox");
+    expect(box).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(box);
+    expect(box).toHaveAttribute("aria-expanded", "true");
+    fireEvent.click(screen.getByRole("option", { name: "Joining the group" }));
+    expect(box).toHaveTextContent("Joining the group");
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+
+    fireEvent.change(
+      screen.getByLabelText(content.getInvolved.form.name.label),
+      { target: { value: "Ada" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(content.getInvolved.form.email.label),
+      { target: { value: "ada@utoronto.ca" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(content.getInvolved.form.message.label),
+      { target: { value: "hello there" } },
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: content.getInvolved.form.submit }),
+    );
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    const body = JSON.parse(
+      String((fetchMock.mock.calls[0][1] as RequestInit).body),
+    );
+    expect(body.topic).toBe("Joining the group");
+  });
+
+  it("works from the keyboard and closes on Escape", () => {
+    render(<ContactFormActive defaultTopic="Other" />);
+    const box = screen.getByRole("combobox");
+    expect(box).toHaveTextContent("Other");
+    fireEvent.keyDown(box, { key: "ArrowDown" });
+    expect(screen.getByRole("listbox")).toBeInTheDocument();
+    fireEvent.keyDown(box, { key: "Home" });
+    fireEvent.keyDown(box, { key: "Enter" });
+    expect(box).toHaveTextContent("General question");
+    fireEvent.keyDown(box, { key: "ArrowDown" });
+    fireEvent.keyDown(box, { key: "Escape" });
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
 });

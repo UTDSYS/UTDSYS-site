@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import content from "@/lib/content";
-import { validateContact } from "@/lib/contact";
+import { validateContact, type ContactData } from "@/lib/contact";
+import { notifyDiscord } from "@/lib/discord";
 import { CONTACT_FORM_ENABLED } from "@/lib/flags";
 
 /**
@@ -40,10 +41,14 @@ export async function POST(request: Request) {
     );
   }
 
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   if (rateLimited(ip)) {
     return NextResponse.json(
-      { error: "Too many messages from this connection. Please try again in a few minutes, or email us directly." },
+      {
+        error:
+          "Too many messages from this connection. Please try again in a few minutes, or email us directly.",
+      },
       { status: 429 },
     );
   }
@@ -66,18 +71,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: result.error }, { status: 400 });
   }
 
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.error("RESEND_API_KEY is not set; cannot send contact message.");
+  const data = result.data;
+  const hasEmail = Boolean(process.env.RESEND_API_KEY);
+  const hasDiscord = Boolean(process.env.DISCORD_WEBHOOK_URL);
+  if (!hasEmail && !hasDiscord) {
+    console.error(
+      "Neither RESEND_API_KEY nor DISCORD_WEBHOOK_URL is set; cannot deliver.",
+    );
     return NextResponse.json(
-      { error: "Email isn't configured yet." },
+      { error: "Messaging isn't configured yet." },
       { status: 500 },
     );
   }
 
-  const { name, email, topic, message } = result.data;
+  // Email (the record, in info@) and Discord (where the execs see it) go out
+  // side by side. Either one landing counts as delivered, so an outage in one
+  // never loses the message or shows the visitor an error.
+  const [emailed, posted] = await Promise.all([
+    hasEmail ? sendEmail(data) : Promise.resolve(false),
+    notifyDiscord(data),
+  ]);
+
+  if (!emailed && !posted) {
+    return NextResponse.json(
+      { error: "Could not send your message." },
+      { status: 502 },
+    );
+  }
+  return NextResponse.json({ ok: true });
+}
+
+/** Resolves true if Resend accepted it; never throws. */
+async function sendEmail({
+  name,
+  email,
+  topic,
+  message,
+}: ContactData): Promise<boolean> {
   try {
-    const resend = new Resend(apiKey);
+    const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: FROM,
       to: [content.contact.email],
@@ -87,19 +119,10 @@ export async function POST(request: Request) {
       subject: `[${topic}] Website message from ${name}`,
       text: `Topic: ${topic}\nName: ${name}\nEmail: ${email}\n\n${message}`,
     });
-    if (error) {
-      console.error("Resend send error:", error);
-      return NextResponse.json(
-        { error: "Could not send your message." },
-        { status: 502 },
-      );
-    }
-    return NextResponse.json({ ok: true });
+    if (error) console.error("Resend send error:", error);
+    return !error;
   } catch (err) {
-    console.error("Contact route error:", err);
-    return NextResponse.json(
-      { error: "Could not send your message." },
-      { status: 502 },
-    );
+    console.error("Resend send failed:", err);
+    return false;
   }
 }

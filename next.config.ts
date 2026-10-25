@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
         destination: "/quantitative-research",
         permanent: true,
       },
+      // Contact merged into Get involved; old links land on its channels.
+      { source: "/contact", destination: "/get-involved#contact", permanent: true },
       // The blog was retired; send old links home.
       { source: "/blog", destination: "/", permanent: true },
     ];
