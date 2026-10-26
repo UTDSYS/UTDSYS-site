@@ -6,6 +6,8 @@ export type TeamMember = {
 
 export type Rating = "Buy" | "Hold" | "Sell";
 export type ResearchReport = {
+  /** URL segment for the report's own page: /fundamental-research/<slug>. */
+  slug: string;
   company: string;
   ticker: string;
   exchange: string;
@@ -22,6 +24,10 @@ export type ResearchReport = {
   analysts: string[];
   /** Key figures shown on the featured card, label → preformatted value. */
   metrics: { label: string; value: string }[];
+  /** Holding period the target is set over, e.g. "2-year". Defaults to 12-month. */
+  horizon?: string;
+  /** Yahoo Finance symbol; when set, the live tracker charts the call. */
+  quoteSymbol?: string;
   /** Path under /public, e.g. "/research/acme-initiation.pdf". */
   pdf: string | null;
   /** Placeholder entries are tagged so they can never pass as real coverage. */
@@ -42,7 +48,7 @@ const content = {
     desks: [
       {
         name: "Quantitative desk",
-        body: "Models, markets and the literature behind them.",
+        body: "Portfolio research, tested on past data and in paper trading.",
         href: "/quantitative-research",
       },
       {
@@ -124,7 +130,7 @@ const content = {
   },
   // /team: one roster, everyone at the same size, in org order (the two
   // desk leads, then officers). Drop headshots in public/team/ and set
-  // `photo` to "/team/<file>"; without one, a member shows their initials.
+  // `photo` to "/team/<file>"; without one, a member shows a placeholder silhouette.
   // A "\n" in `role` starts a new line on the card.
   team: {
     eyebrow: "University of Toronto Decision Systems",
@@ -132,17 +138,15 @@ const content = {
     intro:
       "Two research desks, quantitative and fundamental. Every call the group makes goes through both.",
     members: [
-      { name: "Name", role: "Founder\nLead Quantitative Researcher", photo: null },
-      { name: "Name", role: "Lead Fundamentals Researcher", photo: null },
-      { name: "Name", role: "VP, Internal", photo: null },
-      { name: "Name", role: "VP, External", photo: null },
-      { name: "Name", role: "CTO", photo: null },
+      { name: "Sunny Zhang", role: "Founder\nLead Quantitative Researcher", photo: null },
+      { name: "Bosco Yu", role: "Lead Fundamentals Researcher", photo: null },
     ] as TeamMember[],
   },
-  // /fundamental-research: an equity research hub. The newest report is
-  // featured; the rest fill the coverage table. To publish, add an entry to
-  // `reports` and put the PDF in public/research/. Delete the sample entries
-  // once real coverage exists — the sample notice disappears with them.
+  // /fundamental-research: an equity research hub. The index shows each
+  // report's summary card, newest first; the card opens its own page at
+  // /fundamental-research/<slug> with the live chart and the PDF. To
+  // publish, add an entry to `reports` and put the PDF in public/research/.
+  // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
     eyebrow: "Fundamental Research",
     heading: "Equity research",
@@ -150,7 +154,10 @@ const content = {
       "Bottom-up coverage of public companies. Every name is diligenced, modelled, and defended in front of the desk before a report goes out.",
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
-    featuredLabel: "Latest report",
+    backLabel: "All research",
+    trackerLabel: "Since the call",
+    reportHeading: "Full report",
+    reportPending: "The full write-up is being finalised and will be published here.",
     coverageHeading: "Coverage",
     process: {
       heading: "How we cover a name",
@@ -174,234 +181,127 @@ const content = {
       ],
     },
     ratings: [
-      { rating: "Buy", definition: "Expected 12-month total return above 15%." },
-      { rating: "Hold", definition: "Expected 12-month total return between -5% and 15%." },
-      { rating: "Sell", definition: "Expected 12-month total return below -5%." },
+      { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
+      { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },
+      { rating: "Sell", definition: "Expected total return below -5% over the horizon." },
     ] as { rating: Rating; definition: string }[],
     disclaimer:
       "Reports are produced by University of Toronto students for educational purposes only. They are not investment advice or a recommendation to buy or sell any security, and UTDSYS and its members may hold positions in the securities discussed.",
     reports: [
       {
-        company: "Acme Logistics",
-        ticker: "ACME",
-        exchange: "TSX",
-        sector: "Industrials",
-        date: "2026-10-02",
-        rating: "Buy",
-        currency: "C$",
-        priceAtPublication: 42.1,
-        priceTarget: 53,
-        headline: "Network density is finally showing up in margins",
-        summary:
-          "A decade of terminal investment has built a cost advantage the market still prices as cyclical. We see operating leverage carrying EBITDA margins 300bp higher by FY28 as volumes recover.",
-        analysts: ["Analyst Name", "Analyst Name"],
-        metrics: [
-          { label: "Market cap", value: "C$8.4B" },
-          { label: "EV / EBITDA (NTM)", value: "9.2x" },
-          { label: "P / E (NTM)", value: "15.8x" },
-          { label: "Dividend yield", value: "2.1%" },
-        ],
-        pdf: null,
-        sample: true,
-      },
-      {
-        company: "Initech Software",
-        ticker: "INTK",
+        slug: "futu",
+        company: "Futu Holdings",
+        ticker: "FUTU",
         exchange: "NASDAQ",
-        sector: "Technology",
-        date: "2026-09-18",
-        rating: "Hold",
-        currency: "US$",
-        priceAtPublication: 118.4,
-        priceTarget: 126,
-        headline: "Quality franchise, full price",
-        summary:
-          "Net retention remains best in class, but the multiple already discounts a reacceleration we can't underwrite yet.",
-        analysts: ["Analyst Name"],
-        metrics: [
-          { label: "Market cap", value: "US$31.0B" },
-          { label: "EV / Sales (NTM)", value: "11.4x" },
-          { label: "FCF margin", value: "27%" },
-          { label: "Net retention", value: "118%" },
-        ],
-        pdf: null,
-        sample: true,
-      },
-      {
-        company: "Globex Energy",
-        ticker: "GBXE",
-        exchange: "NYSE",
-        sector: "Energy",
-        date: "2026-08-29",
-        rating: "Sell",
-        currency: "US$",
-        priceAtPublication: 64.7,
-        priceTarget: 55,
-        headline: "Reserve life is shorter than the market assumes",
-        summary:
-          "Decline rates in the core basin are running ahead of guidance, and the buyback is being funded at the expense of reinvestment.",
-        analysts: ["Analyst Name"],
-        metrics: [
-          { label: "Market cap", value: "US$22.6B" },
-          { label: "EV / EBITDA (NTM)", value: "5.1x" },
-          { label: "Net debt / EBITDA", value: "1.8x" },
-          { label: "Reserve life", value: "8.3 yrs" },
-        ],
-        pdf: null,
-        sample: true,
-      },
-      {
-        company: "Umbrella Health",
-        ticker: "UMBH",
-        exchange: "TSX",
-        sector: "Healthcare",
-        date: "2026-08-07",
+        sector: "Financials",
+        date: "2026-07-17",
         rating: "Buy",
-        currency: "C$",
-        priceAtPublication: 27.3,
-        priceTarget: 34.5,
-        headline: "A misunderstood roll-up with real integration skill",
+        currency: "US$",
+        priceAtPublication: 95.1,
+        priceTarget: 167.7,
+        horizon: "2-year",
+        quoteSymbol: "FUTU",
+        headline: "A mispriced business, not a broken one",
         summary:
-          "Acquired clinics are reaching group margins within 18 months, a track record the current discount ignores.",
-        analysts: ["Analyst Name", "Analyst Name"],
+          "The stock is down 47% this year on a one-time, fully provisioned CSRC fine, while revenue grows 25% a year and client assets hit a record. Growth outside mainland China is already most of the business, and the market is pricing a setback as a permanent impairment.",
+        analysts: ["Bosco Yu"],
         metrics: [
-          { label: "Market cap", value: "C$3.2B" },
-          { label: "EV / EBITDA (NTM)", value: "10.6x" },
-          { label: "P / E (NTM)", value: "19.4x" },
-          { label: "Organic growth", value: "7%" },
+          { label: "Valuation", value: "15x FY27E EPS" },
+          { label: "FY27E EPS", value: "US$11.18" },
+          { label: "Expected IRR", value: "33%" },
+          { label: "Holding period", value: "2 years" },
         ],
         pdf: null,
-        sample: true,
       },
     ] as ResearchReport[],
   },
-  // /quantitative-research: the desk's projects first (the main work), then
-  // how it reviews papers, the annotated reading list, and written reviews.
-  // References are numbered in the order listed; a project's `reading` and a
-  // review's `ref` point at those numbers. Set each project's `stage` to
-  // where the work actually is.
+  // /quantitative-research: the desk's portfolio research, tested on past
+  // data and then in paper trading. Kept deliberately short: the studies
+  // (robust portfolios is the first; more may follow), each with its own
+  // paper-trading setup, then the method and the reading list. References are numbered in the
+  // order listed; a study's `reading` points at those numbers.
   quantResearch: {
+    eyebrow: "Quantitative desk",
     heading: "Quantitative research",
-    intro:
-      "The quantitative desk builds projects and reads the literature behind them. Each project starts from published work, is implemented by members from scratch, and is tested against data before we trust it.",
-    projects: {
-      heading: "Projects",
-      readingLabel: "Builds on",
+    intro: "Systematic portfolio research, evaluated against simple benchmarks and tested through paper trading.",
+    process: {
+      heading: "Method",
+      intro: "Every study moves through the same four stages.",
+      steps: [
+        { name: "Literature review", body: "Review prior work and reproduce its key results." },
+        { name: "Planning", body: "Define hypotheses and evaluation rules before any testing." },
+        { name: "Historical testing", body: "Evaluate on unseen historical data, net of trading costs." },
+        { name: "Paper trading", body: "Trade on live prices with simulated capital." },
+      ],
+    },
+    studies: {
+      heading: "Studies",
+      label: "study",
+      resultsLabel: "Since inception",
+      resultsColumns: ["Strategy", "Return", "Volatility", "Sharpe ratio"],
+      resultsPending: "Results are posted monthly once trading begins.",
+      benchmarksLabel: "Compared with",
+      paperLabel: "Paper trading",
+      readingLabel: "References",
       items: [
         {
-          name: "Quoting engine",
-          summary:
-            "A market-making engine: it quotes a price to buy and a price to sell, and adjusts both for inventory and volatility so the desk isn't left holding risk. The first version implements a closed-form model from the literature exactly, so we have a baseline we fully understand before adding anything learned from data.",
-          reading: [5, 6, 2],
-          stages: [
-            { name: "Literature review", detail: "Avellaneda–Stoikov and its extensions" },
-            { name: "Model specification", detail: "Quoting rule, inventory limits, parameter estimation" },
-            { name: "Backtest", detail: "Historical order-book data, with fill assumptions written down" },
-            { name: "Paper trading", detail: "Live data, simulated execution" },
-          ],
-          stage: "Model specification",
+          name: "Robust portfolios",
+          question:
+            "Robust portfolios are designed to account for errors in their forecasts. When that allowance is set from the data, can they perform as well as simple strategies such as equal weighting?",
+          benchmarks: ["Equal weighting", "Lowest volatility", "Robust, standard setting"],
+          reading: [9, 4, 7],
+          paper: {
+            terms: [
+              { label: "Assets", value: "Nine U.S. sector ETFs" },
+              { label: "Capital", value: "$100,000 simulated per strategy" },
+              { label: "Rebalancing", value: "Monthly" },
+            ],
+            status: "Not yet live",
+            // Fill in once paper trading has run; until then the table
+            // shows each strategy with empty values.
+            results: null as null | {
+              asOf: string;
+              rows: { name: string; ret: string; vol: string; sharpe: string }[];
+            },
+          },
         },
       ],
     },
     disclaimer:
-      "Student research for educational purposes. Nothing here is investment advice.",
-    method: {
-      heading: "How we review a paper",
-      // A real sequence: every paper goes through these in order.
-      steps: [
-        {
-          name: "Read",
-          body: "One member takes the paper and writes a one-page summary: the question, the method, the result, and every assumption it rests on.",
-        },
-        {
-          name: "Present",
-          body: "They walk the desk through it. The job of everyone else is to find where the argument is weakest.",
-        },
-        {
-          name: "Replicate",
-          body: "Where the data or a simulation allows, we rebuild the key result ourselves before we rely on it.",
-        },
-        {
-          name: "Write up",
-          body: "The summary, the objections raised, and any replication code go into a written review.",
-        },
-      ],
-    },
+      "Student research for educational purposes. Paper-trading results use simulated capital and do not constitute investment advice.",
     reading: {
       heading: "Reading list",
       groups: [
         {
-          name: "Market microstructure",
+          name: "Building portfolios",
           items: [
-            {
-              cite: "Kyle, A. S. (1985). Continuous auctions and insider trading. Econometrica 53(6), 1315–1335.",
-              note: "How an informed trader hides in noise, and where price impact comes from.",
-            },
-            {
-              cite: "Glosten, L. R. and Milgrom, P. R. (1985). Bid, ask and transaction prices in a specialist market with heterogeneously informed traders. Journal of Financial Economics 14(1), 71–100.",
-              note: "The bid–ask spread as the price of trading against better-informed counterparties.",
-            },
-            {
-              cite: "Cont, R., Kukanov, A. and Stoikov, S. (2014). The price impact of order book events. Journal of Financial Econometrics 12(1), 47–88.",
-              note: "Order-flow imbalance at the top of the book explains short-horizon price moves.",
-            },
+            "Markowitz, H. (1952). Portfolio selection. Journal of Finance 7(1), 77–91.",
+            "Ledoit, O. and Wolf, M. (2004). Honey, I shrunk the sample covariance matrix. Journal of Portfolio Management 30(4), 110–119.",
+            "Jorion, P. (1986). Bayes-Stein estimation for portfolio analysis. Journal of Financial and Quantitative Analysis 21(3), 279–292.",
+            "DeMiguel, V., Garlappi, L. and Uppal, R. (2009). Optimal versus naive diversification: How inefficient is the 1/N portfolio strategy? Review of Financial Studies 22(5), 1915–1953.",
+            "DeMiguel, V., Garlappi, L., Nogales, F. J. and Uppal, R. (2009). A generalized approach to portfolio optimization: Improving performance by constraining portfolio norms. Management Science 55(5), 798–812.",
           ],
         },
         {
-          name: "Optimal control and execution",
+          name: "Robust optimisation",
           items: [
-            {
-              cite: "Almgren, R. and Chriss, N. (2001). Optimal execution of portfolio transactions. Journal of Risk 3(2), 5–39.",
-              note: "Trading off market impact against price risk when unwinding a position.",
-            },
-            {
-              cite: "Avellaneda, M. and Stoikov, S. (2008). High-frequency trading in a limit order book. Quantitative Finance 8(3), 217–224.",
-              note: "Quoting as a stochastic control problem, solved in closed form.",
-            },
-            {
-              cite: "Cartea, Á., Jaimungal, S. and Penalva, J. (2015). Algorithmic and High-Frequency Trading. Cambridge University Press.",
-              note: "The standard textbook treatment of the whole area, from a University of Toronto author.",
-            },
+            "Garlappi, L., Uppal, R. and Wang, T. (2007). Portfolio selection with parameter and model uncertainty: A multi-prior approach. Review of Financial Studies 20(1), 41–81.",
+            "Scherer, B. (2007). Can robust portfolio optimisation help to build better portfolios? Journal of Asset Management 7(6).",
+            "Kim, W. C., Kim, J. H., Ahn, S. H. and Fabozzi, F. J. (2013). What do robust equity portfolio models really do? Annals of Operations Research 205, 141–168.",
+            "Gotoh, J., Kim, M. J. and Lim, A. E. B. (2020). Calibration of distributionally robust empirical optimization models. arXiv:1711.06565.",
+            "Cornuéjols, G., Elçi, Ö. and Patil, V. (2024). Addressing estimation errors on expected asset returns through robust portfolio optimization. Optimization Online.",
           ],
         },
         {
-          name: "Statistical learning and testing",
+          name: "Testing results",
           items: [
-            {
-              cite: "Harvey, C. R., Liu, Y. and Zhu, H. (2016). … and the cross-section of expected returns. Review of Financial Studies 29(1), 5–68.",
-              note: "Why most published return factors are likely false, and how high the bar should be.",
-            },
-            {
-              cite: "Bailey, D. H. and López de Prado, M. (2014). The deflated Sharpe ratio: correcting for selection bias, backtest overfitting, and non-normality. Journal of Portfolio Management 40(5), 94–107.",
-              note: "Adjusting a backtest's Sharpe ratio for the number of strategies that were tried.",
-            },
-            {
-              cite: "Gu, S., Kelly, B. and Xiu, D. (2020). Empirical asset pricing via machine learning. Review of Financial Studies 33(5), 2223–2273.",
-              note: "A careful comparison of learning methods for predicting returns, tested out of sample.",
-            },
-          ],
-        },
-        {
-          name: "Portfolios and risk",
-          items: [
-            {
-              cite: "Markowitz, H. (1952). Portfolio selection. Journal of Finance 7(1), 77–91.",
-              note: "Where mean–variance optimisation starts.",
-            },
-            {
-              cite: "Ledoit, O. and Wolf, M. (2004). Honey, I shrunk the sample covariance matrix. Journal of Portfolio Management 30(4), 110–119.",
-              note: "Why the sample covariance matrix fails in practice, and a simple estimator that holds up.",
-            },
+            "Ledoit, O. and Wolf, M. (2008). Robust performance hypothesis testing with the Sharpe ratio. Journal of Empirical Finance 15(5), 850–859.",
+            "Bailey, D. H. and López de Prado, M. (2014). The deflated Sharpe ratio: correcting for selection bias, backtest overfitting, and non-normality. Journal of Portfolio Management 40(5), 94–107.",
           ],
         },
       ],
     },
-    reviews: {
-      heading: "Reviews",
-      empty: "Written reviews will be published here as they're finished.",
-      items: [] as { title: string; reviewer: string; date: string; ref: number; pdf: string | null }[],
-    },
-    join: { text: "Want to present a paper?", label: "Get involved", href: "/get-involved" },
+    join: { text: "Interested in contributing to our research?", label: "Get involved", href: "/get-involved" },
   },
   contact: {
     email: "info@utdsys.com",

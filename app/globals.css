@@ -348,3 +348,77 @@ body {
   background-position: 85% 55%;
   background-size: 640px 640px;
 }
+
+/* ------------------------------------------------------------------ */
+/* Call tracker (fundamental research): the line draws in, the target  */
+/* line marches, the live dot breathes, and a new price flashes.       */
+/* ------------------------------------------------------------------ */
+@keyframes tracker-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.tracker-draw {
+  stroke-dasharray: 1;
+  animation: tracker-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both;
+}
+
+@keyframes tracker-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.tracker-fade {
+  animation: tracker-fade 1.2s ease-out 0.6s both;
+}
+
+@keyframes tracker-march {
+  to {
+    stroke-dashoffset: -12;
+  }
+}
+
+.tracker-march {
+  animation: tracker-march 1.2s linear infinite;
+}
+
+@keyframes tracker-pulse {
+  from {
+    r: 6;
+    opacity: 0.8;
+  }
+  to {
+    r: 18;
+    opacity: 0;
+  }
+}
+
+.tracker-pulse {
+  animation: tracker-pulse 1.8s ease-out infinite;
+}
+
+/* --tick is set per render: green if the price is above the call, red below. */
+@keyframes tracker-tick {
+  from {
+    color: var(--tick);
+  }
+}
+
+.tracker-tick {
+  animation: tracker-tick 1.2s ease-out both;
+}
+
+@keyframes tracker-grow {
+  from {
+    width: 0;
+  }
+}
+
+.tracker-grow {
+  animation: tracker-grow 1.4s cubic-bezier(0.22, 0.7, 0.24, 1) 0.4s both;
+}

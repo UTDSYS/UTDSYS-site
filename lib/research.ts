@@ -27,3 +27,8 @@ export const ratingClass: Record<Rating, string> = {
   Hold: "bg-transparent text-navy border-navy/30",
   Sell: "bg-ink text-white border-ink",
 };
+
+/** Price moves, and only price moves, read green up and red down. */
+export const UP = "#059669";
+export const DOWN = "#dc2626";
+export const moveColor = (change: number) => (change >= 0 ? UP : DOWN);

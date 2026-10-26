@@ -8,14 +8,6 @@ export const metadata = {
 
 const { eyebrow, heading, intro, members } = content.team;
 
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
-    .join("");
-
 /** Every headshot is the same 4:5 portrait, square-cornered. */
 function Portrait({ m }: { m: TeamMember }) {
   const base = "relative flex aspect-[4/5] w-full items-center justify-center overflow-hidden";
@@ -25,9 +17,14 @@ function Portrait({ m }: { m: TeamMember }) {
         <Image src={m.photo} alt="" fill sizes="(min-width: 1024px) 340px, 45vw" className="object-cover" />
       </span>
     );
+  // no photo yet: a generic head-and-shoulders silhouette rising from the
+  // bottom edge, in the navy tint
   return (
-    <span className={`${base} bg-navy/8 font-display text-4xl font-bold text-navy/40 sm:text-6xl`} aria-hidden="true">
-      {initials(m.name)}
+    <span className={`${base} bg-navy/8`} aria-hidden="true">
+      <svg viewBox="0 0 80 100" preserveAspectRatio="xMidYMax meet" className="absolute inset-0 h-full w-full text-navy/25">
+        <circle cx="40" cy="44" r="15" fill="currentColor" />
+        <path d="M10 100 C10 78 23 66 40 66 C57 66 70 78 70 100 Z" fill="currentColor" />
+      </svg>
     </span>
   );
 }

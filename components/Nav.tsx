@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import content from "@/lib/content";
-import { CrestBadge } from "@/components/Crest";
+import Image from "next/image";
 
 /**
  * Fixed site nav. On the home page it sits over the hero instead
@@ -18,6 +18,8 @@ export default function Nav() {
   const pathname = usePathname();
   // Home sits the brand and menu toggle over the navy crest panel.
   const home = pathname === "/";
+  // A section stays lit on its sub-pages, e.g. a single research report.
+  const inSection = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   // Close the menu when Escape is pressed. (Tapping a link closes it via the
   // link's own onClick.)
@@ -47,7 +49,7 @@ export default function Nav() {
             home ? "text-white hover:text-white/75" : "text-ink hover:text-signal-deep"
           }`}
         >
-          <CrestBadge className="h-9 w-9 shrink-0" />
+          <Image src="/logo.png" alt="" width={40} height={40} priority className="h-10 w-10 shrink-0" />
           {content.brand.name}
         </Link>
 
@@ -68,7 +70,7 @@ export default function Nav() {
                 key={l.label}
                 href={l.href}
                 className={`font-mono text-[0.7rem] uppercase tracking-[0.18em] transition hover:text-signal ${
-                  pathname === l.href ? "text-signal" : "text-navy/70"
+                  inSection(l.href) ? "text-signal" : "text-navy/70"
                 }`}
               >
                 {l.label}
@@ -152,7 +154,7 @@ export default function Nav() {
                 href={l.href}
                 onClick={() => setOpen(false)}
                 className={`border-b border-navy/5 py-3.5 font-mono text-xs uppercase tracking-[0.18em] transition hover:text-signal ${
-                  pathname === l.href ? "text-signal" : "text-navy/70"
+                  inSection(l.href) ? "text-signal" : "text-navy/70"
                 }`}
               >
                 {l.label}
