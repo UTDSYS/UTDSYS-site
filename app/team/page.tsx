@@ -39,14 +39,14 @@ export default function TeamPage() {
       {/* one roster: the same portrait card for everyone */}
       <section aria-label="Members" className="mx-auto max-w-6xl px-6 pb-28 pt-14 sm:pt-20">
         {/* Large, framed cards: the photo sits inset like an ID card. The
-            Get involved heading's two bars sit on the frame: the long navy
-            one along the top from the left corner, the short blue one along
-            the bottom into the right corner. */}
+            Get involved heading's two bars ride the frame and run past it:
+            the long dark blue one out of the top-left corner, the short blue
+            one out of the bottom-right. */}
         <ul className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3 lg:gap-8">
           {members.map((m, i) => (
             <li key={i} className="relative border border-navy/20 bg-white p-3 sm:p-6">
-              <span className="absolute -left-px -top-px h-1.5 w-2/5 bg-ink sm:h-2" aria-hidden="true" />
-              <span className="absolute -bottom-px -right-px h-1.5 w-1/5 bg-signal sm:h-2" aria-hidden="true" />
+              <span className="absolute -left-2 -top-px h-1.5 w-1/2 bg-signal-deep sm:-left-5 sm:h-2" aria-hidden="true" />
+              <span className="absolute -bottom-px -right-2 h-1.5 w-1/4 bg-signal sm:-right-5 sm:h-2" aria-hidden="true" />
               <Portrait m={m} />
               <div className="mt-3 border-t border-navy/12 pt-3 sm:mt-5 sm:pt-4">
                 <p className="font-display text-lg font-bold tracking-tight text-ink sm:text-2xl">{m.name}</p>
