@@ -224,39 +224,45 @@ const content = {
     eyebrow: "Quantitative desk",
     heading: "Quantitative research",
     intro: "Systematic portfolio research, evaluated against simple benchmarks and tested through paper trading.",
-    process: {
-      heading: "Method",
-      intro: "Every study moves through the same four stages.",
-      steps: [
-        { name: "Literature review", body: "Review prior work and reproduce its key results." },
-        { name: "Planning", body: "Define hypotheses and evaluation rules before any testing." },
-        { name: "Historical testing", body: "Evaluate on unseen historical data, net of trading costs." },
-        { name: "Paper trading", body: "Trade on live prices with simulated capital." },
-      ],
-    },
     studies: {
       heading: "Studies",
       label: "study",
       resultsLabel: "Since inception",
       resultsColumns: ["Strategy", "Return", "Volatility", "Sharpe ratio"],
       resultsPending: "Results are posted monthly once trading begins.",
-      benchmarksLabel: "Compared with",
       paperLabel: "Paper trading",
       readingLabel: "References",
+      backtestLabel: "Historical testing",
+      backtestColumns: ["Strategy", "Volatility", "Largest drawdown", "Sharpe ratio"],
       items: [
         {
           name: "Robust portfolios",
           question:
-            "Robust portfolios are designed to account for errors in their forecasts. When that allowance is set from the data, can they perform as well as simple strategies such as equal weighting?",
-          benchmarks: ["Equal weighting", "Lowest volatility", "Robust, standard setting"],
+            "Robust portfolios are designed to account for errors in their forecasts. Can they lower risk without giving up risk-adjusted return?",
+          strategies: ["Robust", "Min-variance"],
+          benchmarks: ["Equal weighting"],
           reading: [9, 4, 7],
+          // From the research repo (results/phase2/risk_vol.md): net of
+          // 10 bp trading costs, sector ETFs Jan 2004 – Aug 2026.
+          backtest: {
+            headline:
+              "10–26% less volatility than equal weighting in every market tested, with equal or better risk-adjusted returns.",
+            summary:
+              "Tested on U.S. sector and industry data back to 1973, after trading costs.",
+            period: "Sector ETFs, Jan 2004 – Aug 2026",
+            rows: [
+              { name: "Robust", vol: "12.4%", maxdd: "42.1%", sharpe: "0.73" },
+              { name: "Min-variance", vol: "11.5%", maxdd: "37.2%", sharpe: "0.71" },
+              { name: "Equal weighting", vol: "14.3%", maxdd: "49.2%", sharpe: "0.66" },
+            ],
+          },
           paper: {
             terms: [
               { label: "Assets", value: "Nine U.S. sector ETFs" },
               { label: "Capital", value: "$100,000 simulated per strategy" },
               { label: "Rebalancing", value: "Monthly" },
             ],
-            status: "Not yet live",
+            status: "Starting soon",
             // Fill in once paper trading has run; until then the table
             // shows each strategy with empty values.
             results: null as null | {

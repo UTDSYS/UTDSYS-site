@@ -8,7 +8,7 @@ export const metadata = {
     "The UofT Decision Systems quantitative desk: portfolio research, tested on past data and then in paper trading.",
 };
 
-const { eyebrow, heading, intro, disclaimer, process, studies, reading, join } = content.quantResearch;
+const { eyebrow, heading, intro, disclaimer, studies, reading, join } = content.quantResearch;
 
 // References are numbered continuously across groups, in the order listed,
 // so a study can point at one by number.
@@ -31,12 +31,11 @@ const shortCite = (n: number) => {
   return `${who} (${rest.slice(0, 4)})`;
 };
 
-const pad = (n: number) => String(n).padStart(2, "0");
 const ordinals = ["First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth", "Tenth"];
 const ordinal = (i: number) => ordinals[i] ?? `No. ${i + 1}`;
 
-// One left column runs the length of the page, so the pipeline, each study
-// and the reading list all hang off the same edge.
+// One left column runs the length of the page, so the reading list and the
+// footer hang off the same edge.
 const rail = "lg:grid-cols-[15rem_minmax(0,1fr)]";
 const label = "font-mono text-[0.7rem] uppercase tracking-[0.16em]";
 
@@ -64,7 +63,7 @@ export default function QuantitativeResearchPage() {
           only need an entry in content. */}
       {studies.items.map((p, i) => {
         const results = p.paper.results;
-        const rows = results?.rows ?? [p.name, ...p.benchmarks].map((name) => ({ name, ret: "", vol: "", sharpe: "" }));
+        const rows = results?.rows ?? [...p.strategies, ...p.benchmarks].map((name) => ({ name, ret: "", vol: "", sharpe: "" }));
         return (
           <article
             key={p.name}
@@ -72,136 +71,155 @@ export default function QuantitativeResearchPage() {
             aria-labelledby={`study-${i + 1}-name`}
             className="mx-auto mt-16 max-w-6xl scroll-mt-28 px-6 sm:mt-20"
           >
-            <p className={`${label} text-signal-deep`}>
-              {ordinal(i)} {studies.label}
-            </p>
-            <h2
-              id={`study-${i + 1}-name`}
-              className="font-display mt-4 text-4xl font-extrabold tracking-[-0.03em] text-ink sm:text-5xl"
-            >
-              {p.name}
-            </h2>
-            <p className="font-display mt-6 max-w-[46rem] text-balance text-xl leading-snug tracking-tight text-navy/85 sm:text-2xl">
-              {p.question}
-            </p>
-
-            <div className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)] lg:gap-14">
-              <dl className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-1">
-                <div>
-                  <dt className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{studies.benchmarksLabel}</dt>
-                  <dd>
-                    <ul className="mt-3 space-y-2">
-                      {p.benchmarks.map((b) => (
-                        <li key={b} className="text-base font-medium text-ink">
-                          {b}
-                        </li>
-                      ))}
-                    </ul>
-                  </dd>
-                </div>
-                <div>
-                  <dt className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{studies.readingLabel}</dt>
-                  <dd className="mt-3 flex flex-col gap-2">
-                    {p.reading.map((n) => (
-                      <a
-                        key={n}
-                        href={`#ref-${n}`}
-                        className="w-fit text-base text-signal-deep underline decoration-signal-deep/25 underline-offset-4 transition hover:decoration-signal-deep"
-                      >
-                        {shortCite(n)}
-                      </a>
-                    ))}
-                  </dd>
-                </div>
-              </dl>
-
-              {/* paper trading: setup, then results */}
-              <section
-                aria-labelledby={`study-${i + 1}-paper`}
-                className="border border-navy/15 bg-white shadow-[0_1px_2px_rgb(14_24_48/0.04),0_18px_44px_-24px_rgb(14_24_48/0.2)]"
+            {/* each study is its own box, so later studies stack as peers */}
+            <div className="border border-navy/15 bg-navy/[0.03] p-6 shadow-[0_1px_2px_rgb(14_24_48/0.04),0_18px_44px_-24px_rgb(14_24_48/0.2)] sm:p-10">
+              <p className={`${label} text-signal-deep`}>
+                {ordinal(i)} {studies.label}
+              </p>
+              <h2
+                id={`study-${i + 1}-name`}
+                className="font-display mt-4 text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl"
               >
-                <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-6 sm:px-8 sm:pt-7">
-                  <h3 id={`study-${i + 1}-paper`} className="font-display text-xl font-bold tracking-tight text-ink">
-                    {studies.paperLabel}
-                  </h3>
-                  <p className="inline-flex items-center gap-2 bg-navy/[0.05] px-3 py-1 text-xs font-medium text-navy/70">
-                    <span
-                      aria-hidden="true"
-                      className={`h-1.5 w-1.5 rounded-full ${results ? "bg-signal" : "border border-navy/50"}`}
-                    />
-                    {p.paper.status}
-                  </p>
-                </div>
+                {p.name}
+              </h2>
+              <p className="font-display mt-4 max-w-[46rem] text-balance text-lg leading-snug tracking-tight text-navy/85 sm:text-xl">
+                {p.question}
+              </p>
 
-                <dl className="mt-5 grid gap-4 px-6 sm:grid-cols-3 sm:px-8">
-                  {p.paper.terms.map((t) => (
-                    <div key={t.label}>
-                      <dt className="text-sm text-navy/55">{t.label}</dt>
-                      <dd className="mt-0.5 text-base font-medium text-ink">{t.value}</dd>
-                    </div>
-                  ))}
-                </dl>
+              <div className="mt-10 grid grid-cols-1 gap-8 sm:mt-12">
+                {/* paper trading: setup, then results */}
+                <section
+                  aria-labelledby={`study-${i + 1}-paper`}
+                  className="border border-navy/15 bg-white"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-3 px-6 pt-6 sm:px-8 sm:pt-7">
+                    <h3 id={`study-${i + 1}-paper`} className="font-display text-xl font-bold tracking-tight text-ink">
+                      {studies.paperLabel}
+                    </h3>
+                    <p className="inline-flex items-center gap-2 bg-navy/[0.05] px-3 py-1 text-xs font-medium text-navy/70">
+                      <span
+                        aria-hidden="true"
+                        className={`h-1.5 w-1.5 rounded-full ${results ? "bg-signal" : "border border-navy/50"}`}
+                      />
+                      {p.paper.status}
+                    </p>
+                  </div>
 
-                <div className="mt-7 border-t border-navy/8 px-6 pb-6 pt-5 sm:px-8 sm:pb-7">
-                  <p className={`${label} text-navy/55`}>
-                    {studies.resultsLabel}
-                    {results && <span className="text-navy/40"> · {results.asOf}</span>}
-                  </p>
-                  <div className="mt-3 overflow-x-auto">
-                    <table className="w-full min-w-[26rem] text-left text-sm">
-                      <thead>
-                        <tr className="border-b border-navy/10 text-navy/55">
-                          {studies.resultsColumns.map((c, j) => (
-                            <th key={c} scope="col" className={`py-2.5 font-medium ${j > 0 ? "text-right" : ""}`}>
-                              {c}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="tabular-nums">
-                        {rows.map((r, j) => (
-                          <tr key={r.name} className="border-b border-navy/8 last:border-b-0">
-                            <th scope="row" className={`py-2.5 font-medium ${j === 0 ? "text-ink" : "text-navy/75"}`}>
-                              {r.name}
-                            </th>
-                            {[r.ret, r.vol, r.sharpe].map((v, k) => (
-                              <td key={k} className="py-2.5 text-right font-mono text-navy/75">
-                                {v || <span className="text-navy/30">—</span>}
-                              </td>
+                  <dl className="mt-5 grid gap-4 px-6 sm:grid-cols-3 sm:px-8">
+                    {p.paper.terms.map((t) => (
+                      <div key={t.label}>
+                        <dt className="text-sm text-navy/55">{t.label}</dt>
+                        <dd className="mt-0.5 text-base font-medium text-ink">{t.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+
+                  <div className="mt-7 border-t border-navy/8 px-6 pb-6 pt-5 sm:px-8 sm:pb-7">
+                    <p className={`${label} text-navy/55`}>
+                      {studies.resultsLabel}
+                      {results && <span className="text-navy/40"> · {results.asOf}</span>}
+                    </p>
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="w-full min-w-[26rem] text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-navy/10 text-navy/55">
+                            {studies.resultsColumns.map((c, j) => (
+                              <th key={c} scope="col" className={`py-2.5 font-medium ${j > 0 ? "text-right" : ""}`}>
+                                {c}
+                              </th>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody className="tabular-nums">
+                          {rows.map((r, j) => (
+                            <tr key={r.name} className="border-b border-navy/8 last:border-b-0">
+                              <th scope="row" className={`py-2.5 font-medium ${j === 0 ? "text-ink" : "text-navy/75"}`}>
+                                {r.name}
+                              </th>
+                              {[r.ret, r.vol, r.sharpe].map((v, k) => (
+                                <td key={k} className="py-2.5 text-right font-mono text-navy/75">
+                                  {v || <span className="text-navy/30">—</span>}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    {!results && <p className="mt-3 text-xs text-navy/50">{studies.resultsPending}</p>}
                   </div>
-                  {!results && <p className="mt-3 text-xs text-navy/50">{studies.resultsPending}</p>}
-                </div>
-              </section>
+                </section>
+
+                {/* historical testing: the headline finding and its table */}
+                <section
+                  aria-labelledby={`study-${i + 1}-backtest`}
+                  className="border border-navy/15 bg-white"
+                >
+                  <div className="px-6 pt-6 sm:px-8 sm:pt-7">
+                    <h3 id={`study-${i + 1}-backtest`} className="font-display text-xl font-bold tracking-tight text-ink">
+                      {studies.backtestLabel}
+                    </h3>
+                    <p className="font-display mt-3 text-lg font-semibold leading-snug tracking-tight text-ink">
+                      {p.backtest.headline}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-navy/65">{p.backtest.summary}</p>
+                  </div>
+                  <div className="mt-6 border-t border-navy/8 px-6 pb-6 pt-5 sm:px-8 sm:pb-7">
+                    <p className={`${label} text-navy/55`}>{p.backtest.period}</p>
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="w-full min-w-[26rem] text-left text-sm">
+                        <thead>
+                          <tr className="border-b border-navy/10 text-navy/55">
+                            {studies.backtestColumns.map((c, j) => (
+                              <th key={c} scope="col" className={`py-2.5 font-medium ${j > 0 ? "text-right" : ""}`}>
+                                {c}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody className="tabular-nums">
+                          {p.backtest.rows.map((r) => (
+                            <tr key={r.name} className="border-b border-navy/8 last:border-b-0">
+                              <th
+                                scope="row"
+                                className={`py-2.5 font-medium ${(p.strategies as readonly string[]).includes(r.name) ? "text-ink" : "text-navy/75"}`}
+                              >
+                                {r.name}
+                              </th>
+                              {[r.vol, r.maxdd, r.sharpe].map((v, k) => (
+                                <td key={k} className="py-2.5 text-right font-mono text-navy/75">
+                                  {v}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </section>
+
+                <dl className="mt-2">
+                  <div>
+                    <dt className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{studies.readingLabel}</dt>
+                    <dd className="mt-3 flex flex-col gap-2">
+                      {p.reading.map((n) => (
+                        <a
+                          key={n}
+                          href={`#ref-${n}`}
+                          className="w-fit text-base text-signal-deep underline decoration-signal-deep/25 underline-offset-4 transition hover:decoration-signal-deep"
+                        >
+                          {shortCite(n)}
+                        </a>
+                      ))}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
             </div>
           </article>
         );
       })}
-
-      {/* method, kept short: the four stages every study passes through */}
-      <section aria-labelledby="method" className={`mx-auto mt-24 grid max-w-6xl grid-cols-1 gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}>
-        <div className="lg:pr-10">
-          <h2 id="method" className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">
-            {process.heading}
-          </h2>
-          <p className="mt-2 text-sm leading-relaxed text-navy/60">{process.intro}</p>
-        </div>
-        <Swipe label={process.heading} count={process.steps.length}>
-          <ol className="swipe grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {process.steps.map((s, i) => (
-              <li key={s.name} className="border-t border-navy/12 pt-4">
-                <span className={`${label} text-signal-deep`}>{pad(i + 1)}</span>
-                <h3 className="font-display mt-2 text-base font-bold tracking-tight text-ink">{s.name}</h3>
-                <p className="mt-1 text-sm leading-relaxed text-navy/60">{s.body}</p>
-              </li>
-            ))}
-          </ol>
-        </Swipe>
-      </section>
 
       {/* the reading list, as a bibliography on the same rail */}
       <section
