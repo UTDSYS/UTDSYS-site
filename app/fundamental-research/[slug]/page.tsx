@@ -35,7 +35,7 @@ export default async function ReportPage({ params }: Props) {
 
   return (
     <main className="relative min-h-screen">
-      <div className="mx-auto max-w-7xl px-6 pb-28 pt-36">
+      <div className="mx-auto max-w-7xl px-6 pb-28 pt-28 sm:pt-36">
         <Link
           href="/fundamental-research"
           className="group inline-flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/50 transition hover:text-signal-deep"
@@ -121,7 +121,7 @@ export default async function ReportPage({ params }: Props) {
               </p>
             </object>
           ) : (
-            <div className="mt-6 flex min-h-[22rem] flex-col items-center justify-center gap-3 rounded-sm border border-dashed border-navy/20 bg-white/40 px-6 text-center">
+            <div className="mt-6 flex min-h-[14rem] sm:min-h-[22rem] flex-col items-center justify-center gap-3 rounded-sm border border-dashed border-navy/20 bg-white/40 px-6 text-center">
               <span className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/45">
                 PDF · {report.exchange}:{report.ticker}
               </span>

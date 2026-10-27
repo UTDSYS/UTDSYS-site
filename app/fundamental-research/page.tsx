@@ -2,6 +2,7 @@ import content from "@/lib/content";
 import { byNewest } from "@/lib/research";
 import ReportCard from "@/components/research/ReportCard";
 import Disclosures from "@/components/research/Disclosures";
+import Swipe from "@/components/Swipe";
 
 export const metadata = {
   title: "Fundamental Research — UofT Decision Systems",
@@ -26,7 +27,7 @@ export default function FundamentalResearchPage() {
 
   return (
     <main className="relative min-h-screen">
-      <div className="mx-auto max-w-7xl px-6 pb-28 pt-36">
+      <div className="mx-auto max-w-7xl px-6 pb-28 pt-28 sm:pt-36">
         {/* masthead */}
         <header className="grid gap-10 border-b border-navy/12 pb-12 lg:grid-cols-[1fr_auto] lg:items-end">
           <div className="max-w-2xl">
@@ -75,19 +76,21 @@ export default function FundamentalResearchPage() {
           <h2 id="process" className="font-display text-2xl font-bold tracking-tight text-ink">
             {process.heading}
           </h2>
-          <ol className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            {process.steps.map((s, i) => (
-              <li key={s.title} className="border-t border-navy/15 pt-5">
-                <span className="font-mono text-[0.65rem] tracking-[0.2em] text-signal-deep">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <h3 className="font-display mt-3 text-lg font-semibold tracking-tight text-ink">
-                  {s.title}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-navy/65">{s.body}</p>
-              </li>
-            ))}
-          </ol>
+          <Swipe label={process.heading} count={process.steps.length} className="mt-8">
+            <ol className="swipe grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+              {process.steps.map((s, i) => (
+                <li key={s.title} className="border-t border-navy/15 pt-5">
+                  <span className="font-mono text-[0.65rem] tracking-[0.2em] text-signal-deep">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <h3 className="font-display mt-3 text-lg font-semibold tracking-tight text-ink">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-navy/65">{s.body}</p>
+                </li>
+              ))}
+            </ol>
+          </Swipe>
         </section>
 
         <Disclosures />

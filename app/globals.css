@@ -422,3 +422,33 @@ body {
 .tracker-grow {
   animation: tracker-grow 1.4s cubic-bezier(0.22, 0.7, 0.24, 1) 0.4s both;
 }
+
+/* ------------------------------------------------------------------ */
+/* Swipe rows: on phones, a long run of items becomes one horizontal   */
+/* row that snaps card by card. It bleeds to the screen edge so the    */
+/* next card peeks in and the row reads as swipeable.                  */
+/* ------------------------------------------------------------------ */
+@media (max-width: 639.98px) {
+  .swipe {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    /* the page gutter is px-6 */
+    margin-inline: -1.5rem;
+    padding-inline: 1.5rem;
+    scroll-padding-inline: 1.5rem;
+  }
+
+  .swipe::-webkit-scrollbar {
+    display: none;
+  }
+
+  .swipe > * {
+    flex: 0 0 var(--swipe-w, min(78%, 19rem));
+    scroll-snap-align: start;
+  }
+}

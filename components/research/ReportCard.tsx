@@ -10,7 +10,7 @@ export default function ReportCard({ report }: { report: ResearchReport }) {
       href={`/fundamental-research/${report.slug}`}
       className="group grid overflow-hidden rounded-sm border border-navy/12 bg-white/60 transition hover:border-navy/30 hover:shadow-[0_12px_40px_-20px_rgb(14_24_48/0.35)] lg:grid-cols-[1.6fr_1fr]"
     >
-      <div className="flex flex-col p-8 md:p-10">
+      <div className="flex flex-col p-6 sm:p-8 md:p-10">
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-navy/50">
           <span>{formatDate(report.date)}</span>
           <span aria-hidden="true">·</span>
@@ -49,7 +49,7 @@ export default function ReportCard({ report }: { report: ResearchReport }) {
       </div>
 
       {/* the call and the numbers */}
-      <aside className="border-t border-navy/10 bg-offwhite/70 p-8 md:p-10 lg:border-l lg:border-t-0">
+      <aside className="border-t border-navy/10 bg-offwhite/70 p-6 sm:p-8 md:p-10 lg:border-l lg:border-t-0">
         <div className="flex items-center justify-between">
           <span className="font-mono text-[0.6rem] uppercase tracking-[0.2em] text-navy/45">
             Rating

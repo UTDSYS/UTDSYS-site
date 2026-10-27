@@ -3,16 +3,20 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ResearchReport } from "@/lib/content";
 import type { PricePoint, Quote } from "@/lib/quotes";
-import { DOWN, UP, formatPct, formatPrice, moveColor } from "@/lib/research";
+import { UP, formatPct, formatPrice, moveColor } from "@/lib/research";
 
 const NAVY = "#1b2a4a";
+const INK = "#0e1830";
 const TARGET = "#1d3fb8";
 const POLL_MS = 60_000;
 const DAY = 86_400_000;
 
-type Range = "call" | "ytd" | "1y";
+type Range = "call" | "1m" | "3m" | "6m" | "ytd" | "1y";
 const RANGES: { id: Range; label: string }[] = [
-  { id: "call", label: "Since the call" },
+  { id: "call", label: "Since call" },
+  { id: "1m", label: "1M" },
+  { id: "3m", label: "3M" },
+  { id: "6m", label: "6M" },
   { id: "ytd", label: "YTD" },
   { id: "1y", label: "1Y" },
 ];
@@ -31,10 +35,27 @@ const timeFmt = new Intl.DateTimeFormat("en-CA", {
   minute: "2-digit",
   timeZone: "America/New_York",
 });
+// axis labels: "Oct 6" for short ranges, "Oct" (or the year in January) for long
+const tickDayFmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: "America/New_York" });
+const tickMonthFmt = new Intl.DateTimeFormat("en-US", { month: "short", timeZone: "America/New_York" });
+const nyMonth = (t: number) => new Date(t - 5 * 3_600_000).getUTCMonth();
 
-const PAD = { top: 28, right: 76, bottom: 28, left: 8 };
+const PAD = { top: 16, right: 64, bottom: 30, left: 4 };
+const PILL_H = 18;
 
-/** The call, charted live: entry, target, and where it trades now. */
+/** Round gridline values, about `n` of them, the way a price axis reads. */
+function niceTicks(lo: number, hi: number, n: number) {
+  const raw = (hi - lo) / n;
+  const mag = 10 ** Math.floor(Math.log10(raw));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw) ?? raw;
+  const out: number[] = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) out.push(+v.toFixed(6));
+  return out;
+}
+
+const signed = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`;
+
+/** The call, charted live in the style of a quote page: entry, target, and where it trades now. */
 export default function CallTracker({
   report,
   initial,
@@ -57,7 +78,6 @@ export default function CallTracker({
   const target = report.priceTarget;
   const years = parseInt(report.horizon ?? "1", 10) || 1;
   const horizonEnd = callT + years * 365 * DAY;
-  const tone = (v: number) => moveColor(v - call);
 
   // Refresh while the tab is visible; the server caches, so this is cheap.
   useEffect(() => {
@@ -88,7 +108,7 @@ export default function CallTracker({
     return () => ro.disconnect();
   }, []);
 
-  const height = width !== null && width < 640 ? 240 : 340;
+  const height = width !== null && width < 640 ? 260 : 360;
 
   const points = useMemo<PricePoint[]>(() => {
     if (!quote) return [];
@@ -97,18 +117,22 @@ export default function CallTracker({
         ? callT - DAY
         : range === "ytd"
           ? Date.parse(`${new Date(quote.asOf).getUTCFullYear()}-01-01T00:00:00Z`)
-          : quote.asOf - 365 * DAY;
+          : quote.asOf - { "1m": 31, "3m": 92, "6m": 183, "1y": 365 }[range] * DAY;
     return quote.points.filter((p) => p.t >= from);
   }, [quote, range, callT]);
 
   const last = quote?.last ?? null;
-  const sinceCall = last === null ? null : last / call - 1;
   const toTarget = last === null ? null : target / last - 1;
-  const priceProgress =
-    last === null ? 0 : Math.min(1, Math.max(0, (last - call) / (target - call)));
+  const priceProgress = last === null ? 0 : Math.min(1, Math.max(0, (last - call) / (target - call)));
   const asOf = quote?.asOf ?? callT;
   const timeProgress = Math.min(1, Math.max(0, (asOf - callT) / (horizonEnd - callT)));
   const dayN = Math.max(0, Math.floor((asOf - callT) / DAY));
+
+  // The line takes one colour for the whole range: green if the range is up.
+  const first = points[0]?.close ?? call;
+  const end = points[points.length - 1]?.close ?? call;
+  const lineColor = moveColor(end - first);
+  const rangeChange = end / first - 1;
 
   // scales
   const chart = useMemo(() => {
@@ -116,29 +140,36 @@ export default function CallTracker({
     const t0 = points[0].t;
     const t1 = points[points.length - 1].t;
     const prices = points.map((p) => p.close);
-    const lo = Math.min(...prices, call) * 0.94;
-    const hi = Math.max(...prices, target) * 1.04;
+    const pad = (Math.max(...prices, target, call) - Math.min(...prices, call)) * 0.06;
+    const lo = Math.min(...prices, call) - pad;
+    const hi = Math.max(...prices, target) + pad;
     const w = width - PAD.left - PAD.right;
     const h = height - PAD.top - PAD.bottom;
     const x = (t: number) => PAD.left + ((t - t0) / (t1 - t0 || 1)) * w;
     const y = (v: number) => PAD.top + (1 - (v - lo) / (hi - lo)) * h;
-    const path = (ps: PricePoint[]) =>
-      ps.map((p, i) => `${i ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.close).toFixed(1)}`).join("");
+    const line = points.map((p, i) => `${i ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.close).toFixed(1)}`).join("");
+    const base = (PAD.top + h).toFixed(1);
+    const area = `${line}L${x(t1).toFixed(1)},${base}L${x(t0).toFixed(1)},${base}Z`;
 
-    const before = points.filter((p) => p.t < callT);
-    const after = points.filter((p) => p.t >= callT);
-    // Join the two halves so the line doesn't break at the call.
-    if (before.length && after.length) before.push(after[0]);
-    const afterLine = path(after);
-    // Fill between the price and the call price: green above, red below.
-    const area = after.length
-      ? `${afterLine}L${x(after[after.length - 1].t).toFixed(1)},${y(call).toFixed(1)}L${x(after[0].t).toFixed(1)},${y(call).toFixed(1)}Z`
-      : "";
-    // Where the call price sits in the plot, for the green/red split.
-    const split = Math.min(1, Math.max(0, (y(call) - PAD.top) / h));
+    // date labels along the bottom
+    const narrow = width < 640;
+    let xTicks: { t: number; label: string }[] = [];
+    if (t1 - t0 <= 70 * DAY) {
+      const every = Math.max(1, Math.round(points.length / (narrow ? 3 : 5)));
+      for (let i = every; i < points.length - 1; i += every)
+        xTicks.push({ t: points[i].t, label: tickDayFmt.format(points[i].t) });
+    } else {
+      points.forEach((p, i) => {
+        if (i === 0 || nyMonth(p.t) === nyMonth(points[i - 1].t)) return;
+        const label = nyMonth(p.t) === 0 ? String(new Date(p.t).getUTCFullYear()) : tickMonthFmt.format(p.t);
+        xTicks.push({ t: p.t, label });
+      });
+      const max = narrow ? 4 : 7;
+      const k = Math.ceil(xTicks.length / max);
+      xTicks = xTicks.filter((_, i) => i % k === 0);
+    }
+    xTicks = xTicks.filter((tk) => x(tk.t) > PAD.left + 20 && x(tk.t) < PAD.left + w - 20);
 
-    const step = (hi - lo) / 4;
-    const ticks = [1, 2, 3].map((i) => lo + step * i);
     return {
       width,
       x,
@@ -146,11 +177,10 @@ export default function CallTracker({
       w,
       h,
       t0,
-      beforeLine: path(before),
-      afterLine,
+      line,
       area,
-      split,
-      ticks,
+      yTicks: niceTicks(lo, hi, narrow ? 4 : 6),
+      xTicks,
       callX: x(Math.max(callT, t0)),
     };
   }, [points, width, height, call, target, callT]);
@@ -169,12 +199,32 @@ export default function CallTracker({
   const hp = hover !== null ? points[hover] : null;
   const lastPt = points[points.length - 1];
 
+  // The headline follows the crosshair, as on a quote page.
+  const shown = hp?.close ?? last;
+  const shownChange = shown === null ? null : shown - call;
+
+  // Price tags on the right edge. Placed in priority order; a tag that would
+  // overlap one already placed is dropped, and so is any gridline label it covers.
+  const pills: { v: number; text: string; fill: string; y: number }[] = [];
+  if (chart) {
+    const want = [
+      hp && { v: hp.close, fill: INK },
+      lastPt && { v: lastPt.close, fill: lineColor },
+      { v: target, fill: TARGET },
+      { v: call, fill: "#8a93a6" },
+    ];
+    for (const p of want) {
+      if (!p) continue;
+      const y = chart.y(p.v);
+      if (pills.some((q) => Math.abs(q.y - y) < PILL_H + 1)) continue;
+      pills.push({ ...p, y, text: p.v.toFixed(2) });
+    }
+  }
+  const clearOfPills = (y: number) => pills.every((p) => Math.abs(p.y - y) > PILL_H / 2 + 6);
+
   return (
-    <section
-      aria-labelledby="tracker"
-      className="relative mt-6 overflow-hidden rounded-sm border border-navy/12 bg-white p-6 md:p-10"
-    >
-      <div className="relative flex flex-wrap items-start justify-between gap-6">
+    <section aria-labelledby="tracker" className="relative mt-6 rounded-sm border border-navy/12 bg-white p-5 md:p-10">
+      <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-navy/50">
             <h2 id="tracker">{label}</h2>
@@ -183,68 +233,75 @@ export default function CallTracker({
               {report.exchange}:{report.ticker}
             </span>
           </div>
-          <div className="mt-4 flex flex-wrap items-baseline gap-x-5 gap-y-2">
+          <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span
-              key={last ?? "none"}
-              className="tracker-tick font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl"
-              style={{ "--tick": last === null ? NAVY : tone(last) } as React.CSSProperties}
+              key={hp ? "hover" : (last ?? "none")}
+              className={`font-display text-5xl font-bold tracking-tight text-ink md:text-6xl ${hp ? "" : "tracker-tick"}`}
+              style={{ "--tick": last === null ? NAVY : moveColor(last - call) } as React.CSSProperties}
             >
-              {last === null ? "—" : formatPrice(report.currency, last)}
+              {shown === null ? "—" : formatPrice(report.currency, shown)}
             </span>
-            {sinceCall !== null && (
-              <span className="font-mono text-sm tabular-nums" style={{ color: moveColor(sinceCall) }}>
-                {formatPct(sinceCall)} since the call
+            {shownChange !== null && (
+              <span
+                className="text-lg font-semibold tabular-nums md:text-xl"
+                style={{ color: moveColor(shownChange) }}
+              >
+                {signed(shownChange)} ({formatPct(shownChange / call)})
               </span>
             )}
           </div>
+          <p className="mt-1 text-sm text-navy/55">
+            {hp
+              ? `${dayFmt.format(hp.t)} · vs the call at ${formatPrice(report.currency, call)}`
+              : quote
+                ? `Since the call at ${formatPrice(report.currency, call)} · As of ${timeFmt.format(quote.asOf)} ET`
+                : `Called at ${formatPrice(report.currency, call)}`}
+          </p>
         </div>
 
-        <div className="flex flex-col items-start gap-2 sm:items-end sm:text-right">
-          {quote ? (
-            <span className="inline-flex items-center gap-2 rounded-sm border border-navy/15 px-3 py-1 font-mono text-[0.6rem] uppercase tracking-[0.22em] text-navy/70">
-              <span className="relative flex h-2 w-2">
-                {quote.open && (
-                  <span
-                    className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
-                    style={{ background: UP }}
-                  />
-                )}
+        {quote ? (
+          <span className="inline-flex items-center gap-2 rounded-full border border-navy/15 px-3 py-1 text-xs font-medium text-navy/70">
+            <span className="relative flex h-2 w-2">
+              {quote.open && (
                 <span
-                  className="relative inline-flex h-2 w-2 rounded-full"
-                  style={{ background: quote.open ? UP : "rgb(27 42 74 / 0.3)" }}
+                  className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75"
+                  style={{ background: UP }}
                 />
-              </span>
-              {quote.open ? "Live" : "Market closed"}
+              )}
+              <span
+                className="relative inline-flex h-2 w-2 rounded-full"
+                style={{ background: quote.open ? UP : "rgb(27 42 74 / 0.3)" }}
+              />
             </span>
-          ) : (
-            <span className="font-mono text-[0.6rem] uppercase tracking-[0.22em] text-navy/40">
-              Live price unavailable
-            </span>
-          )}
-          {quote && (
-            <span className="font-mono text-[0.6rem] uppercase tracking-[0.18em] text-navy/40">
-              As of {timeFmt.format(quote.asOf)} ET
-            </span>
-          )}
-        </div>
+            {quote.open ? "Live" : "Market closed"}
+          </span>
+        ) : (
+          <span className="text-xs text-navy/40">Live price unavailable</span>
+        )}
       </div>
 
-      <div className="relative mt-8 flex flex-wrap gap-2">
-        {RANGES.map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => setRange(r.id)}
-            aria-pressed={range === r.id}
-            className={`rounded-sm border px-3 py-1 font-mono text-[0.6rem] uppercase tracking-[0.18em] transition ${
-              range === r.id
-                ? "border-ink bg-ink text-white"
-                : "border-navy/15 text-navy/60 hover:border-navy/40 hover:text-navy"
-            }`}
-          >
-            {r.label}
-          </button>
-        ))}
+      {/* ranges, as a row of tabs; the range's own change sits at the end */}
+      <div className="relative mt-6 flex items-center justify-between gap-3 border-b border-navy/10 pb-3">
+        <div className="-mx-1 flex gap-1 overflow-x-auto [scrollbar-width:none]">
+          {RANGES.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setRange(r.id)}
+              aria-pressed={range === r.id}
+              className={`shrink-0 whitespace-nowrap rounded-full px-2 py-1.5 sm:px-3 text-sm font-semibold transition ${
+                range === r.id ? "bg-signal/10 text-signal-deep" : "text-navy/55 hover:bg-navy/5 hover:text-ink"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+        {points.length > 1 && range !== "call" && (
+          <span className="hidden shrink-0 text-sm font-semibold tabular-nums sm:block" style={{ color: lineColor }}>
+            {formatPct(rangeChange)}
+          </span>
+        )}
       </div>
 
       {/* the chart */}
@@ -253,50 +310,72 @@ export default function CallTracker({
           <svg
             width={chart.width}
             height={height}
-            className="absolute inset-0 overflow-visible"
+            className="absolute inset-0 overflow-visible font-sans"
             role="img"
             aria-label={`${report.company} share price, ${points.length} trading days. Called at ${formatPrice(report.currency, call)}, target ${formatPrice(report.currency, target)}${last !== null ? `, now ${formatPrice(report.currency, last)}` : ""}.`}
           >
             <defs>
-              {/* hard stop at the call price: green above it, red below */}
-              <linearGradient
-                id={`${gid}-line`}
-                gradientUnits="userSpaceOnUse"
-                x1="0"
-                x2="0"
-                y1={PAD.top}
-                y2={PAD.top + chart.h}
-              >
-                <stop offset={chart.split} stopColor={UP} />
-                <stop offset={chart.split} stopColor={DOWN} />
-              </linearGradient>
-              <linearGradient
-                id={`${gid}-area`}
-                gradientUnits="userSpaceOnUse"
-                x1="0"
-                x2="0"
-                y1={PAD.top}
-                y2={PAD.top + chart.h}
-              >
-                <stop offset="0" stopColor={UP} stopOpacity="0.22" />
-                <stop offset={chart.split} stopColor={UP} stopOpacity="0.03" />
-                <stop offset={chart.split} stopColor={DOWN} stopOpacity="0.03" />
-                <stop offset="1" stopColor={DOWN} stopOpacity="0.22" />
+              <linearGradient id={`${gid}-area`} x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0" stopColor={lineColor} stopOpacity="0.24" />
+                <stop offset="1" stopColor={lineColor} stopOpacity="0" />
               </linearGradient>
             </defs>
 
-            {/* price scale: labels only, no gridlines */}
-            {chart.ticks.map((v) => (
+            {/* price grid, labelled on the right */}
+            {chart.yTicks.map((v) => (
+              <g key={v}>
+                <line
+                  x1={PAD.left}
+                  x2={PAD.left + chart.w}
+                  y1={chart.y(v)}
+                  y2={chart.y(v)}
+                  stroke={NAVY}
+                  strokeOpacity="0.07"
+                />
+                {clearOfPills(chart.y(v)) && (
+                  <text
+                    x={PAD.left + chart.w + 8}
+                    y={chart.y(v) + 4}
+                    className="fill-navy/50 text-[11px] tabular-nums"
+                  >
+                    {v.toFixed(2)}
+                  </text>
+                )}
+              </g>
+            ))}
+
+            {/* dates along the bottom */}
+            <line
+              x1={PAD.left}
+              x2={PAD.left + chart.w}
+              y1={PAD.top + chart.h}
+              y2={PAD.top + chart.h}
+              stroke={NAVY}
+              strokeOpacity="0.15"
+            />
+            {chart.xTicks.map((tk) => (
               <text
-                key={v}
-                x={chart.width - 4}
-                y={chart.y(v) + 3}
-                textAnchor="end"
-                className="fill-navy/40 font-mono text-[10px] tabular-nums"
+                key={tk.t}
+                x={chart.x(tk.t)}
+                y={height - 8}
+                textAnchor="middle"
+                className="fill-navy/50 text-[11px]"
               >
-                {v.toFixed(0)}
+                {tk.label}
               </text>
             ))}
+
+            {/* the call price: a dotted reference line, like a previous close */}
+            <line
+              x1={PAD.left}
+              x2={PAD.left + chart.w}
+              y1={chart.y(call)}
+              y2={chart.y(call)}
+              stroke={NAVY}
+              strokeOpacity="0.45"
+              strokeDasharray="1 3"
+              strokeLinecap="round"
+            />
 
             {/* target */}
             <line
@@ -309,79 +388,15 @@ export default function CallTracker({
               strokeDasharray="6 6"
               className="tracker-march"
             />
-            <g transform={`translate(${PAD.left + chart.w + 6}, ${chart.y(target)})`}>
-              <rect x="0" y="-11" width={PAD.right - 8} height="22" rx="2" fill={TARGET} />
-              <text
-                x={(PAD.right - 8) / 2}
-                y="3.5"
-                textAnchor="middle"
-                className="fill-white font-mono text-[10px] font-medium tabular-nums"
-              >
-                {target.toFixed(2)}
-              </text>
-            </g>
-            <text
-              x={PAD.left + chart.w - 4}
-              y={chart.y(target) - 10}
-              textAnchor="end"
-              className="font-mono text-[10px] uppercase tracking-[0.2em]"
-              fill={TARGET}
-            >
-              {report.horizon ?? "12-month"} target
-            </text>
-
-            {/* the call */}
-            {callT >= chart.t0 && (
-              <g>
-                <line
-                  x1={chart.callX}
-                  x2={chart.callX}
-                  y1={PAD.top - 12}
-                  y2={PAD.top + chart.h}
-                  stroke={NAVY}
-                  strokeOpacity="0.35"
-                  strokeDasharray="2 4"
-                />
-                <line
-                  x1={chart.callX}
-                  x2={PAD.left + chart.w}
-                  y1={chart.y(call)}
-                  y2={chart.y(call)}
-                  stroke={NAVY}
-                  strokeOpacity="0.25"
-                  strokeDasharray="2 4"
-                />
-                <text
-                  x={chart.callX + 8}
-                  y={PAD.top - 4}
-                  className="fill-ink font-mono text-[10px] uppercase tracking-[0.2em]"
-                >
-                  The call · {formatPrice(report.currency, call)}
-                </text>
-              </g>
-            )}
 
             {/* price */}
             <g key={range}>
-              {chart.beforeLine && (
-                <path
-                  d={chart.beforeLine}
-                  fill="none"
-                  stroke={NAVY}
-                  strokeOpacity="0.3"
-                  strokeWidth="1.5"
-                  pathLength={1}
-                  className="tracker-draw"
-                />
-              )}
-              {chart.area && (
-                <path d={chart.area} fill={`url(#${gid}-area)`} className="tracker-fade" />
-              )}
+              <path d={chart.area} fill={`url(#${gid}-area)`} className="tracker-fade" />
               <path
-                d={chart.afterLine}
+                d={chart.line}
                 fill="none"
-                stroke={`url(#${gid}-line)`}
-                strokeWidth="2.25"
+                stroke={lineColor}
+                strokeWidth="2"
                 strokeLinejoin="round"
                 strokeLinecap="round"
                 pathLength={1}
@@ -389,6 +404,7 @@ export default function CallTracker({
               />
             </g>
 
+            {/* the day of the call */}
             {callT >= chart.t0 && (
               <g transform={`translate(${chart.callX}, ${chart.y(call)})`}>
                 <circle r="8" fill={NAVY} fillOpacity="0.1" />
@@ -397,14 +413,14 @@ export default function CallTracker({
             )}
 
             {/* now */}
-            {lastPt && (
+            {lastPt && !hp && (
               <g transform={`translate(${chart.x(lastPt.t)}, ${chart.y(lastPt.close)})`}>
-                {quote?.open && <circle r="6" fill={tone(lastPt.close)} className="tracker-pulse" />}
-                <circle r="5" fill={tone(lastPt.close)} stroke="white" strokeWidth="2" />
+                {quote?.open && <circle r="6" fill={lineColor} className="tracker-pulse" />}
+                <circle r="4" fill={lineColor} stroke="white" strokeWidth="2" />
               </g>
             )}
 
-            {/* hover */}
+            {/* crosshair */}
             {hp && (
               <g pointerEvents="none">
                 <line
@@ -413,18 +429,51 @@ export default function CallTracker({
                   y1={PAD.top}
                   y2={PAD.top + chart.h}
                   stroke={NAVY}
-                  strokeOpacity="0.3"
+                  strokeOpacity="0.45"
+                  strokeDasharray="3 3"
+                />
+                <line
+                  x1={PAD.left}
+                  x2={PAD.left + chart.w}
+                  y1={chart.y(hp.close)}
+                  y2={chart.y(hp.close)}
+                  stroke={NAVY}
+                  strokeOpacity="0.45"
+                  strokeDasharray="3 3"
                 />
                 <circle
                   cx={chart.x(hp.t)}
                   cy={chart.y(hp.close)}
-                  r="4"
-                  fill={tone(hp.close)}
+                  r="4.5"
+                  fill={lineColor}
                   stroke="white"
                   strokeWidth="2"
                 />
+                <g
+                  transform={`translate(${Math.min(Math.max(chart.x(hp.t), PAD.left + 44), PAD.left + chart.w - 44)}, ${PAD.top + chart.h + 3})`}
+                >
+                  <rect x="-44" width="88" height={PILL_H} rx="3" fill={INK} />
+                  <text y="12.5" textAnchor="middle" className="fill-white text-[11px] font-medium">
+                    {dayFmt.format(hp.t)}
+                  </text>
+                </g>
               </g>
             )}
+
+            {/* price tags on the axis */}
+            {pills.map((p) => (
+              <g key={p.fill} transform={`translate(${PAD.left + chart.w + 2}, ${p.y - PILL_H / 2})`}>
+                <rect width={PAD.right - 4} height={PILL_H} rx="3" fill={p.fill} />
+                <text
+                  x={(PAD.right - 4) / 2}
+                  y="12.5"
+                  textAnchor="middle"
+                  className="fill-white text-[11px] font-semibold tabular-nums"
+                >
+                  {p.text}
+                </text>
+              </g>
+            ))}
 
             <rect
               x={PAD.left}
@@ -436,27 +485,36 @@ export default function CallTracker({
               onPointerMove={onMove}
               onPointerDown={onMove}
               onPointerLeave={() => setHover(null)}
+              onPointerCancel={() => setHover(null)}
             />
           </svg>
         )}
 
-        {hp && chart && (
-          <div
-            className="pointer-events-none absolute top-0 z-10 -translate-x-1/2 rounded-sm border border-navy/12 bg-white/95 px-3 py-2 font-mono text-[0.65rem] tabular-nums shadow-lg backdrop-blur"
-            style={{ left: Math.min(Math.max(chart.x(hp.t), 70), chart.width - 70) }}
-          >
-            <div className="uppercase tracking-[0.16em] text-navy/45">{dayFmt.format(hp.t)}</div>
-            <div className="mt-1 text-sm text-ink">{formatPrice(report.currency, hp.close)}</div>
-            <div style={{ color: tone(hp.close) }}>{formatPct(hp.close / call - 1)} vs call</div>
-          </div>
-        )}
-
         {!chart && width !== null && (
-          <div className="flex h-full items-center justify-center font-mono text-[0.65rem] uppercase tracking-[0.2em] text-navy/35">
+          <div className="flex h-full items-center justify-center text-sm text-navy/40">
             {quote ? "Not enough data for this range" : "Waiting for the market feed"}
           </div>
         )}
       </div>
+
+      {/* what the two reference lines are */}
+      {chart && (
+        <ul className="mt-2 flex flex-wrap gap-x-6 gap-y-1 text-xs text-navy/60">
+          <li className="flex items-center gap-2">
+            <svg width="18" height="2" aria-hidden="true">
+              <line x1="1" x2="17" y1="1" y2="1" stroke={NAVY} strokeOpacity="0.6" strokeDasharray="1 3" strokeLinecap="round" />
+            </svg>
+            The call <span className="font-semibold tabular-nums text-ink">{formatPrice(report.currency, call)}</span>
+          </li>
+          <li className="flex items-center gap-2">
+            <svg width="18" height="2" aria-hidden="true">
+              <line x1="0" x2="18" y1="1" y2="1" stroke={TARGET} strokeDasharray="4 3" />
+            </svg>
+            {report.horizon ?? "12-month"} target{" "}
+            <span className="font-semibold tabular-nums text-ink">{formatPrice(report.currency, target)}</span>
+          </li>
+        </ul>
+      )}
 
       {/* progress: price vs time */}
       <dl className="relative mt-8 grid gap-6 border-t border-navy/10 pt-6 font-mono text-[0.65rem] uppercase tracking-[0.16em] md:grid-cols-3">
@@ -483,17 +541,7 @@ export default function CallTracker({
   );
 }
 
-function Rail({
-  label,
-  value,
-  note,
-  color,
-}: {
-  label: string;
-  value: number;
-  note: string;
-  color: string;
-}) {
+function Rail({ label, value, note, color }: { label: string; value: number; note: string; color: string }) {
   return (
     <div>
       <dt className="flex justify-between text-navy/45">

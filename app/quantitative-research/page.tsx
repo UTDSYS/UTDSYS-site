@@ -1,4 +1,5 @@
 import Button from "@/components/ui/Button";
+import Swipe from "@/components/Swipe";
 import content from "@/lib/content";
 
 export const metadata = {
@@ -42,7 +43,7 @@ const label = "font-mono text-[0.7rem] uppercase tracking-[0.16em]";
 export default function QuantitativeResearchPage() {
   return (
     <main className="relative min-h-screen pb-24">
-      <header className="mx-auto max-w-6xl px-6 pt-36 sm:pt-40">
+      <header className="mx-auto max-w-6xl px-6 pt-28 sm:pt-40">
         <p className={`${label} text-signal-deep`}>{eyebrow}</p>
         <h1 className="font-display mt-5 text-balance text-[clamp(2.75rem,7vw,5.5rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink">
           {heading}
@@ -84,8 +85,8 @@ export default function QuantitativeResearchPage() {
               {p.question}
             </p>
 
-            <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)] lg:gap-14">
-              <dl className="space-y-8">
+            <div className="mt-10 grid grid-cols-1 gap-10 sm:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)] lg:gap-14">
+              <dl className="grid grid-cols-2 gap-6 sm:gap-8 lg:grid-cols-1">
                 <div>
                   <dt className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{studies.benchmarksLabel}</dt>
                   <dd>
@@ -182,58 +183,63 @@ export default function QuantitativeResearchPage() {
       })}
 
       {/* method, kept short: the four stages every study passes through */}
-      <section aria-labelledby="method" className={`mx-auto mt-24 grid max-w-6xl gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}>
+      <section aria-labelledby="method" className={`mx-auto mt-24 grid max-w-6xl grid-cols-1 gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}>
         <div className="lg:pr-10">
           <h2 id="method" className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">
             {process.heading}
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-navy/60">{process.intro}</p>
         </div>
-        <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {process.steps.map((s, i) => (
-            <li key={s.name} className="border-t border-navy/12 pt-4">
-              <span className={`${label} text-signal-deep`}>{pad(i + 1)}</span>
-              <h3 className="font-display mt-2 text-base font-bold tracking-tight text-ink">{s.name}</h3>
-              <p className="mt-1 text-sm leading-relaxed text-navy/60">{s.body}</p>
-            </li>
-          ))}
-        </ol>
+        <Swipe label={process.heading} count={process.steps.length}>
+          <ol className="swipe grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {process.steps.map((s, i) => (
+              <li key={s.name} className="border-t border-navy/12 pt-4">
+                <span className={`${label} text-signal-deep`}>{pad(i + 1)}</span>
+                <h3 className="font-display mt-2 text-base font-bold tracking-tight text-ink">{s.name}</h3>
+                <p className="mt-1 text-sm leading-relaxed text-navy/60">{s.body}</p>
+              </li>
+            ))}
+          </ol>
+        </Swipe>
       </section>
 
       {/* the reading list, as a bibliography on the same rail */}
       <section
         aria-labelledby="reading"
-        className={`mx-auto mt-24 grid max-w-6xl gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}
+        className={`mx-auto mt-24 grid max-w-6xl grid-cols-1 gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}
       >
         <div className="lg:pr-10">
           <h2 id="reading" className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink">
             {reading.heading}
           </h2>
         </div>
-        <div className="space-y-10">
-          {groups.map((g) => (
-            <div key={g.name}>
-              <h3 className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{g.name}</h3>
-              <ol className="mt-4 space-y-3.5">
-                {g.items.map((cite, i) => (
-                  <li
-                    key={cite}
-                    id={`ref-${g.start + i}`}
-                    className="grid scroll-mt-28 grid-cols-[2.5rem_minmax(0,1fr)] target:bg-signal/[0.07]"
-                  >
-                    <span className="font-mono text-xs tabular-nums leading-relaxed text-signal-deep">
-                      [{g.start + i}]
-                    </span>
-                    <p className="text-[0.9375rem] leading-relaxed text-navy/80">{cite}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          ))}
-        </div>
+        {/* on phones each group is a card in a swipe row */}
+        <Swipe label={reading.heading} count={groups.length}>
+          <div className="swipe space-y-10 [--swipe-w:86%]">
+            {groups.map((g) => (
+              <div key={g.name}>
+                <h3 className={`${label} border-b border-navy/12 pb-3 text-navy/55`}>{g.name}</h3>
+                <ol className="mt-4 space-y-3.5">
+                  {g.items.map((cite, i) => (
+                    <li
+                      key={cite}
+                      id={`ref-${g.start + i}`}
+                      className="grid scroll-mt-28 grid-cols-[2.5rem_minmax(0,1fr)] target:bg-signal/[0.07]"
+                    >
+                      <span className="font-mono text-xs tabular-nums leading-relaxed text-signal-deep">
+                        [{g.start + i}]
+                      </span>
+                      <p className="text-[0.9375rem] leading-relaxed text-navy/80">{cite}</p>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        </Swipe>
       </section>
 
-      <footer className={`mx-auto mt-24 grid max-w-6xl gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}>
+      <footer className={`mx-auto mt-24 grid max-w-6xl grid-cols-1 gap-8 px-6 sm:mt-28 ${rail} lg:gap-0`}>
         <div />
         <div>
           <div className="flex flex-col gap-5 border-t border-navy/12 pt-8 sm:flex-row sm:items-center sm:justify-between">
