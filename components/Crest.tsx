@@ -1,12 +1,12 @@
 /**
  * The group seal: the 3 → 1 mark (three inputs, one decision) inside two
  * rings, with the full name set around the outer one. Drawn for a dark
- * ground; the ring of text turns slowly and the decision node breathes.
+ * ground by default, or in ink with `tone="light"`; the ring of text turns slowly and the decision node breathes.
  * Decorative: the page names the group in text beside it.
  */
-export default function Crest({ className = "" }: { className?: string }) {
+export default function Crest({ className = "", tone = "dark" }: { className?: string; tone?: "dark" | "light" }) {
   return (
-    <svg viewBox="0 0 400 400" aria-hidden="true" className={`crest ${className}`}>
+    <svg viewBox="0 0 400 400" aria-hidden="true" className={`crest ${tone === "light" ? "crest-light" : ""} ${className}`}>
       <defs>
         <path id="crest-ring" d="M200,200 m-150,0 a150,150 0 1,1 300,0 a150,150 0 1,1 -300,0" />
       </defs>

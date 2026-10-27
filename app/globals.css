@@ -261,6 +261,20 @@ body {
   }
 }
 
+/* the same seal in ink, for a light ground; the decision stays blue */
+.crest-light .crest-rule {
+  stroke: rgb(27 42 74 / 0.22);
+}
+
+.crest-light .crest-text,
+.crest-light .crest-inputs circle {
+  fill: var(--color-ink);
+}
+
+.crest-light .crest-edges line {
+  stroke: var(--color-ink);
+}
+
 /* the mark draws itself on, then the decision lands */
 .crest-edges line {
   stroke: #ffffff;
@@ -347,6 +361,15 @@ body {
   background-repeat: no-repeat;
   background-position: 85% 55%;
   background-size: 640px 640px;
+}
+
+/* Full-width blue bands that break up the light research pages. */
+.blue-band {
+  background-color: var(--color-crest);
+  background-image: radial-gradient(closest-side, rgb(45 91 255 / 0.2), transparent);
+  background-repeat: no-repeat;
+  background-position: 78% 50%;
+  background-size: 820px 820px;
 }
 
 /* ------------------------------------------------------------------ */

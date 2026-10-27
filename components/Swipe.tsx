@@ -11,12 +11,15 @@ export default function Swipe({
   label,
   count,
   className = "",
+  onDark = false,
   children,
 }: {
   label: string;
   /** how many cards the list holds */
   count: number;
   className?: string;
+  /** set on a dark band, so the position dots stay visible */
+  onDark?: boolean;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -88,7 +91,7 @@ export default function Swipe({
                 aria-current={i === index ? "true" : undefined}
                 onClick={() => go(i)}
                 className={`h-2 rounded-full transition-all duration-300 ${
-                  i === index ? "w-6 bg-signal-deep" : "w-2 bg-navy/20"
+                  i === index ? `w-6 ${onDark ? "bg-white" : "bg-signal-deep"}` : `w-2 ${onDark ? "bg-white/25" : "bg-navy/20"}`
                 }`}
               />
             ))}

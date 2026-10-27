@@ -224,52 +224,110 @@ const content = {
     eyebrow: "Quantitative desk",
     heading: "Quantitative research",
     intro: "Systematic portfolio research, evaluated against simple benchmarks and tested through paper trading.",
+    // The page's opening story, for a visitor who has never heard of the desk,
+    // beside a live figure: the variance surface of three sector ETFs.
+    story: {
+      label: "What we do",
+      lede: "We build mathematical models that turn market data into portfolio decisions.",
+      body: "Each study starts from a question raised in the academic literature. We test our answer on decades of historical data, after trading costs and against simple benchmarks, and then move it into paper trading, where it runs forward on markets it has never seen.",
+      // read to screen readers only; the figure itself carries no text
+      figure:
+        "The variance of every mix of Energy, Financials and Technology sector ETFs, as a surface, with gradient descent moving to the lowest-volatility mix.",
+    },
     studies: {
       heading: "Studies",
-      label: "study",
-      resultsLabel: "Since inception",
-      resultsColumns: ["Strategy", "Return", "Volatility", "Sharpe ratio"],
-      resultsPending: "Results are posted monthly once trading begins.",
-      paperLabel: "Paper trading",
-      readingLabel: "References",
-      backtestLabel: "Historical testing",
-      backtestColumns: ["Strategy", "Volatility", "Largest drawdown", "Sharpe ratio"],
+      label: "Study",
+      readLabel: "Read the study",
+      backLabel: "Quantitative research",
+      sections: {
+        overview: "Overview",
+        findings: "What we found",
+        results: "Results by market",
+        paper: "Paper trading",
+        references: "References",
+      },
+      resultsColumns: ["Strategy", "Volatility", "Largest drawdown", "Sharpe ratio"],
+      // Each study is a report: what was asked, what was found, and how it
+      // was tested. The method itself stays internal.
       items: [
         {
+          slug: "robust-portfolios",
           name: "Robust portfolios",
+          status: "Paper trading starts soon",
           question:
             "Robust portfolios are designed to account for errors in their forecasts. Can they lower risk without giving up risk-adjusted return?",
-          strategies: ["Robust", "Min-variance"],
-          benchmarks: ["Equal weighting"],
-          reading: [9, 4, 7],
-          // From the research repo (results/phase2/risk_vol.md): net of
-          // 10 bp trading costs, sector ETFs Jan 2004 – Aug 2026.
-          backtest: {
-            headline:
-              "10–26% less volatility than equal weighting in every market tested, with equal or better risk-adjusted returns.",
-            summary:
-              "Tested on U.S. sector and industry data back to 1973, after trading costs.",
-            period: "Sector ETFs, Jan 2004 – Aug 2026",
-            rows: [
-              { name: "Robust", vol: "12.4%", maxdd: "42.1%", sharpe: "0.73" },
-              { name: "Min-variance", vol: "11.5%", maxdd: "37.2%", sharpe: "0.71" },
-              { name: "Equal weighting", vol: "14.3%", maxdd: "49.2%", sharpe: "0.66" },
-            ],
+          finding:
+            "10 to 13% less volatility than equal weighting in every market tested, with similar risk-adjusted returns.",
+          overview: [
+            "A portfolio optimiser relies on forecasts of how assets will behave, and those forecasts are always partly wrong. Standard optimisers treat them as exact, which tends to produce concentrated portfolios that perform poorly once the forecasts miss.",
+            "A robust portfolio is built to remain sound when its forecasts are wrong. This study asks whether that design delivers a measurable benefit over two simple alternatives: holding every asset in equal weight, and holding the mix with the lowest forecast volatility.",
+          ],
+          figures: [
+            { value: "53", unit: "years", label: "of monthly data, 1973 to 2026" },
+            { value: "3", unit: "markets", label: "U.S. industries and sector ETFs" },
+            { value: "10–13%", unit: "", label: "less volatility than equal weighting" },
+            { value: "0.1%", unit: "", label: "trading cost on every dollar traded" },
+          ],
+          findings: [
+            "The robust portfolio was less volatile than equal weighting in all three markets, by 10 to 13%. The difference is statistically significant in each market (p < 0.001).",
+            "Its largest loss was smaller in every market, by 6 to 7 percentage points.",
+            "Its Sharpe ratio was slightly higher than equal weighting in all three markets. These differences are not statistically significant.",
+            "The lowest-volatility portfolio reduced volatility further, by 17 to 26%, but held fewer assets: in sector ETFs its weight was spread across the equivalent of 3.4 funds, against 6.3 for the robust portfolio.",
+          ],
+          // From the research repo (results/phase2/risk_vol.json and the base
+          // tables), net of 10 bp trading costs. `ratio` is volatility
+          // relative to equal weighting, with its 95% interval.
+          markets: [
+            {
+              name: "10 U.S. industries",
+              period: "Jul 1973 – Aug 2026",
+              rows: [
+                { name: "Robust", vol: "13.6%", maxdd: "41.2%", sharpe: "0.57", ratio: 0.904, ci: [0.88, 0.93] },
+                { name: "Lowest volatility", vol: "12.4%", maxdd: "34.4%", sharpe: "0.59", ratio: 0.827, ci: [0.79, 0.866] },
+                { name: "Equal weighting", vol: "15.0%", maxdd: "48.1%", sharpe: "0.55", ratio: 1, ci: null },
+              ],
+            },
+            {
+              name: "48 U.S. industries",
+              period: "Jul 1973 – Aug 2026",
+              rows: [
+                { name: "Robust", vol: "14.9%", maxdd: "46.5%", sharpe: "0.52", ratio: 0.882, ci: [0.852, 0.913] },
+                { name: "Lowest volatility", vol: "12.6%", maxdd: "38.3%", sharpe: "0.56", ratio: 0.743, ci: [0.705, 0.783] },
+                { name: "Equal weighting", vol: "16.9%", maxdd: "52.7%", sharpe: "0.51", ratio: 1, ci: null },
+              ],
+            },
+            {
+              name: "9 U.S. sector ETFs",
+              period: "Jan 2004 – Aug 2026",
+              rows: [
+                { name: "Robust", vol: "12.4%", maxdd: "42.1%", sharpe: "0.73", ratio: 0.871, ci: [0.829, 0.921] },
+                { name: "Lowest volatility", vol: "11.5%", maxdd: "37.2%", sharpe: "0.71", ratio: 0.808, ci: [0.752, 0.883] },
+                { name: "Equal weighting", vol: "14.3%", maxdd: "49.2%", sharpe: "0.66", ratio: 1, ci: null },
+              ],
+            },
+          ] as { name: string; period: string; rows: { name: string; vol: string; maxdd: string; sharpe: string; ratio: number; ci: number[] | null }[] }[],
+          charts: {
+            ratio: {
+              title: "Volatility relative to equal weighting",
+              caption: "Lines show 95% confidence intervals. Below 100% means less volatile than equal weighting.",
+            },
+            growth: {
+              title: "Growth of $10,000 in nine U.S. sector ETFs",
+              caption:
+                "Equal weighting finished slightly ahead. The robust portfolio fell less in 2008 (42% against 49%) and in 2020 (18% against 24%), and more in 2022 (20% against 16%).",
+              drawdownLabel: "Decline from previous high",
+            },
           },
           paper: {
+            intro: "Following historical testing, the study moves to forward testing in a simulated account.",
             terms: [
               { label: "Assets", value: "Nine U.S. sector ETFs" },
               { label: "Capital", value: "$100,000 simulated per strategy" },
               { label: "Rebalancing", value: "Monthly" },
             ],
             status: "Starting soon",
-            // Fill in once paper trading has run; until then the table
-            // shows each strategy with empty values.
-            results: null as null | {
-              asOf: string;
-              rows: { name: string; ret: string; vol: string; sharpe: string }[];
-            },
           },
+          reading: [9, 4, 7],
         },
       ],
     },
