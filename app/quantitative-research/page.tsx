@@ -75,9 +75,9 @@ export default function QuantitativeResearchPage() {
           {studies.heading}
         </h2>
         <ul className="mt-8 space-y-6">
-          {studies.items.map((s, i) => (
+          {studies.items.map((s) => (
             <li key={s.slug}>
-              <StudyCard study={s} index={i} />
+              <StudyCard study={s} />
             </li>
           ))}
         </ul>

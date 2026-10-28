@@ -3,7 +3,7 @@ import content from "@/lib/content";
 
 type Study = (typeof content.quantResearch.studies.items)[number];
 
-const { label, readLabel } = content.quantResearch.studies;
+const { readLabel } = content.quantResearch.studies;
 const mono = "font-mono text-[0.7rem] uppercase tracking-[0.16em]";
 
 const bar: Record<string, string> = {
@@ -13,7 +13,7 @@ const bar: Record<string, string> = {
 };
 
 /** A study on the index: its finding up front, one figure beside it; the whole card opens the report. */
-export default function StudyCard({ study, index }: { study: Study; index: number }) {
+export default function StudyCard({ study }: { study: Study }) {
   // the most recent market, the one paper trading runs on
   const market = study.markets[study.markets.length - 1];
   const vols = market.rows.map((r) => ({ ...r, v: parseFloat(r.vol) }));
@@ -25,16 +25,26 @@ export default function StudyCard({ study, index }: { study: Study; index: numbe
       className="group grid border border-navy/15 bg-white transition hover:border-navy/35 hover:shadow-[0_18px_44px_-24px_rgb(14_24_48/0.3)] lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]"
     >
       <div className="flex flex-col p-6 sm:p-10">
-        <p className={`${mono} text-signal-deep`}>
-          {label} {String(index + 1).padStart(2, "0")} <span className="text-navy/40">· {study.status}</span>
-        </p>
-        <h3 className="font-display mt-4 text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
+        <h3 className="font-display text-3xl font-extrabold tracking-[-0.03em] text-ink sm:text-4xl">
           {study.name}
         </h3>
         <p className="font-display mt-4 max-w-[34rem] text-balance text-xl leading-snug tracking-tight text-signal-deep sm:text-2xl">
           {study.finding}
         </p>
         <p className="mt-5 max-w-[34rem] text-base leading-relaxed text-navy/65">{study.question}</p>
+        {/* where it trades now, under the finding it is testing */}
+        <div className="mt-8 max-w-[34rem] border-t border-navy/12 pt-5">
+          <p className={`${mono} text-navy/55`}>Paper trading</p>
+          <p className="font-display mt-2 text-xl font-bold tracking-tight text-ink">
+            Trading on {study.paper.broker} from {study.paper.start}
+          </p>
+          <p className="mt-1 text-sm text-navy/60">
+            {study.paper.terms
+              .filter((t) => t.label !== "Broker")
+              .map((t) => t.value)
+              .join(" · ")}
+          </p>
+        </div>
         <span className={`${mono} mt-auto inline-flex items-center gap-2 pt-10 text-signal-deep`}>
           {readLabel}
           <span aria-hidden="true" className="transition group-hover:translate-x-1">
@@ -45,7 +55,7 @@ export default function StudyCard({ study, index }: { study: Study; index: numbe
 
       <figure className="border-t border-navy/10 bg-navy/[0.03] p-6 sm:p-10 lg:border-l lg:border-t-0">
         <figcaption>
-          <p className={`${mono} text-navy/55`}>Volatility</p>
+          <p className={`${mono} text-navy/55`}>Backtested volatility</p>
           <p className="mt-1 text-sm text-navy/55">
             {market.name}, {market.period}
           </p>

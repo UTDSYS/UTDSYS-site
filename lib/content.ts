@@ -241,23 +241,25 @@ const content = {
       backLabel: "Quantitative research",
       sections: {
         overview: "Overview",
-        findings: "What we found",
-        results: "Results by market",
+        findings: "What the backtests found",
+        results: "Backtest results by market",
         paper: "Paper trading",
         references: "References",
       },
       resultsColumns: ["Strategy", "Volatility", "Largest drawdown", "Sharpe ratio"],
+      // labels the report's headline numbers as historical, not paper trading
+      backtestLabel: "Backtest",
       // Each study is a report: what was asked, what was found, and how it
       // was tested. The method itself stays internal.
       items: [
         {
           slug: "robust-portfolios",
           name: "Robust portfolios",
-          status: "Paper trading starts soon",
+          status: "Paper trading on Alpaca",
           question:
             "Robust portfolios are designed to account for errors in their forecasts. Can they lower risk without giving up risk-adjusted return?",
           finding:
-            "10 to 13% less volatility than equal weighting in every market tested, with similar risk-adjusted returns.",
+            "In backtests, 10 to 13% less volatility than equal weighting in every market tested, with similar risk-adjusted returns.",
           overview: [
             "A portfolio optimiser relies on forecasts of how assets will behave, and those forecasts are always partly wrong. Standard optimisers treat them as exact, which tends to produce concentrated portfolios that perform poorly once the forecasts miss.",
             "A robust portfolio is built to remain sound when its forecasts are wrong. This study asks whether that design delivers a measurable benefit over two simple alternatives: holding every asset in equal weight, and holding the mix with the lowest forecast volatility.",
@@ -308,24 +310,27 @@ const content = {
           ] as { name: string; period: string; rows: { name: string; vol: string; maxdd: string; sharpe: string; ratio: number; ci: number[] | null }[] }[],
           charts: {
             ratio: {
-              title: "Volatility relative to equal weighting",
+              title: "Backtested volatility relative to equal weighting",
               caption: "Lines show 95% confidence intervals. Below 100% means less volatile than equal weighting.",
             },
             growth: {
-              title: "Growth of $10,000 in nine U.S. sector ETFs",
+              title: "Backtested growth of $10,000 in nine U.S. sector ETFs",
               caption:
                 "Equal weighting finished slightly ahead. The robust portfolio fell less in 2008 (42% against 49%) and in 2020 (18% against 24%), and more in 2022 (20% against 16%).",
               drawdownLabel: "Decline from previous high",
             },
           },
           paper: {
-            intro: "Following historical testing, the study moves to forward testing in a simulated account.",
+            intro: "Following historical testing, the study moves to forward testing in an Alpaca paper trading account.",
+            broker: "Alpaca",
+            start: "2 November 2026",
             terms: [
+              { label: "Broker", value: "Alpaca paper trading" },
               { label: "Assets", value: "Nine U.S. sector ETFs" },
               { label: "Capital", value: "$100,000 simulated per strategy" },
               { label: "Rebalancing", value: "Monthly" },
             ],
-            status: "Starting soon",
+            status: "From 2 November 2026",
           },
           reading: [9, 4, 7],
         },

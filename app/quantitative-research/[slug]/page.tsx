@@ -51,20 +51,17 @@ function Section({ id, title, children }: { id: string; title: string; children:
 }
 
 function Figure({
-  n,
   title,
   caption,
   children,
 }: {
-  n: number;
   title: string;
   caption: string;
   children: React.ReactNode;
 }) {
   return (
     <figure className="border border-navy/15 bg-white p-6 sm:p-8">
-      <p className={`${label} text-navy/55`}>Figure {n}</p>
-      <p className="font-display mt-2 text-xl font-bold tracking-tight text-ink">{title}</p>
+      <p className="font-display text-xl font-bold tracking-tight text-ink">{title}</p>
       <div className="mt-6">{children}</div>
       <figcaption className="mt-6 border-t border-navy/8 pt-4 text-sm leading-relaxed text-navy/60">
         {caption}
@@ -106,7 +103,8 @@ export default async function StudyPage({ params }: Props) {
 
       {/* the study in four numbers, on a full-width blue band */}
       <div className="blue-band mt-14 text-white">
-        <dl className="mx-auto grid max-w-6xl grid-cols-2 px-6 py-6 sm:py-8 lg:grid-cols-4">
+        <p className={`${label} mx-auto max-w-6xl px-6 pt-10 text-white/55`}>{studies.backtestLabel}</p>
+        <dl className="mx-auto grid max-w-6xl grid-cols-2 px-6 pb-6 sm:pb-8 lg:grid-cols-4">
           {study.figures.map((f, i) => (
             <div
               key={f.label}
@@ -146,11 +144,11 @@ export default async function StudyPage({ params }: Props) {
         </ol>
 
         <div className="mt-12 space-y-8">
-          <Figure n={1} title={study.charts.ratio.title} caption={study.charts.ratio.caption}>
+          <Figure title={study.charts.ratio.title} caption={study.charts.ratio.caption}>
             <RatioChart markets={study.markets} />
           </Figure>
           {series && (
-            <Figure n={2} title={study.charts.growth.title} caption={study.charts.growth.caption}>
+            <Figure title={study.charts.growth.title} caption={study.charts.growth.caption}>
               <GrowthChart data={series} drawdownLabel={study.charts.growth.drawdownLabel} />
             </Figure>
           )}
@@ -209,7 +207,7 @@ export default async function StudyPage({ params }: Props) {
               {study.paper.status}
             </p>
           </div>
-          <dl className="mt-6 grid gap-4 border-t border-navy/8 pt-6 sm:grid-cols-3">
+          <dl className="mt-6 grid gap-4 border-t border-navy/8 pt-6 sm:grid-cols-2 lg:grid-cols-4">
             {study.paper.terms.map((t) => (
               <div key={t.label}>
                 <dt className="text-sm text-navy/55">{t.label}</dt>
