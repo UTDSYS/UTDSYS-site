@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const rail = "lg:grid-cols-[15rem_minmax(0,1fr)]";
-const label = "font-mono text-[0.7rem] uppercase tracking-[0.16em]";
+const label = "font-mono text-[0.8rem] uppercase tracking-[0.08em]";
 
 /** A section of the report: its name on the left rail, its body to the right. */
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -42,7 +42,7 @@ function Section({ id, title, children }: { id: string; title: string; children:
       aria-labelledby={id}
       className={`mx-auto mt-20 grid max-w-6xl grid-cols-1 gap-6 px-6 sm:mt-24 ${rail} lg:gap-0`}
     >
-      <h2 id={id} className="font-display text-2xl font-extrabold tracking-[-0.03em] text-ink lg:pr-10">
+      <h2 id={id} className="font-display text-2xl font-semibold tracking-[-0.01em] text-ink lg:pr-10">
         {title}
       </h2>
       <div className="min-w-0">{children}</div>
@@ -61,7 +61,7 @@ function Figure({
 }) {
   return (
     <figure className="border border-navy/15 bg-white p-6 sm:p-8">
-      <p className="font-display text-xl font-bold tracking-tight text-ink">{title}</p>
+      <p className="font-display text-xl font-semibold tracking-tight text-ink">{title}</p>
       <div className="mt-6">{children}</div>
       <figcaption className="mt-6 border-t border-navy/8 pt-4 text-sm leading-relaxed text-navy/60">
         {caption}
@@ -89,10 +89,7 @@ export default async function StudyPage({ params }: Props) {
           </span>
           {studies.backLabel}
         </Link>
-        <p className={`${label} mt-10 text-signal-deep`}>
-          {studies.label} {String(index + 1).padStart(2, "0")} <span className="text-navy/40">· {study.status}</span>
-        </p>
-        <h1 className="font-display mt-5 text-balance text-[clamp(2.5rem,6vw,4.75rem)] font-extrabold leading-[0.95] tracking-[-0.035em] text-ink">
+        <h1 className="font-display mt-10 text-balance text-[clamp(2.5rem,6vw,4.75rem)] font-semibold leading-[0.95] tracking-[-0.01em] text-ink">
           {study.name}
         </h1>
         <p className="font-display mt-6 max-w-[46rem] text-balance text-xl leading-snug tracking-tight text-signal-deep sm:text-2xl">
@@ -107,11 +104,12 @@ export default async function StudyPage({ params }: Props) {
         <dl className="mx-auto grid max-w-6xl grid-cols-2 px-6 pb-6 sm:pb-8 lg:grid-cols-4">
           {study.figures.map((f, i) => (
             <div
-              key={f.label}
+              key={f.value}
               className={`flex flex-col-reverse justify-end py-6 pr-4 ${i % 2 ? "border-l border-white/12 pl-4 sm:pl-6" : ""} ${i > 0 ? "lg:border-l lg:border-white/12 lg:pl-6" : ""} ${i > 1 ? "border-t border-white/12 lg:border-t-0" : ""}`}
             >
-              <dt className="mt-2 text-sm leading-snug text-white/60">{f.label}</dt>
-              <dd className="font-display text-4xl font-extrabold tracking-tight sm:text-5xl">
+              {/* a figure whose unit says it all has no caption; its dt stays for screen readers */}
+              <dt className={f.label ? "mt-2 text-sm leading-snug text-white/60" : "sr-only"}>{f.label || f.unit}</dt>
+              <dd className="font-display text-4xl font-semibold tracking-tight sm:text-5xl">
                 {f.value}
                 {f.unit && <span className="ml-2 text-lg font-semibold text-white/60">{f.unit}</span>}
               </dd>
@@ -233,7 +231,7 @@ export default async function StudyPage({ params }: Props) {
         <div />
         <div>
           <div className="flex flex-col gap-5 border-t border-navy/12 pt-8 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-display text-2xl font-bold tracking-tight text-ink">{join.text}</p>
+            <p className="font-display text-2xl font-semibold tracking-tight text-ink">{join.text}</p>
             <Button href={join.href} variant="signal">
               {join.label}
             </Button>

@@ -13,7 +13,7 @@
 
   --font-sans: var(--ff-body);
   --font-display: var(--ff-display);
-  --font-mono: var(--ff-mono);
+  --font-mono: var(--ff-body);
 }
 
 html {
@@ -98,8 +98,8 @@ body {
   background-size: min(120%, 760px) min(120%, 760px);
 }
 
-/* The copy and crest compose first; the network then builds inside the
-   finished layout. One short staggered rise, nothing scroll-triggered. */
+/* The copy and crest compose first, then the dots light. One short
+   staggered rise, nothing scroll-triggered. */
 @keyframes hero-in {
   from {
     opacity: 0;
@@ -114,113 +114,6 @@ body {
 .hero-in:nth-child(3) { animation-delay: 0.14s; }
 .hero-in:nth-child(4) { animation-delay: 0.2s; }
 .hero-in:nth-child(5) { animation-delay: 0.26s; }
-
-/* The dot on the dotless ı: the crest's decision node, set in the word.
-   It pops in once the copy has risen, then breathes like the crest's. */
-.hero-tittle {
-  position: absolute;
-  /* measured off the font's own "i" dot: 0.215em across, centred 0.285em
-     below the top of the line box. The heading's -0.04em tracking trims the
-     ı's box on the right, so its centre sits left of the stem; push back. */
-  left: calc(50% + 0.025em);
-  top: 0.1775em;
-  width: 0.215em;
-  height: 0.215em;
-  margin-left: -0.1075em;
-  border-radius: 50%;
-  background: var(--color-signal);
-  box-shadow: 0 0 22px 4px rgb(45 91 255 / 0.45);
-  animation:
-    crest-pop 0.6s cubic-bezier(0.2, 0.7, 0.3, 1.4) 0.5s both,
-    hero-glow 3.2s ease-in-out 1.1s infinite;
-}
-
-@keyframes hero-glow {
-  50% {
-    box-shadow: 0 0 40px 10px rgb(45 91 255 / 0.6);
-  }
-}
-
-/* the second dot lights once the net has drawn across to it */
-.hero-tittle-out {
-  animation:
-    crest-pop 0.6s cubic-bezier(0.2, 0.7, 0.3, 1.4) 1.55s both,
-    hero-glow 3.2s ease-in-out 2.15s infinite;
-}
-
-/* The miniature net between the two dots: 1 → 3 → 1, drawn in em so it
-   scales with the type. It draws on layer by layer after the first dot,
-   then a spark runs dot to dot every 2.4s. */
-.hero-net {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1.1em;
-  height: 0.45em;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.hero-net-edge {
-  stroke: var(--color-signal);
-  stroke-opacity: 0.45;
-  stroke-width: 16;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  animation: crest-draw 0.4s cubic-bezier(0.22, 0.7, 0.24, 1) both;
-  animation-delay: calc(0.9s + var(--layer) * 0.35s + var(--i) * 0.05s);
-}
-
-.hero-net-node {
-  fill: var(--color-signal);
-  transform-box: fill-box;
-  transform-origin: center;
-  filter: drop-shadow(0 0 6px rgb(45 91 255 / 0.7));
-  animation:
-    crest-pop 0.4s cubic-bezier(0.2, 0.7, 0.3, 1.4) calc(1.2s + var(--i) * 0.05s) both,
-    hero-net-flash 2.4s ease-out calc(2.4s + var(--i) * 0.05s) infinite;
-}
-
-.hero-net-spark {
-  stroke: var(--color-signal);
-  stroke-width: 24;
-  stroke-linecap: round;
-  stroke-dasharray: 0.16 2;
-  stroke-dashoffset: 0.16;
-  opacity: 0;
-  filter: drop-shadow(0 0 5px rgb(45 91 255 / 0.9));
-  animation: hero-net-spark 2.4s ease-in calc(2.1s + var(--layer) * 0.3s + var(--i) * 0.05s) infinite;
-}
-
-@keyframes hero-net-spark {
-  0% {
-    stroke-dashoffset: 0.16;
-    opacity: 1;
-  }
-  12.5% {
-    stroke-dashoffset: -1;
-    opacity: 1;
-  }
-  12.6%,
-  100% {
-    stroke-dashoffset: -1;
-    opacity: 0;
-  }
-}
-
-/* a hidden node flares as the first-layer spark reaches it */
-@keyframes hero-net-flash {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  6% {
-    transform: scale(1.7);
-  }
-  20% {
-    transform: scale(1);
-  }
-}
 
 /* --- the crest ---------------------------------------------------- */
 
@@ -325,11 +218,7 @@ body {
   .crest-ring,
   .crest-edges line,
   .crest-inputs circle,
-  .crest-decision,
-  .hero-tittle,
-  .hero-net-edge,
-  .hero-net-node,
-  .hero-net-spark {
+  .crest-decision {
     animation: none;
   }
 }
@@ -473,5 +362,25 @@ body {
   .swipe > * {
     flex: 0 0 var(--swipe-w, min(78%, 19rem));
     scroll-snap-align: start;
+  }
+}
+
+/* --- the fundamental research row ----------------------------------- */
+/* Every report sits in the same grid cell; --d is its place in the row
+   from the front card (−1 left, 0 front, 1 right), --ad its distance.
+   Neighbours lie flat beside it, dimmed; anything further is out of view. */
+.exhibit-card {
+  grid-area: 1 / 1;
+  justify-self: center;
+  width: min(100%, 52rem);
+  transform: translateX(calc(var(--d) * (100% + 2rem)));
+  opacity: calc(1 - min(var(--ad), 1) * 0.6);
+  transition:
+    transform 0.6s cubic-bezier(0.22, 0.7, 0.24, 1),
+    opacity 0.6s cubic-bezier(0.22, 0.7, 0.24, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .exhibit-card {
+    transition: none;
   }
 }

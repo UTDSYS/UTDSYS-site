@@ -13,7 +13,7 @@ export default function Masthead({
 }: {
   eyebrow: string;
   heading: string;
-  intro: string;
+  intro?: string;
 }) {
   return (
     <header className="team-masthead text-white">
@@ -22,12 +22,22 @@ export default function Masthead({
           <p className="font-display text-[0.9375rem] font-semibold tracking-tight text-white/70 sm:text-base">
             {eyebrow}
           </p>
-          <h1 className="font-display mt-4 text-balance text-[clamp(3.25rem,9vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] sm:mt-5">
+          <h1 className="font-display mt-4 text-balance text-[clamp(3.25rem,9vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.01em] sm:mt-5">
             {heading}
           </h1>
-          <p className="mt-6 max-w-[34rem] text-balance text-[1.0625rem] leading-[1.45] text-white/75 sm:mt-7 sm:text-xl">
-            {intro}
-          </p>
+          {/* the Get involved bars, cut into an equal row like the roster
+              below: every member the same size, the last one lit */}
+          <div aria-hidden="true" className="mt-8 flex gap-1.5 sm:mt-10">
+            {[0, 1, 2, 3].map((i) => (
+              <span key={i} className="h-2 w-10 bg-white sm:w-14" />
+            ))}
+            <span className="h-2 w-10 bg-signal sm:w-14" />
+          </div>
+          {intro && (
+            <p className="mt-6 max-w-[34rem] text-balance text-[1.0625rem] leading-[1.45] text-white/75 sm:mt-7 sm:text-xl">
+              {intro}
+            </p>
+          )}
         </div>
         <Crest className="hidden w-[min(26vw,300px)] md:block" />
       </div>

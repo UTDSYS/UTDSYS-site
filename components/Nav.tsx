@@ -45,7 +45,7 @@ export default function Nav() {
       >
         <Link
           href="/"
-          className={`flex items-center gap-3 font-display text-lg font-bold tracking-tight transition ${
+          className={`flex items-center gap-3 font-display text-lg font-semibold tracking-tight transition ${
             home ? "text-white hover:text-white/75" : "text-ink hover:text-signal-deep"
           }`}
         >
@@ -61,7 +61,7 @@ export default function Nav() {
                 key={l.label}
                 href={l.href}
                 aria-current={pathname === l.href ? "page" : undefined}
-                className="nav-cta rounded-full bg-signal-deep px-4 py-2 font-mono text-[0.7rem] uppercase tracking-[0.18em] text-white shadow-[0_6px_20px_-6px_rgb(29_63_184/0.6)] transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                className="nav-cta rounded-full bg-signal-deep px-4 py-2 font-mono text-[0.8rem] uppercase tracking-[0.08em] text-white shadow-[0_6px_20px_-6px_rgb(29_63_184/0.6)] transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
               >
                 {l.label}
               </Link>
@@ -69,7 +69,7 @@ export default function Nav() {
               <Link
                 key={l.label}
                 href={l.href}
-                className={`font-mono text-[0.7rem] uppercase tracking-[0.18em] transition hover:text-signal ${
+                className={`font-mono text-[0.8rem] uppercase tracking-[0.08em] transition hover:text-signal ${
                   inSection(l.href) ? "text-signal" : "text-navy/70"
                 }`}
               >
@@ -144,7 +144,7 @@ export default function Nav() {
                 key={l.label}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className="my-3 rounded-full bg-signal-deep py-3 text-center font-mono text-xs uppercase tracking-[0.18em] text-white transition hover:bg-ink"
+                className="my-3 rounded-full bg-signal-deep py-3 text-center font-mono text-xs uppercase tracking-[0.08em] text-white transition hover:bg-ink"
               >
                 {l.label}
               </Link>
@@ -153,7 +153,7 @@ export default function Nav() {
                 key={l.label}
                 href={l.href}
                 onClick={() => setOpen(false)}
-                className={`border-b border-navy/5 py-3.5 font-mono text-xs uppercase tracking-[0.18em] transition hover:text-signal ${
+                className={`border-b border-navy/5 py-3.5 font-mono text-xs uppercase tracking-[0.08em] transition hover:text-signal ${
                   inSection(l.href) ? "text-signal" : "text-navy/70"
                 }`}
               >

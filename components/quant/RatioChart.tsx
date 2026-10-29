@@ -70,7 +70,7 @@ export default function RatioChart({ markets }: { markets: Market[] }) {
                     <span
                       aria-hidden="true"
                       style={{ left: `calc(${at(r.ci![1])} + 0.5rem)` }}
-                      className="absolute top-1/2 -translate-y-1/2 font-mono text-[0.7rem] tabular-nums text-navy/60"
+                      className="absolute top-1/2 -translate-y-1/2 font-mono text-[0.8rem] tabular-nums text-navy/60"
                     >
                       {Math.round(r.ratio * 100)}%
                     </span>
@@ -85,7 +85,7 @@ export default function RatioChart({ markets }: { markets: Market[] }) {
             <span
               key={t}
               style={{ left: at(t) }}
-              className="absolute top-2 -translate-x-1/2 font-mono text-[0.65rem] tabular-nums text-navy/45"
+              className="absolute top-2 -translate-x-1/2 font-mono text-[0.75rem] tabular-nums text-navy/45"
             >
               {Math.round(t * 100)}%
             </span>

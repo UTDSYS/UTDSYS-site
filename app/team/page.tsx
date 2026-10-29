@@ -44,7 +44,7 @@ export default function TeamPage() {
             <li key={i} className="relative border border-navy/20 bg-white p-3 sm:p-6">
               <Portrait m={m} />
               <div className="mt-3 border-t border-navy/12 pt-3 sm:mt-5 sm:pt-4">
-                <p className="font-display text-lg font-bold tracking-tight text-ink sm:text-2xl">{m.name}</p>
+                <p className="font-display text-lg font-semibold tracking-tight text-ink sm:text-2xl">{m.name}</p>
                 <p className="mt-0.5 whitespace-pre-line text-[0.9375rem] leading-snug text-navy/70 sm:mt-1 sm:text-base">
                   {m.role}
                 </p>

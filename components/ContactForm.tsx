@@ -117,7 +117,7 @@ export function ContactFormActive({
   if (status === "success") {
     return (
       <div role="status" className={`${s.success} px-6 py-8`}>
-        <p className="font-display text-xl font-bold tracking-tight">
+        <p className="font-display text-xl font-semibold tracking-tight">
           {f.successHeading}
         </p>
         <p className="mt-2 text-base opacity-80">{f.success}</p>

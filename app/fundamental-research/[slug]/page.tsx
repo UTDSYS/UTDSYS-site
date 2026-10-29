@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import content from "@/lib/content";
-import { formatDate, formatPct, formatPrice, upside } from "@/lib/research";
+import { formatPct, formatPrice, upside } from "@/lib/research";
 import { fetchQuote } from "@/lib/quotes";
 import RatingBadge from "@/components/research/RatingBadge";
 import CallTracker from "@/components/research/CallTracker";
 import Disclosures from "@/components/research/Disclosures";
 
-const { backLabel, trackerLabel, reportHeading, reportPending, reports } =
+const { backLabel, reportHeading, reportPending, model, reports } =
   content.fundamentalResearch;
 
 type Props = { params: Promise<{ slug: string }> };
@@ -38,7 +38,7 @@ export default async function ReportPage({ params }: Props) {
       <div className="mx-auto max-w-7xl px-6 pb-28 pt-28 sm:pt-36">
         <Link
           href="/fundamental-research"
-          className="group inline-flex items-center gap-2 font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/50 transition hover:text-signal-deep"
+          className="group inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50 transition hover:text-signal-deep"
         >
           <span aria-hidden="true" className="transition group-hover:-translate-x-1">
             ←
@@ -49,28 +49,18 @@ export default async function ReportPage({ params }: Props) {
         {/* the call in one line; the full card lives on the index */}
         <header className="mt-6 flex flex-wrap items-end justify-between gap-8 border-b border-navy/12 pb-8">
           <div className="max-w-3xl">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-navy/50">
-              <span>{formatDate(report.date)}</span>
-              <span aria-hidden="true">·</span>
-              <span>{report.sector}</span>
-              <span aria-hidden="true">·</span>
-              <span>
-                {report.exchange}:{report.ticker}
-              </span>
-              <span aria-hidden="true">·</span>
-              <span>{report.analysts.join(", ")}</span>
-            </div>
-            <h1 className="font-display mt-4 text-4xl font-bold tracking-tight text-ink md:text-5xl">
+            <h1 className="font-display text-4xl font-semibold tracking-tight text-ink md:text-5xl">
               {report.company}
             </h1>
             <p className="font-display mt-3 text-xl leading-snug tracking-tight text-signal-deep md:text-2xl">
               {report.headline}
             </p>
+            <p className="mt-3 text-base font-medium text-ink">{report.analysts.join(" · ")}</p>
           </div>
           <div className="flex items-center gap-6 font-mono tabular-nums">
             <RatingBadge rating={report.rating} size="lg" />
             <div>
-              <div className="text-[0.6rem] uppercase tracking-[0.2em] text-navy/45">
+              <div className="text-[0.75rem] uppercase tracking-[0.08em] text-navy/45">
                 {report.horizon ?? "12-month"} target
               </div>
               <div className="font-display mt-1 text-2xl font-semibold tracking-tight text-ink [font-variant-numeric:normal]">
@@ -84,14 +74,14 @@ export default async function ReportPage({ params }: Props) {
           </div>
         </header>
 
-        {report.quoteSymbol && <CallTracker report={report} initial={quote} label={trackerLabel} />}
+        {report.quoteSymbol && <CallTracker report={report} initial={quote} />}
 
         {/* the write-up itself */}
         <section aria-labelledby="full-report" className="mt-16">
           <div className="flex flex-wrap items-baseline justify-between gap-4">
             <h2
               id="full-report"
-              className="font-display text-2xl font-bold tracking-tight text-ink"
+              className="font-display text-2xl font-semibold tracking-tight text-ink"
             >
               {reportHeading}
             </h2>
@@ -100,7 +90,7 @@ export default async function ReportPage({ params }: Props) {
                 href={report.pdf}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-mono text-[0.65rem] uppercase tracking-[0.18em] text-signal-deep underline decoration-signal-deep/30 underline-offset-4 transition hover:decoration-signal-deep"
+                className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-signal-deep underline decoration-signal-deep/30 underline-offset-4 transition hover:decoration-signal-deep"
               >
                 Open PDF ↗
               </a>
@@ -120,9 +110,67 @@ export default async function ReportPage({ params }: Props) {
                 .
               </p>
             </object>
+          ) : report.model ? (
+            <div className="mt-6 rounded-sm border border-navy/12 bg-white">
+              <div className="flex flex-col items-start gap-4 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+                <div>
+                  <p className="font-display text-xl font-semibold tracking-tight text-ink">{model.title}</p>
+                  <p className="mt-2 max-w-xl text-sm leading-relaxed text-navy/65">{model.body}</p>
+                </div>
+                <a
+                  href={report.model.file}
+                  download
+                  className="inline-flex shrink-0 items-center rounded-full bg-signal-deep px-6 py-3 text-sm font-medium text-white transition hover:bg-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal"
+                >
+                  {model.download}
+                </a>
+              </div>
+
+              {/* the model's inputs and the two prices it blends, so the call reads without Excel */}
+              <div className="grid border-t border-navy/10 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+                <div className="p-6 sm:p-8">
+                  <h3 className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">
+                    {model.assumptionsHeading}
+                  </h3>
+                  <dl className="mt-5 grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-3">
+                    {report.model.assumptions.map((a) => (
+                      <div key={a.label} className="flex flex-col justify-between">
+                        <dt className="text-sm leading-snug text-navy/60">{a.label}</dt>
+                        <dd className="font-display mt-1 text-2xl font-semibold tracking-tight text-ink">{a.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+                <div className="border-t border-navy/10 bg-offwhite/70 p-6 sm:p-8 lg:border-l lg:border-t-0">
+                  <h3 className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">
+                    {model.methodsHeading}
+                  </h3>
+                  <dl className="mt-5 divide-y divide-navy/10 border-y border-navy/10 text-sm tabular-nums">
+                    {report.model.methods.map((m) => (
+                      <div key={m.label} className="flex items-baseline justify-between gap-4 py-3">
+                        <dt className="text-navy/70">
+                          {m.label}
+                          <span className="ml-2 text-navy/45">{Math.round(m.weight * 100)}%</span>
+                        </dt>
+                        <dd className="text-ink">{formatPrice(report.currency, m.price)}</dd>
+                      </div>
+                    ))}
+                    <div className="flex items-baseline justify-between gap-4 py-3">
+                      <dt className="font-medium text-ink">{model.blendLabel}</dt>
+                      <dd className="font-display text-2xl font-semibold tracking-tight text-ink">
+                        {formatPrice(
+                          report.currency,
+                          report.model.methods.reduce((sum, m) => sum + m.price * m.weight, 0),
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="mt-6 flex min-h-[14rem] sm:min-h-[22rem] flex-col items-center justify-center gap-3 rounded-sm border border-dashed border-navy/20 bg-white/40 px-6 text-center">
-              <span className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/45">
+              <span className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/45">
                 PDF · {report.exchange}:{report.ticker}
               </span>
               <p className="font-display text-xl font-semibold tracking-tight text-ink">

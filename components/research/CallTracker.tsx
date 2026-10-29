@@ -59,11 +59,9 @@ const signed = (v: number) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(2)}`
 export default function CallTracker({
   report,
   initial,
-  label,
 }: {
   report: ResearchReport;
   initial: Quote | null;
-  label: string;
 }) {
   const [quote, setQuote] = useState(initial);
   const [range, setRange] = useState<Range>("call");
@@ -226,17 +224,13 @@ export default function CallTracker({
     <section aria-labelledby="tracker" className="relative mt-6 rounded-sm border border-navy/12 bg-white p-5 md:p-10">
       <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
-          <div className="flex items-center gap-3 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-navy/50">
-            <h2 id="tracker">{label}</h2>
-            <span aria-hidden="true">·</span>
-            <span>
-              {report.exchange}:{report.ticker}
-            </span>
-          </div>
+          <h2 id="tracker" className="font-mono text-sm font-semibold uppercase tracking-[0.08em] text-ink">
+            {report.exchange}: {report.ticker}
+          </h2>
           <div className="mt-3 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <span
               key={hp ? "hover" : (last ?? "none")}
-              className={`font-display text-5xl font-bold tracking-tight text-ink md:text-6xl ${hp ? "" : "tracker-tick"}`}
+              className={`font-display text-5xl font-semibold tracking-tight text-ink md:text-6xl ${hp ? "" : "tracker-tick"}`}
               style={{ "--tick": last === null ? NAVY : moveColor(last - call) } as React.CSSProperties}
             >
               {shown === null ? "—" : formatPrice(report.currency, shown)}
@@ -517,7 +511,7 @@ export default function CallTracker({
       )}
 
       {/* progress: price vs time */}
-      <dl className="relative mt-8 grid gap-6 border-t border-navy/10 pt-6 font-mono text-[0.65rem] uppercase tracking-[0.16em] md:grid-cols-3">
+      <dl className="relative mt-8 grid gap-6 border-t border-navy/10 pt-6 font-mono text-[0.75rem] uppercase tracking-[0.08em] md:grid-cols-3">
         <div>
           <dt className="text-navy/45">To target</dt>
           <dd className="font-display mt-1 text-2xl font-semibold normal-case tracking-tight text-ink">

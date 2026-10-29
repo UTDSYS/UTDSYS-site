@@ -12,8 +12,8 @@ export default function RatingBadge({
     <span
       className={`inline-flex items-center rounded-full border font-mono uppercase ${
         size === "lg"
-          ? "px-4 py-1.5 text-xs tracking-[0.25em]"
-          : "px-2.5 py-0.5 text-[0.62rem] tracking-[0.18em]"
+          ? "px-4 py-1.5 text-xs tracking-[0.08em]"
+          : "px-2.5 py-0.5 text-[0.7rem] tracking-[0.08em]"
       } ${ratingClass[rating]}`}
     >
       {rating}

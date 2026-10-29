@@ -9,7 +9,7 @@ export default function Disclosures() {
   return (
     <footer className="mt-24 grid gap-10 border-t border-navy/12 pt-10 lg:grid-cols-[1fr_1.4fr]">
       <div>
-        <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/50">
+        <h2 className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">
           Rating definitions
         </h2>
         <dl className="mt-4 space-y-3">
@@ -24,7 +24,7 @@ export default function Disclosures() {
         </dl>
       </div>
       <div>
-        <h2 className="font-mono text-[0.65rem] uppercase tracking-[0.22em] text-navy/50">
+        <h2 className="font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">
           Disclosures
         </h2>
         <p className="mt-4 text-sm leading-relaxed text-navy/55">{disclaimer}</p>

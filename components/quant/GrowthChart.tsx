@@ -117,14 +117,14 @@ export default function GrowthChart({ data, drawdownLabel }: { data: Data; drawd
             <span
               key={t}
               style={{ top: `${(1 - t / top) * 100}%` }}
-              className="absolute -translate-y-1/2 font-mono text-[0.65rem] tabular-nums text-navy/45"
+              className="absolute -translate-y-1/2 font-mono text-[0.75rem] tabular-nums text-navy/45"
             >
               ${t / 1000}k
             </span>
           ))}
         </div>
 
-        <p className="col-span-2 mt-6 font-mono text-[0.65rem] uppercase tracking-[0.16em] text-navy/50">
+        <p className="col-span-2 mt-6 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">
           {drawdownLabel}
         </p>
         <svg
@@ -152,7 +152,7 @@ export default function GrowthChart({ data, drawdownLabel }: { data: Data; drawd
             <span
               key={t}
               style={{ top: `${(t / floor) * 100}%` }}
-              className="absolute -translate-y-1/2 font-mono text-[0.65rem] tabular-nums text-navy/45"
+              className="absolute -translate-y-1/2 font-mono text-[0.75rem] tabular-nums text-navy/45"
             >
               {t ? `−${t * 100}%` : "0%"}
             </span>
@@ -164,7 +164,7 @@ export default function GrowthChart({ data, drawdownLabel }: { data: Data; drawd
             <span
               key={y}
               style={{ left: `${x * 100}%` }}
-              className="absolute -translate-x-1/2 font-mono text-[0.65rem] tabular-nums text-navy/45"
+              className="absolute -translate-x-1/2 font-mono text-[0.75rem] tabular-nums text-navy/45"
             >
               {y}
             </span>

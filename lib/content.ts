@@ -30,6 +30,13 @@ export type ResearchReport = {
   quoteSymbol?: string;
   /** Path under /public, e.g. "/research/acme-initiation.pdf". */
   pdf: string | null;
+  /** The financial model behind the call: the spreadsheet under /public, and
+   *  the inputs and per-method prices a visitor sees without opening it. */
+  model?: {
+    file: string;
+    assumptions: { label: string; value: string }[];
+    methods: { label: string; price: number; weight: number }[];
+  };
   /** Placeholder entries are tagged so they can never pass as real coverage. */
   sample?: boolean;
 };
@@ -40,25 +47,23 @@ const content = {
     full: "University of Toronto Decision Systems",
   },
   // The hero: the group crest on a navy panel, and the wordmark beside it,
-  // whose "i" is lit by a network firing into its dot. `desks` are the two
+  // whose two i-dots in "Decision" are lit blue. `desks` are the two
   // research desks, each linking to its page.
   hero: {
     eyebrow: "University of Toronto",
-    lede: "A student research group in quantitative and fundamental research.",
     desks: [
       {
-        name: "Quantitative desk",
+        name: "Quantitative research",
         body: "Portfolio research, tested on past data and in paper trading.",
         href: "/quantitative-research",
       },
       {
-        name: "Fundamental desk",
+        name: "Fundamental research",
         body: "Bottom-up research on public companies.",
         href: "/fundamental-research",
       },
     ],
     primary: { label: "Get involved", href: "/get-involved" },
-    secondary: { label: "Join the Discord", href: "https://discord.gg/h2kX42dfdz" },
   },
   nav: {
     links: [
@@ -134,9 +139,8 @@ const content = {
   // A "\n" in `role` starts a new line on the card.
   team: {
     eyebrow: "University of Toronto Decision Systems",
-    heading: "Team",
-    intro:
-      "Two research desks, quantitative and fundamental. Every call the group makes goes through both.",
+    heading: "Meet the team",
+    intro: "The people behind UTDSYS.",
     members: [
       { name: "Sunny Zhang", role: "Founder\nLead Quantitative Researcher", photo: null },
       { name: "Bosco Yu", role: "Lead Fundamentals Researcher", photo: null },
@@ -148,17 +152,24 @@ const content = {
   // publish, add an entry to `reports` and put the PDF in public/research/.
   // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
-    eyebrow: "Fundamental Research",
-    heading: "Equity research",
-    intro:
-      "Bottom-up coverage of public companies. Every name is diligenced, modelled, and defended in front of the desk before a report goes out.",
+    heading: "Fundamental research",
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
     backLabel: "All research",
-    trackerLabel: "Since the call",
     reportHeading: "Full report",
     reportPending: "The full write-up is being finalised and will be published here.",
+    // shown when a call is published as its financial model rather than a write-up
+    model: {
+      title: "Full financial model",
+      body: "The complete DCF in Excel: income statement, balance sheet and cash flow projections, cost of capital, and the valuation.",
+      assumptionsHeading: "Key assumptions",
+      methodsHeading: "How the target is set",
+      blendLabel: "Blended DCF value",
+      download: "Download the model (.xlsx)",
+    },
     coverageHeading: "Coverage",
+    // the small-card list of every report, under the carousel
+    allHeading: "All reports",
     process: {
       heading: "How we cover a name",
       steps: [
@@ -213,6 +224,47 @@ const content = {
         ],
         pdf: null,
       },
+      {
+        slug: "rubrik",
+        company: "Rubrik",
+        ticker: "RBRK",
+        exchange: "NYSE",
+        sector: "Software / Cybersecurity",
+        date: "2026-05-12",
+        rating: "Buy",
+        currency: "US$",
+        priceAtPublication: 60.47,
+        priceTarget: 78,
+        horizon: "1-year",
+        quoteSymbol: "RBRK",
+        headline: "More AI, more data, more to protect",
+        summary:
+          "JPMorgan CEO Jamie Dimon says AI-driven cyber risk has “gone up 10-fold” since Anthropic’s Mythos, a model that can find software flaws faster than almost any human hacker and that reportedly breached real companies’ systems during safety testing. As these capabilities spread, breaches become a question of when, not if. Rubrik sells the recovery layer that brings companies back when defenses fail, and it trades ~23% below our DCF value.",
+        analysts: ["Bosco Yu"],
+        metrics: [
+          { label: "Valuation", value: "DCF, 50/50 perpetuity / exit multiple" },
+          { label: "Implied EV / FY27E revenue", value: "9.9x (market 7.6x)" },
+          { label: "Expected IRR", value: "29%" },
+          { label: "Holding period", value: "1 year" },
+        ],
+        pdf: null,
+        // read off the model's Cover, WACC and DCF tabs
+        model: {
+          file: "/research/rubrik-dcf.xlsx",
+          assumptions: [
+            { label: "Cost of capital (WACC)", value: "9.7%" },
+            { label: "Long-term growth after FY2040", value: "2.5%" },
+            { label: "Exit multiple", value: "11x EBITDA" },
+            { label: "Revenue growth, FY2026–FY2040", value: "13.9% a year" },
+            { label: "Value from beyond FY2040", value: "49%" },
+            { label: "Diluted shares", value: "228.4M" },
+          ],
+          methods: [
+            { label: "DCF, long-term growth", price: 79.6297, weight: 0.5 },
+            { label: "DCF, exit multiple", price: 76.8188, weight: 0.5 },
+          ],
+        },
+      },
     ] as ResearchReport[],
   },
   // /quantitative-research: the desk's portfolio research, tested on past
@@ -221,18 +273,15 @@ const content = {
   // paper-trading setup, then the method and the reading list. References are numbered in the
   // order listed; a study's `reading` points at those numbers.
   quantResearch: {
-    eyebrow: "Quantitative desk",
     heading: "Quantitative research",
-    intro: "Systematic portfolio research, evaluated against simple benchmarks and tested through paper trading.",
     // The page's opening story, for a visitor who has never heard of the desk,
-    // beside a live figure: the variance surface of three sector ETFs.
+    // beside a live figure: five years of daily sector-ETF returns, turned onto their principal components and whitened.
     story: {
-      label: "What we do",
       lede: "We build mathematical models that turn market data into portfolio decisions.",
       body: "Each study starts from a question raised in the academic literature. We test our answer on decades of historical data, after trading costs and against simple benchmarks, and then move it into paper trading, where it runs forward on markets it has never seen.",
       // read to screen readers only; the figure itself carries no text
       figure:
-        "The variance of every mix of Energy, Financials and Technology sector ETFs, as a surface, with gradient descent moving to the lowest-volatility mix.",
+        "Five years of daily returns of Energy, Financials and Technology sector ETFs as a point cloud, rotated onto its principal components and whitened from an ellipsoid into a sphere.",
     },
     studies: {
       heading: "Studies",
@@ -265,8 +314,8 @@ const content = {
             "A robust portfolio is built to remain sound when its forecasts are wrong. This study asks whether that design delivers a measurable benefit over two simple alternatives: holding every asset in equal weight, and holding the mix with the lowest forecast volatility.",
           ],
           figures: [
-            { value: "53", unit: "years", label: "of monthly data, 1973 to 2026" },
-            { value: "3", unit: "markets", label: "U.S. industries and sector ETFs" },
+            { value: "53", unit: "years of data", label: "" },
+            { value: "3", unit: "markets", label: "" },
             { value: "10–13%", unit: "", label: "less volatility than equal weighting" },
             { value: "0.1%", unit: "", label: "trading cost on every dollar traded" },
           ],

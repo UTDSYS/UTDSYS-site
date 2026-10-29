@@ -46,7 +46,7 @@ export default function GetInvolvedPage() {
               <p className="font-display text-[0.9375rem] font-semibold tracking-tight text-white/70 sm:text-base">
                 {eyebrow}
               </p>
-              <h1 className="font-display mt-4 text-[clamp(3.25rem,9vw,7.5rem)] font-extrabold leading-[0.9] tracking-[-0.04em] sm:mt-5">
+              <h1 className="font-display mt-4 text-[clamp(3.25rem,9vw,7.5rem)] font-semibold leading-[0.9] tracking-[-0.01em] sm:mt-5">
                 {heading}
               </h1>
               {/* two thick bars set off to the side, the second shorter */}
@@ -69,7 +69,7 @@ export default function GetInvolvedPage() {
               </p>
               <h2
                 id="students"
-                className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
+                className="font-display mt-3 text-3xl font-semibold tracking-tight sm:text-4xl"
               >
                 {doors.students.heading}
               </h2>
@@ -84,7 +84,7 @@ export default function GetInvolvedPage() {
                     key={s.name}
                     className="grid grid-cols-[1.75rem_minmax(0,1fr)] text-base"
                   >
-                    <span className="font-display font-bold tabular-nums text-[#9db3ff]">
+                    <span className="font-display font-semibold tabular-nums text-[#9db3ff]">
                       {i + 1}
                     </span>
                     <span>
@@ -127,7 +127,7 @@ export default function GetInvolvedPage() {
               </p>
               <h2
                 id="partners"
-                className="font-display mt-3 text-3xl font-bold tracking-tight sm:text-4xl"
+                className="font-display mt-3 text-3xl font-semibold tracking-tight sm:text-4xl"
               >
                 {doors.partners.heading}
               </h2>
@@ -195,7 +195,7 @@ export default function GetInvolvedPage() {
                     {...(isEmail
                       ? {}
                       : { target: "_blank", rel: "noopener noreferrer" })}
-                    className="font-display mt-3 block text-lg font-bold tracking-tight text-ink transition hover:text-signal-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
+                    className="font-display mt-3 block text-lg font-semibold tracking-tight text-ink transition hover:text-signal-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-signal"
                   >
                     {breakable(c.value)}
                   </a>
