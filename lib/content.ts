@@ -370,7 +370,7 @@ const content = {
             },
           },
           paper: {
-            intro: "Following historical testing, the study moves to forward testing in an Alpaca paper trading account.",
+            intro: "Following historical testing, the study is now forward testing in an Alpaca paper trading account. The first monthly rebalance was placed on 2 November 2026.",
             broker: "Alpaca",
             start: "2 November 2026",
             terms: [
@@ -379,7 +379,7 @@ const content = {
               { label: "Capital", value: "$100,000 simulated per strategy" },
               { label: "Rebalancing", value: "Monthly" },
             ],
-            status: "From 2 November 2026",
+            status: "Live since 2 November 2026",
           },
           reading: [9, 4, 7],
         },

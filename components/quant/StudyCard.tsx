@@ -37,7 +37,7 @@ export default function StudyCard({ study }: { study: Study }) {
         <div className="mt-8 max-w-[34rem] border border-navy/15 bg-navy/[0.03] px-5 py-4 sm:px-6 sm:py-5">
           <p className={`${mono} text-navy/55`}>Paper trading</p>
           <p className="font-display mt-2 text-xl font-semibold tracking-tight text-ink">
-            Trading on {study.paper.broker} from {study.paper.start}
+            Trading on {study.paper.broker} since {study.paper.start}
           </p>
         </div>
         <span className={`${mono} mt-auto inline-flex items-center gap-2 pt-10 text-signal-deep`}>
