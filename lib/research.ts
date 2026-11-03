@@ -107,13 +107,13 @@ export function callStatus(r: ResearchReport, points: { t: number; close: number
   if (r.rating !== "Hold") {
     const hit = life.find((p) => (r.rating === "Buy" ? p.close >= r.priceTarget : p.close <= r.priceTarget));
     if (hit) {
-      return { state: "closed", reason: "target", label: "Target reached", t: hit.t, price: hit.close, ret: hit.close / entry - 1 };
+      return { state: "closed", reason: "target", label: "Target Reached", t: hit.t, price: hit.close, ret: hit.close / entry - 1 };
     }
   }
   const lastT = points.length ? points[points.length - 1].t : 0;
   if (lastT >= end && life.length) {
     const p = life[life.length - 1];
-    return { state: "closed", reason: "horizon", label: "Horizon ended", t: p.t, price: p.close, ret: p.close / entry - 1 };
+    return { state: "closed", reason: "horizon", label: "Horizon Ended", t: p.t, price: p.close, ret: p.close / entry - 1 };
   }
   return { state: "open" };
 }

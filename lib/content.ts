@@ -166,7 +166,7 @@ const content = {
   // publish, add an entry to `reports` and put the PDF in public/research/.
   // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
-    heading: "Fundamental research",
+    heading: "Fundamental Research",
     reportsHeading: "Published Research",
     // /fundamental-research: the division's landing page. Kept to a
     // summary: the full method lives in the Research Handbook.
@@ -174,7 +174,7 @@ const content = {
       hero: {
         eyebrow: "Fundamental Research",
         title: "What We Do",
-        body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced.",
+        body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced. We work alongside UTDSYS Quantitative Research: their screens surface ideas, and our work informs their models.",
         primary: { label: "View Published Research", href: "/fundamental-research/reports" },
         secondary: { label: "Join the Team", href: "/get-involved" },
         // public/fundamental-hero.jpg; swap the file to change the photo
@@ -183,7 +183,7 @@ const content = {
       approach: {
         heading: "Investment Philosophy",
         intro:
-          "Fundamental Research is one of two divisions at UofT Decision Systems. We work alongside Quantitative Research: their screens surface ideas, and our work informs their models.",
+          "We look for quality businesses the market has mispriced, and hold every idea to the same standard of valuation discipline.",
         items: [
           {
             title: "Focus",
@@ -266,12 +266,8 @@ const content = {
         heading: "Latest Research",
         all: "All Published Research",
       },
-      standards: {
-        heading: "Accountability",
-        body: "Every call we publish is dated, with its entry price, target, and horizon, and stays on our record whether it works or not. Figures are sourced to primary documents, assumptions are disclosed, and corrections are made openly.",
-      },
       join: {
-        text: "Want to research with us?",
+        text: "Want to Research With Us?",
         label: "Join the Team",
         href: "/get-involved",
       },
@@ -279,16 +275,16 @@ const content = {
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
     backLabel: "Published Research",
-    reportHeading: "Full report",
+    reportHeading: "Full Report",
     reportPending: "The full write-up is being finalised and will be published here.",
     // shown when a call is published as its financial model rather than a write-up
     model: {
-      title: "Full financial model",
+      title: "Full Financial Model",
       body: "The complete DCF in Excel: income statement, balance sheet and cash flow projections, cost of capital, and the valuation.",
-      assumptionsHeading: "Key assumptions",
-      methodsHeading: "How the target is set",
+      assumptionsHeading: "Key Assumptions",
+      methodsHeading: "How the Target Is Set",
       blendLabel: "Blended DCF value",
-      download: "Download the model (.xlsx)",
+      download: "Download the Model (.xlsx)",
     },
     coverageHeading: "Coverage",
     // the sortable table of every call and how it has done since publication
@@ -296,11 +292,13 @@ const content = {
     reportsIntro:
       "Every call we publish, dated, with its entry price and target, and tracked against its benchmark.",
     trackNote:
-      "A call closes on the first day the stock closes at or beyond its target, or at the end of its horizon, and its return is locked at that close; if our view changes, we publish a new call. Open calls show the return to the latest price. Returns are price returns, excluding dividends, against the S&P 500 for US listings and the S&P/TSX Composite for Canadian listings. Prices may be delayed.",
+      "A call closes on the first day the stock closes at or beyond its target, or at the end of its horizon, and its return is locked at that close. Open calls are measured to the latest price. Price returns exclude dividends; benchmarks are the S&P 500 for US listings and the S&P/TSX Composite for Canadian listings.",
+    // relative to the call's benchmark, so a rating means the same thing
+    // whatever the call's horizon
     ratings: [
-      { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
-      { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },
-      { rating: "Sell", definition: "Expected total return below -5% over the horizon." },
+      { rating: "Buy", definition: "We expect the stock to outperform its benchmark over the call's horizon." },
+      { rating: "Hold", definition: "We expect the stock to perform roughly in line with its benchmark." },
+      { rating: "Sell", definition: "We expect the stock to underperform its benchmark over the call's horizon." },
     ] as { rating: Rating; definition: string }[],
     // from the Fundamental Research summary (October 2026), word for word
     disclaimer:
@@ -346,7 +344,7 @@ const content = {
         quoteSymbol: "RBRK",
         headline: "More AI, more data, more to protect",
         summary:
-          "JPMorgan CEO Jamie Dimon says AI-driven cyber risk has “gone up 10-fold” since Anthropic’s Mythos, a model that can find software flaws faster than almost any human hacker and that reportedly breached real companies’ systems during safety testing. As these capabilities spread, breaches become a question of when, not if. Rubrik sells the recovery layer that brings companies back when defenses fail, and it trades ~23% below our DCF value.",
+          "AI is making cyberattacks faster and cheaper to launch, so for most companies a breach is a question of when, not if. Rubrik sells the recovery layer that restores a business when its defences fail, a need that grows with every attack, and the stock trades about 23% below our DCF value.",
         analysts: ["Bosco Yu"],
         metrics: [
           { label: "Valuation", value: "Blended DCF" },

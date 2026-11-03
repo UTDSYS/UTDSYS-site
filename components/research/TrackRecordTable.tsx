@@ -147,13 +147,13 @@ export default function TrackRecordTable({ rows }: { rows: TrackRow[] }) {
                 {r.status === null ? (
                   <span className="text-navy/35">—</span>
                 ) : r.status.t === null ? (
-                  <span className="inline-flex items-center gap-1.5 text-[0.75rem] uppercase tracking-[0.08em] text-navy/70">
+                  <span className="inline-flex items-center gap-1.5 font-sans text-sm text-navy/75">
                     <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />
                     {r.status.label}
                   </span>
                 ) : (
                   <span className="block">
-                    <span className="inline-flex items-center gap-1.5 text-[0.75rem] uppercase tracking-[0.08em] text-ink">
+                    <span className="inline-flex items-center gap-1.5 font-sans text-sm font-medium text-ink">
                       <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-ink" />
                       {r.status.label}
                     </span>
@@ -171,7 +171,7 @@ export default function TrackRecordTable({ rows }: { rows: TrackRow[] }) {
               </td>
               <td className="px-4 py-4 text-right">
                 <Move value={r.relative} />
-                <div className="mt-0.5 text-[0.65rem] uppercase tracking-[0.08em] text-navy/40">{r.benchmark}</div>
+                <div className="mt-0.5 font-sans text-xs text-navy/45">{r.benchmark}</div>
               </td>
             </tr>
           ))}

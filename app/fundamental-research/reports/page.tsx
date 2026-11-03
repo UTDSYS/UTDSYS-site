@@ -76,7 +76,7 @@ export default async function PublishedResearchPage() {
   const rows = await trackRecord();
 
   const facts = [
-    { label: "Calls published", value: String(rows.length) },
+    { label: "Calls Published", value: String(rows.length) },
     { label: "Latest", value: sorted.length ? monthYear.format(new Date(`${sorted[0].date}T00:00:00Z`)) : "—" },
     { label: "Coverage", value: "NYSE · NASDAQ · TSX" },
     { label: "Benchmarks", value: "S&P 500 · S&P/TSX" },
@@ -98,7 +98,7 @@ export default async function PublishedResearchPage() {
             <dl className="mt-10 grid grid-cols-2 gap-x-10 gap-y-6 border-t border-navy/8 pt-8 sm:grid-cols-4">
               {facts.map((f) => (
                 <div key={f.label} className="flex flex-col-reverse">
-                  <dt className={`${label} mt-1.5 text-[0.7rem] text-navy/50`}>{f.label}</dt>
+                  <dt className="mt-1 text-sm text-navy/55">{f.label}</dt>
                   <dd className="font-display whitespace-nowrap text-xl font-semibold tracking-tight text-ink">{f.value}</dd>
                 </div>
               ))}
@@ -127,7 +127,7 @@ export default async function PublishedResearchPage() {
             <h2 id="track-record" className="font-display text-3xl font-semibold tracking-[-0.01em] text-ink">
               {allHeading}
             </h2>
-            <span className={`${label} text-navy/45`}>Click a column to sort</span>
+            <span className="text-sm text-navy/50">Select a column to sort.</span>
           </div>
           <TrackRecordTable rows={rows} />
           <p className="mt-4 max-w-4xl text-xs leading-relaxed text-navy/50">{trackNote}</p>

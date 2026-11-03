@@ -15,8 +15,17 @@ const num = (i: number) => String(i + 1).padStart(2, "0");
  * The six research steps as tabs on a dark band: pick a step and its full
  * detail opens below. Arrow keys move between steps, as with any tab list.
  */
-export default function ProcessExplorer({ steps, label }: { steps: readonly Step[]; label: string }) {
-  const [active, setActive] = useState(0);
+export default function ProcessExplorer({
+  steps,
+  label,
+  initial = steps.findIndex((s) => s.layers) === -1 ? 0 : steps.findIndex((s) => s.layers),
+}: {
+  steps: readonly Step[];
+  label: string;
+  /** the step open on arrival: by default the one with the most to show */
+  initial?: number;
+}) {
+  const [active, setActive] = useState(initial);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
   const step = steps[active];
 
@@ -39,6 +48,7 @@ export default function ProcessExplorer({ steps, label }: { steps: readonly Step
 
   return (
     <div>
+      <p className="mb-4 text-sm text-white/50">Select any step to read more.</p>
       {/* the steps: a progress rail with the active step lit */}
       <div role="tablist" aria-label={label} className="grid grid-cols-2 gap-px bg-white/10 sm:grid-cols-3 lg:grid-cols-6">
         {steps.map((s, i) => {
@@ -89,8 +99,8 @@ export default function ProcessExplorer({ steps, label }: { steps: readonly Step
       >
         <div key={active} className="step-in grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:gap-14">
           <div>
-            <span className="font-mono text-xs uppercase tracking-[0.1em] text-[rgb(122_162_255)]">
-              Step {num(active)} of {num(steps.length - 1)}
+            <span className="text-sm font-medium text-[rgb(122_162_255)]">
+              Step {active + 1} of {steps.length}
             </span>
             <h3 className="font-display mt-3 text-3xl font-semibold tracking-tight text-white">{step.title}</h3>
             <p className="mt-4 text-base leading-relaxed text-white/70 sm:text-lg">{step.detail}</p>
@@ -126,14 +136,14 @@ export default function ProcessExplorer({ steps, label }: { steps: readonly Step
           <button
             type="button"
             onClick={() => setActive((active - 1 + steps.length) % steps.length)}
-            className="font-mono text-xs uppercase tracking-[0.1em] text-white/55 transition hover:text-white"
+            className="text-sm font-medium text-white/60 transition hover:text-white"
           >
             ← {steps[(active - 1 + steps.length) % steps.length].title}
           </button>
           <button
             type="button"
             onClick={() => setActive((active + 1) % steps.length)}
-            className="font-mono text-xs uppercase tracking-[0.1em] text-white/55 transition hover:text-white"
+            className="text-sm font-medium text-white/60 transition hover:text-white"
           >
             {steps[(active + 1) % steps.length].title} →
           </button>

@@ -34,11 +34,11 @@ export default function ReportCard({ report }: { report: ResearchReport }) {
           {/* only say what's there; nothing is promised before it's published */}
           {(report.pdf || report.model) && (
             <span className="inline-flex items-center rounded-full border border-navy/15 px-6 py-3 text-sm font-medium text-navy/50">
-              {report.pdf ? "Full report available" : "Full model available"}
+              {report.pdf ? "Full Report Available" : "Full Model Available"}
             </span>
           )}
           <span className="ml-auto inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-signal-deep">
-            Track the call
+            Track the Call
             <span aria-hidden="true" className="transition group-hover:translate-x-1">
               →
             </span>
