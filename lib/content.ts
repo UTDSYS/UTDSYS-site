@@ -73,8 +73,8 @@ const content = {
         href: "/fundamental-research",
         // shown as a dropdown on hover, and indented in the mobile menu
         children: [
-          { label: "Who we are", href: "/fundamental-research" },
-          { label: "Published research", href: "/fundamental-research/reports" },
+          { label: "Who We Are", href: "/fundamental-research" },
+          { label: "Published Research", href: "/fundamental-research/reports" },
         ],
       },
       { label: "Team", href: "/team" },
@@ -161,7 +161,7 @@ const content = {
   // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
     heading: "Fundamental research",
-    reportsHeading: "Published reports",
+    reportsHeading: "Published Research",
     // /fundamental-research: the division's landing page. Kept to a
     // summary: the full method lives in the Research Handbook.
     about: {
@@ -169,16 +169,16 @@ const content = {
         eyebrow: "Fundamental Research",
         title: "Quality businesses, at the right price.",
         body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced.",
-        primary: { label: "View published research", href: "/fundamental-research/reports" },
+        primary: { label: "View Published Research", href: "/fundamental-research/reports" },
         secondary: { label: "Join the team", href: "/get-involved" },
       },
       approach: {
-        heading: "Our approach",
+        heading: "Investment Philosophy",
         intro:
           "Fundamental Research is one of two divisions at UofT Decision Systems. We work alongside Quantitative Research: their screens surface ideas, and our work informs their models.",
         items: [
           {
-            title: "Quality",
+            title: "Focus",
             body: "Compounders with durable moats and strong free cash flow, and growth businesses we can underwrite ahead of profitability.",
           },
           {
@@ -186,7 +186,7 @@ const content = {
             body: "Businesses whose price has moved away from their fundamentals, through short-term sentiment or growth the market has yet to recognise.",
           },
           {
-            title: "Conviction",
+            title: "Variant View",
             body: "Where we disagree with the market, we state exactly where and why. Where we don't, we still hold every call to the same valuation discipline.",
           },
         ],
@@ -216,13 +216,13 @@ const content = {
       },
       join: {
         text: "See the calls we've published.",
-        label: "Published research",
+        label: "Published Research",
         href: "/fundamental-research/reports",
       },
     },
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
-    backLabel: "All reports",
+    backLabel: "Published Research",
     reportHeading: "Full report",
     reportPending: "The full write-up is being finalised and will be published here.",
     // shown when a call is published as its financial model rather than a write-up
@@ -235,15 +235,20 @@ const content = {
       download: "Download the model (.xlsx)",
     },
     coverageHeading: "Coverage",
-    // the small-card list of every report, under the carousel
-    allHeading: "All reports",
+    // the sortable table of every call and how it has done since publication
+    allHeading: "Track Record",
+    reportsIntro:
+      "Every call we publish, dated, with its entry price and target, and tracked against its benchmark.",
+    trackNote:
+      "Returns are price returns since publication, excluding dividends. Benchmarks: S&P 500 for US listings, S&P/TSX Composite for Canadian listings. Prices may be delayed.",
     ratings: [
       { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
       { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },
       { rating: "Sell", definition: "Expected total return below -5% over the horizon." },
     ] as { rating: Rating; definition: string }[],
+    // from the Fundamental Research summary (October 2026), word for word
     disclaimer:
-      "Reports are produced by University of Toronto students for educational purposes only. They are not investment advice or a recommendation to buy or sell any security, and UTDSYS and its members may hold positions in the securities discussed.",
+      "DSYS periodically publishes research produced by our Fundamentals Team on this page. Nothing here constitutes investment advice, and any edits made after publication are disclosed publicly. We may buy or sell securities without notice and may or may not hold positions in the securities discussed here. This page exists to show the kind of research our Investment Team does and how we think about investing; it is not a recommendation. Because markets and businesses change, these reports can become outdated over time.",
     reports: [
       {
         slug: "futu",
@@ -288,8 +293,8 @@ const content = {
           "JPMorgan CEO Jamie Dimon says AI-driven cyber risk has “gone up 10-fold” since Anthropic’s Mythos, a model that can find software flaws faster than almost any human hacker and that reportedly breached real companies’ systems during safety testing. As these capabilities spread, breaches become a question of when, not if. Rubrik sells the recovery layer that brings companies back when defenses fail, and it trades ~23% below our DCF value.",
         analysts: ["Bosco Yu"],
         metrics: [
-          { label: "Valuation", value: "DCF, 50/50 perpetuity / exit multiple" },
-          { label: "Implied EV / FY27E revenue", value: "9.9x (market 7.6x)" },
+          { label: "Valuation", value: "Blended DCF" },
+          { label: "EV / FY27E sales", value: "9.9x vs 7.6x mkt" },
           { label: "Expected IRR", value: "29%" },
           { label: "Holding period", value: "1 year" },
         ],

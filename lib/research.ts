@@ -32,3 +32,17 @@ export const ratingClass: Record<Rating, string> = {
 export const UP = "#059669";
 export const DOWN = "#dc2626";
 export const moveColor = (change: number) => (change >= 0 ? UP : DOWN);
+
+/** The benchmark a call is measured against: S&P/TSX for Canadian listings, S&P 500 otherwise. */
+export const benchmarkFor = (r: ResearchReport) =>
+  r.exchange === "TSX"
+    ? { symbol: "^GSPTSE", name: "S&P/TSX Composite", short: "S&P/TSX" }
+    : { symbol: "^GSPC", name: "S&P 500", short: "S&P 500" };
+
+/** First close on or after an ISO day, or null when the history doesn't reach back that far. */
+export function closeOnOrAfter(points: { t: number; close: number }[], iso: string): number | null {
+  const from = Date.parse(`${iso}T00:00:00Z`);
+  if (!points.length || points[0].t > from + 7 * 86_400_000) return null;
+  const p = points.find((x) => x.t >= from);
+  return p ? p.close : null;
+}

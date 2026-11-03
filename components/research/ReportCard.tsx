@@ -31,9 +31,12 @@ export default function ReportCard({ report }: { report: ResearchReport }) {
         <p className="mt-3 text-base font-medium text-ink">{report.analysts.join(" · ")}</p>
         <p className="mt-5 max-w-xl text-base leading-relaxed text-navy/70">{report.summary}</p>
         <div className="mt-auto flex flex-wrap items-center gap-x-6 gap-y-4 pt-8">
-          <span className="inline-flex items-center rounded-full border border-navy/15 px-6 py-3 text-sm font-medium text-navy/40">
-            {report.pdf ? "Full report available" : report.model ? "Full model available" : "Full report coming soon"}
-          </span>
+          {/* only say what's there; nothing is promised before it's published */}
+          {(report.pdf || report.model) && (
+            <span className="inline-flex items-center rounded-full border border-navy/15 px-6 py-3 text-sm font-medium text-navy/50">
+              {report.pdf ? "Full report available" : "Full model available"}
+            </span>
+          )}
           <span className="ml-auto inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-signal-deep">
             Track the call
             <span aria-hidden="true" className="transition group-hover:translate-x-1">
@@ -64,9 +67,9 @@ export default function ReportCard({ report }: { report: ResearchReport }) {
         </div>
         <dl className="mt-8 divide-y divide-navy/10 border-t border-navy/10 font-mono text-sm tabular-nums">
           {report.metrics.map((m) => (
-            <div key={m.label} className="flex items-center justify-between py-3">
+            <div key={m.label} className="grid grid-cols-[minmax(0,1fr)_auto] items-baseline gap-6 py-3">
               <dt className="text-[0.75rem] uppercase tracking-[0.08em] text-navy/50">{m.label}</dt>
-              <dd className="text-ink">{m.value}</dd>
+              <dd className="whitespace-nowrap text-right text-ink">{m.value}</dd>
             </div>
           ))}
         </dl>
