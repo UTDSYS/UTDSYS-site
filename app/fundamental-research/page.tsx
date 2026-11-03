@@ -6,7 +6,7 @@ import content from "@/lib/content";
 import { byNewest, formatDate, formatPct, formatPrice, upside } from "@/lib/research";
 
 export const metadata = {
-  title: "Who We Are — Fundamental Research — UofT Decision Systems",
+  title: "What We Do — Fundamental Research — UofT Decision Systems",
   description:
     "UofT Decision Systems Fundamental Research: bottom-up company research with a top-down view of the economy, focused on durable businesses the market has mispriced.",
 };

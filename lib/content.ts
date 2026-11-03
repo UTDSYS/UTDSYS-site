@@ -39,6 +39,12 @@ export type ResearchReport = {
   };
   /** Placeholder entries are tagged so they can never pass as real coverage. */
   sample?: boolean;
+  /**
+   * Close a call by hand, e.g. on a downgrade. Leave it out and the site
+   * applies the rule in lib/research.ts: a call closes the first day it
+   * closes at its target, or at the end of its horizon.
+   */
+  closed?: { date: string; price: number; reason: string };
 };
 
 const content = {
@@ -73,7 +79,7 @@ const content = {
         href: "/fundamental-research",
         // shown as a dropdown on hover, and indented in the mobile menu
         children: [
-          { label: "Who We Are", href: "/fundamental-research" },
+          { label: "What We Do", href: "/fundamental-research" },
           { label: "Published Research", href: "/fundamental-research/reports" },
         ],
       },
@@ -167,7 +173,7 @@ const content = {
     about: {
       hero: {
         eyebrow: "Fundamental Research",
-        title: "Who We Are",
+        title: "What We Do",
         body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced.",
         primary: { label: "View Published Research", href: "/fundamental-research/reports" },
         secondary: { label: "Join the Team", href: "/get-involved" },
@@ -290,7 +296,7 @@ const content = {
     reportsIntro:
       "Every call we publish, dated, with its entry price and target, and tracked against its benchmark.",
     trackNote:
-      "Returns are price returns since publication, excluding dividends. Benchmarks: S&P 500 for US listings, S&P/TSX Composite for Canadian listings. Prices may be delayed.",
+      "A call closes on the first day the stock closes at or beyond its target, or at the end of its horizon, and its return is locked at that close; if our view changes, we publish a new call. Open calls show the return to the latest price. Returns are price returns, excluding dividends, against the S&P 500 for US listings and the S&P/TSX Composite for Canadian listings. Prices may be delayed.",
     ratings: [
       { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
       { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },

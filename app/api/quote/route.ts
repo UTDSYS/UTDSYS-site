@@ -3,16 +3,20 @@ import content from "@/lib/content";
 import { fetchQuote, QUOTE_TTL } from "@/lib/quotes";
 
 // Only names we actually cover, so this can't be used as an open proxy.
-const TRACKED = new Set(
-  content.fundamentalResearch.reports.flatMap((r) => (r.quoteSymbol ? [r.quoteSymbol] : [])),
-);
+// Each maps to its oldest call, so the history covers every call's life.
+const TRACKED = new Map<string, string>();
+for (const r of content.fundamentalResearch.reports) {
+  if (!r.quoteSymbol) continue;
+  const seen = TRACKED.get(r.quoteSymbol);
+  if (!seen || r.date < seen) TRACKED.set(r.quoteSymbol, r.date);
+}
 
 export async function GET(req: Request) {
   const symbol = new URL(req.url).searchParams.get("symbol") ?? "";
   if (!TRACKED.has(symbol)) {
     return NextResponse.json({ error: "Unknown symbol" }, { status: 404 });
   }
-  const quote = await fetchQuote(symbol);
+  const quote = await fetchQuote(symbol, TRACKED.get(symbol));
   if (!quote) {
     return NextResponse.json({ error: "Quote unavailable" }, { status: 502 });
   }

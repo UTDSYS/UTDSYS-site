@@ -18,7 +18,9 @@ export type TrackRow = {
   currency: string;
   entry: number;
   target: number;
-  /** null when the live price couldn't be fetched */
+  /** Open, or how and when the call closed; null when prices are unavailable */
+  status: { label: string; t: number | null } | null;
+  /** the live price while open, the exit price once closed; null when unavailable */
   current: number | null;
   ret: number | null;
   /** stock return minus benchmark return over the same period */
@@ -26,15 +28,16 @@ export type TrackRow = {
   benchmark: string;
 };
 
-type Key = "company" | "date" | "rating" | "entry" | "target" | "current" | "ret" | "relative";
+type Key = "company" | "date" | "rating" | "status" | "entry" | "target" | "current" | "ret" | "relative";
 
 const columns: { key: Key; label: string; numeric?: boolean }[] = [
   { key: "company", label: "Company" },
   { key: "date", label: "Published" },
   { key: "rating", label: "Rating" },
+  { key: "status", label: "Status" },
   { key: "entry", label: "Entry", numeric: true },
   { key: "target", label: "Target", numeric: true },
-  { key: "current", label: "Current", numeric: true },
+  { key: "current", label: "Last / Exit", numeric: true },
   { key: "ret", label: "Return", numeric: true },
   { key: "relative", label: "vs Benchmark", numeric: true },
 ];
@@ -43,6 +46,7 @@ const ratingOrder: Record<Rating, number> = { Buy: 0, Hold: 1, Sell: 2 };
 
 function sortValue(r: TrackRow, key: Key): number | string | null {
   if (key === "rating") return ratingOrder[r.rating];
+  if (key === "status") return r.status?.label ?? null;
   return r[key];
 }
 
@@ -88,7 +92,7 @@ export default function TrackRecordTable({ rows }: { rows: TrackRow[] }) {
 
   return (
     <div className="overflow-x-auto rounded-sm border border-navy/12 bg-white">
-      <table className="w-full min-w-[56rem] border-collapse font-mono text-sm tabular-nums">
+      <table className="w-full min-w-[64rem] border-collapse font-mono text-sm tabular-nums">
         <thead>
           <tr className="border-b border-navy/12 bg-offwhite/70">
             {columns.map((c) => {
@@ -138,6 +142,24 @@ export default function TrackRecordTable({ rows }: { rows: TrackRow[] }) {
               <td className="px-4 py-4 text-navy/70">{formatDate(r.date)}</td>
               <td className="px-4 py-4">
                 <RatingBadge rating={r.rating} />
+              </td>
+              <td className="px-4 py-4">
+                {r.status === null ? (
+                  <span className="text-navy/35">—</span>
+                ) : r.status.t === null ? (
+                  <span className="inline-flex items-center gap-1.5 text-[0.75rem] uppercase tracking-[0.08em] text-navy/70">
+                    <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-signal" />
+                    {r.status.label}
+                  </span>
+                ) : (
+                  <span className="block">
+                    <span className="inline-flex items-center gap-1.5 text-[0.75rem] uppercase tracking-[0.08em] text-ink">
+                      <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-ink" />
+                      {r.status.label}
+                    </span>
+                    <span className="mt-0.5 block text-[0.7rem] text-navy/50">{formatDate(new Date(r.status.t).toISOString().slice(0, 10))}</span>
+                  </span>
+                )}
               </td>
               <td className="px-4 py-4 text-right text-navy/70">{formatPrice(r.currency, r.entry)}</td>
               <td className="px-4 py-4 text-right text-ink">{formatPrice(r.currency, r.target)}</td>

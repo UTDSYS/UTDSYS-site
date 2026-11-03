@@ -1,6 +1,6 @@
 import Link from "next/link";
 import content from "@/lib/content";
-import { benchmarkFor, byNewest, closeOnOrAfter } from "@/lib/research";
+import { benchmarkFor, byNewest, callStatus, closeOnOrAfter, closeOnOrBefore } from "@/lib/research";
 import { fetchQuote } from "@/lib/quotes";
 import ReportExhibit from "@/components/research/ReportExhibit";
 import TrackRecordTable, { type TrackRow } from "@/components/research/TrackRecordTable";
@@ -25,13 +25,17 @@ const {
 const label = "font-mono text-[0.75rem] uppercase tracking-[0.1em]";
 const monthYear = new Intl.DateTimeFormat("en-CA", { month: "short", year: "numeric", timeZone: "UTC" });
 
-/** Each call's price return since publication, and the same for its benchmark. */
+/**
+ * Each call's return and its benchmark's over the same span: to today while
+ * the call is open, and frozen at the closing day once it has closed.
+ */
 async function trackRecord(): Promise<TrackRow[]> {
   const published = reports.filter((r) => !r.sample);
+  const oldest = published.map((r) => r.date).sort()[0];
   const benchSymbols = [...new Set(published.map((r) => benchmarkFor(r).symbol))];
   const [quotes, benches] = await Promise.all([
-    Promise.all(published.map((r) => (r.quoteSymbol ? fetchQuote(r.quoteSymbol) : null))),
-    Promise.all(benchSymbols.map((s) => fetchQuote(s))),
+    Promise.all(published.map((r) => (r.quoteSymbol ? fetchQuote(r.quoteSymbol, r.date) : null))),
+    Promise.all(benchSymbols.map((s) => fetchQuote(s, oldest))),
   ]);
   const bench = new Map(benchSymbols.map((s, i) => [s, benches[i]]));
 
@@ -39,11 +43,16 @@ async function trackRecord(): Promise<TrackRow[]> {
     const q = quotes[i];
     const b = benchmarkFor(r);
     const bq = bench.get(b.symbol);
-    const current = q?.last ?? null;
+    // a hand-entered close needs no prices; the rule needs the history
+    const status = r.closed || q ? callStatus(r, q?.points ?? []) : null;
+    const closed = status?.state === "closed" ? status : null;
+    const current = closed ? closed.price : (q?.last ?? null);
     const ret = current === null ? null : current / r.priceAtPublication - 1;
     const benchStart = bq ? closeOnOrAfter(bq.points, r.date) : null;
-    const benchRet = bq && benchStart ? bq.last / benchStart - 1 : null;
+    const benchEnd = bq ? (closed ? closeOnOrBefore(bq.points, closed.t) : bq.last) : null;
+    const benchRet = benchStart && benchEnd ? benchEnd / benchStart - 1 : null;
     return {
+      status: status === null ? null : closed ? { label: closed.label, t: closed.t } : { label: "Open", t: null },
       slug: r.slug,
       company: r.company,
       ticker: r.ticker,
@@ -124,7 +133,7 @@ export default async function PublishedResearchPage() {
           <p className="mt-4 max-w-4xl text-xs leading-relaxed text-navy/50">{trackNote}</p>
         </section>
 
-        {/* the full method lives on the Who We Are page */}
+        {/* the full method lives on the What We Do page */}
         <p className="mt-16 border-t border-navy/12 pt-8 text-[0.9375rem] leading-relaxed text-navy/70">
           Every call goes through the same six-step process, from screen to monitor.{" "}
           <Link

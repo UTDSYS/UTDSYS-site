@@ -31,7 +31,7 @@ export default async function ReportPage({ params }: Props) {
   const { slug } = await params;
   const report = reports.find((r) => r.slug === slug);
   if (!report) notFound();
-  const quote = report.quoteSymbol ? await fetchQuote(report.quoteSymbol) : null;
+  const quote = report.quoteSymbol ? await fetchQuote(report.quoteSymbol, report.date) : null;
 
   return (
     <main className="relative min-h-screen">
