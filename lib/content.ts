@@ -166,11 +166,13 @@ const content = {
     // summary: the full method lives in the Research Handbook.
     about: {
       hero: {
-        eyebrow: "Fundamental Research",
-        title: "Quality businesses, at the right price.",
+        eyebrow: "UofT Decision Systems",
+        title: "Fundamental Research",
         body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced.",
         primary: { label: "View Published Research", href: "/fundamental-research/reports" },
-        secondary: { label: "Join the team", href: "/get-involved" },
+        secondary: { label: "Join the Team", href: "/get-involved" },
+        // public/fundamental-hero.jpg; swap the file to change the photo
+        image: "/fundamental-hero.jpg",
       },
       approach: {
         heading: "Investment Philosophy",
@@ -194,30 +196,51 @@ const content = {
       coverage: {
         heading: "Coverage",
         items: [
-          { title: "Equities", body: "NYSE, NASDAQ, and TSX" },
-          { title: "Commodities", body: "Energy and metals" },
-          { title: "Macro", body: "Canada and the United States" },
+          {
+            title: "Equities",
+            detail: "NYSE · NASDAQ · TSX",
+            body: "Companies and ADRs, researched bottom-up on their own merits. Our portfolio is long-only equities.",
+          },
+          {
+            title: "Commodities",
+            detail: "Energy · Metals",
+            body: "The commodity drivers that matter most for the companies we cover, such as oil and silver, with occasional direct trades.",
+          },
+          {
+            title: "Macro",
+            detail: "Canada · United States",
+            body: "We don't trade macro, but it is the lens that ties our equity and commodity work together and shapes when we make a call.",
+          },
         ],
       },
       process: {
-        heading: "Process",
+        heading: "Research Process",
+        intro: "Every idea goes through the same six steps, from the first screen to the call we track in public.",
         steps: [
-          { title: "Screen", body: "Proprietary screens, earnings, and macro themes." },
-          { title: "Research", body: "Economy, industry, then company." },
-          { title: "Value", body: "DCF and comparables, with bull, base, and bear cases." },
-          { title: "Write", body: "A full thesis in a standard format." },
-          { title: "Review", body: "Peer-reviewed and pitched before publication." },
-          { title: "Monitor", body: "Tracked publicly and revisited on every major catalyst." },
+          { title: "Screen", body: "Proprietary screens, earnings results, news flow, macro themes, and ideas from Quantitative Research." },
+          {
+            title: "Research",
+            body: "Top-down, from the forces that move the business to the business itself.",
+            layers: ["Macro", "Industry", "Company"],
+          },
+          { title: "Value", body: "DCF and comparable companies, plus precedent transactions where M&A is relevant. Bull, base, and bear cases." },
+          { title: "Write", body: "A full written thesis in the DSYS report template." },
+          { title: "Review", body: "Pitched to the team and peer-reviewed: approved, sent back, or dropped." },
+          { title: "Monitor", body: "Tracked on this site and revisited after every major catalyst." },
         ],
+      },
+      latest: {
+        heading: "Latest Research",
+        all: "All Published Research",
       },
       standards: {
         heading: "Accountability",
         body: "Every call we publish is dated, with its entry price, target, and horizon, and stays on our record whether it works or not. Figures are sourced to primary documents, assumptions are disclosed, and corrections are made openly.",
       },
       join: {
-        text: "See the calls we've published.",
-        label: "Published Research",
-        href: "/fundamental-research/reports",
+        text: "Want to research with us?",
+        label: "Join the Team",
+        href: "/get-involved",
       },
     },
     sampleNotice:
