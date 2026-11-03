@@ -153,9 +153,166 @@ const content = {
   // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
     heading: "Fundamental research",
+    reportsHeading: "Published reports",
+    // the two tabs under Fundamental Research: who we are, then the reports
+    tabs: [
+      { label: "Who we are", href: "/fundamental-research" },
+      { label: "Published reports", href: "/fundamental-research/reports" },
+    ],
+    // /fundamental-research: the division's landing page, from the
+    // Investment Philosophy & Research Process summary (October 2026)
+    about: {
+      hero: {
+        eyebrow: "Fundamental Research",
+        title: "Quality businesses, researched until we can defend the call.",
+        body: "A student-run team that combines bottom-up company research with a top-down view of the economy. We cover equities and commodities directly, with macro as the lens that ties the two together.",
+        primary: { label: "Read our research", href: "/fundamental-research/reports" },
+        secondary: { label: "Join the team", href: "/get-involved" },
+        // the hero's figure: a small Q-value grid with the target lit
+        figure: "The Q-value grid: business quality on one axis, valuation on the other, with the high-quality, cheap quadrant highlighted as the target.",
+      },
+      who: {
+        heading: "Who we are",
+        body: [
+          "University of Toronto Decision Systems (DSYS) uses mathematics to make better decisions under uncertainty. The club runs two research divisions: Quantitative Research and Fundamental Research.",
+          "We work alongside the Quantitative Research division. Their screens can surface names for us to dig into, and our work in turn can inform their models. Our portfolio is long-only equities, with occasional trades in energy and metals.",
+        ],
+      },
+      coverage: {
+        heading: "Coverage",
+        items: [
+          {
+            title: "Equities",
+            body: "Companies and ADRs traded on the NYSE, NASDAQ, and TSX.",
+          },
+          {
+            title: "Macro environment",
+            body: "We don't trade macro, but we use it to inform our equity and commodity trades. We watch the macro environment in Canada and the United States.",
+          },
+          {
+            title: "Commodities",
+            body: "Energy and metals, focusing on the commodity drivers that matter most for the companies we cover, such as oil and silver.",
+          },
+        ],
+      },
+      philosophy: {
+        heading: "Investment philosophy",
+        items: [
+          {
+            title: "Focus",
+            body: "We focus on two types of companies: quality compounders with irreplaceable moats, high compounding free cash flow, and structurally superior margins; and growth businesses driving genuine innovation, where we underwrite the path ahead of current profitability. Both are held to the same standard of valuation discipline.",
+          },
+          {
+            title: "Mispricing",
+            body: "We look for companies where price and business have come apart. A moat is still intact, but the stock sold off on short-term sentiment, or the market hasn't caught up to durable growth yet. Mispricing is the main setup and opportunity.",
+          },
+          {
+            title: "Variant view",
+            body: "Not every pitch needs to disagree with the market. A quality compounder at a fair price is still worth owning. But when the thesis is a mispriced business, it's only strong if we can say exactly where we disagree with the market and why we think we're right.",
+          },
+        ],
+      },
+      process: {
+        heading: "Research process",
+        intro:
+          "Every idea goes through the same six steps. We choose companies bottom-up, on their own merits, then look at them from the economy down. A strong business is worth researching in any macro environment, but the macro view shapes when we make the call and how we frame it.",
+        steps: [
+          {
+            title: "Idea screening",
+            body: "The Q-value screen, earnings results, news flow, macro themes, and screens from the Quantitative Research division.",
+          },
+          {
+            title: "Research, top-down",
+            body: "From the economy, to the industry, to the company.",
+            // the three layers, shown as a small chain under this step
+            layers: [
+              {
+                title: "Macro",
+                body: "Which macro forces matter for the company (rates, FX, commodity prices, the cycle) and which way they are moving.",
+              },
+              {
+                title: "Industry",
+                body: "How the industry is structured, who competes, and how those macro forces hit the sector.",
+              },
+              {
+                title: "Company",
+                body: "Qualitative and quantitative analysis, catalysts, and risks: why this business wins or loses.",
+              },
+            ],
+          },
+          {
+            title: "Valuation",
+            body: "A discounted cash flow model and comparable company analysis, plus precedent transactions where M&A is relevant. Bull, base, and bear cases are summarized in a football field.",
+          },
+          {
+            title: "Thesis",
+            body: "A written report in the DSYS template, including a Q-value scorecard.",
+          },
+          {
+            title: "Review & publish",
+            body: "The analyst pitches the idea to the team, and it is approved, sent back for more work, or dropped. Published calls are dated and include the entry price, price target, benchmark, and horizon.",
+          },
+          {
+            title: "Monitor",
+            body: "Each call is tracked on our website, and we review it after any significant catalyst to the core operations of the business.",
+          },
+        ],
+      },
+      qvalue: {
+        heading: "The Q-value framework",
+        intro:
+          "Q-value is our main tool for screening ideas (step 1) and scoring them in every thesis (step 4). It is a guideline rather than a strict rule. It places every company on two axes, business quality and valuation, and we look for the top-right quadrant: high-quality businesses at cheap valuations.",
+        axes: { cheap: "Cheap", expensive: "Expensive", lower: "Lower quality", higher: "Higher quality" },
+        // read row by row: cheap first, lower quality on the left
+        quadrants: [
+          { title: "Value trap risk", body: "Weak business at a cheap price: ask why it is cheap.", tone: "warn" },
+          { title: "Target", body: "High-quality business at a cheap price.", tone: "target" },
+          { title: "Avoid", body: "Weak business at a high price.", tone: "avoid" },
+          { title: "Watchlist", body: "Great business, already fully priced.", tone: "watch" },
+        ],
+        trapCheck: {
+          title: "The value-trap check",
+          body: "The data looks backward, but the market looks forward. When a company scores well on quality and still trades cheaply, we ask what the market sees that the numbers don't. If the discount reflects a real structural threat, it is a value trap and we pass. If the threat is overstated, that becomes our variant view.",
+        },
+        measures: [
+          {
+            title: "Measuring cheapness",
+            body: "The easier half. We compare EV/EBIT, FCF yield, and P/E with sector peers and with the company's own history.",
+          },
+          {
+            title: "Measuring quality",
+            body: "The harder half, because two analysts can judge the same business differently. To keep that in check, most quality scores come from data: profitability, durability, growth, balance sheet strength, and earnings quality, plus an analyst-rated moat score. Each metric is ranked against the company's sector, then weighted.",
+          },
+        ],
+      },
+      accountability: {
+        heading: "Accountability",
+        items: [
+          "We keep a public record of every call we publish, including the ones that don't work out.",
+          "Each call on our website lists its publish date, entry price, price target, and time horizon.",
+          "Portfolio returns are benchmarked annually against the S&P/TSX Composite (for Canadian-listed names) and the S&P 500 (for US-listed names), rather than reported in absolute terms.",
+          "Any edits made to a report after publication are disclosed publicly.",
+        ],
+      },
+      standards: {
+        heading: "Research standards",
+        items: [
+          "We source every figure and list the source in the report. Facts are kept separate from opinion, and all estimates are labelled as estimates.",
+          "We start with primary sources: company filings, earnings calls, and official economic data. News and other analysts' research can point us to questions, but never provide a number in our reports. All market data is dated.",
+          "We show our assumptions. Every valuation sets out the inputs that drive it, including a sensitivity analysis.",
+          "Before publishing, at least one other analyst reviews the report: testing the thesis, checking the numbers, and confirming it meets these standards.",
+          "If we find an error after publishing, we correct it openly, with a dated note explaining what changed.",
+        ],
+      },
+      join: {
+        text: "See the calls we've published.",
+        label: "Published reports",
+        href: "/fundamental-research/reports",
+      },
+    },
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
-    backLabel: "All research",
+    backLabel: "All reports",
     reportHeading: "Full report",
     reportPending: "The full write-up is being finalised and will be published here.",
     // shown when a call is published as its financial model rather than a write-up
@@ -170,27 +327,6 @@ const content = {
     coverageHeading: "Coverage",
     // the small-card list of every report, under the carousel
     allHeading: "All reports",
-    process: {
-      heading: "How we cover a name",
-      steps: [
-        {
-          title: "Screen",
-          body: "Ideas start from a sector view or a mispricing we can articulate in one sentence.",
-        },
-        {
-          title: "Diligence",
-          body: "Filings, transcripts, industry data, and competitor work, until the business is understood end to end.",
-        },
-        {
-          title: "Model",
-          body: "A three-statement model and a valuation built from our own assumptions, cross-checked against comparables.",
-        },
-        {
-          title: "Defend",
-          body: "The thesis is pitched to the desk and stress-tested. Only what survives is published, then tracked.",
-        },
-      ],
-    },
     ratings: [
       { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
       { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },

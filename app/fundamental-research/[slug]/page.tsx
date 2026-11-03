@@ -37,7 +37,7 @@ export default async function ReportPage({ params }: Props) {
     <main className="relative min-h-screen">
       <div className="mx-auto max-w-7xl px-6 pb-28 pt-28 sm:pt-36">
         <Link
-          href="/fundamental-research"
+          href="/fundamental-research/reports"
           className="group inline-flex items-center gap-2 font-mono text-[0.75rem] uppercase tracking-[0.08em] text-navy/50 transition hover:text-signal-deep"
         >
           <span aria-hidden="true" className="transition group-hover:-translate-x-1">
