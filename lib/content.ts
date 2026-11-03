@@ -166,8 +166,8 @@ const content = {
     // summary: the full method lives in the Research Handbook.
     about: {
       hero: {
-        eyebrow: "UofT Decision Systems",
-        title: "Fundamental Research",
+        eyebrow: "Fundamental Research",
+        title: "Who We Are",
         body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced.",
         primary: { label: "View Published Research", href: "/fundamental-research/reports" },
         secondary: { label: "Join the Team", href: "/get-involved" },
@@ -216,17 +216,44 @@ const content = {
       process: {
         heading: "Research Process",
         intro: "Every idea goes through the same six steps, from the first screen to the call we track in public.",
+        // each step: a short line for the step list, and the fuller detail
+        // shown when the step is selected
         steps: [
-          { title: "Screen", body: "Proprietary screens, earnings results, news flow, macro themes, and ideas from Quantitative Research." },
+          {
+            title: "Screen",
+            body: "Where ideas come from.",
+            detail: "Ideas come from our quality-and-valuation screen, earnings results, news flow, macro themes, and screens from the Quantitative Research division. We start bottom-up: a company earns its place on its own merits.",
+          },
           {
             title: "Research",
-            body: "Top-down, from the forces that move the business to the business itself.",
-            layers: ["Macro", "Industry", "Company"],
+            body: "From the economy down to the company.",
+            detail: "A strong business is worth researching in any macro environment, but the macro view shapes when we make the call and how we frame it. So every name is worked through three layers.",
+            layers: [
+              { title: "Macro", body: "Which forces matter for the company (rates, FX, commodity prices, the cycle) and which way they are moving." },
+              { title: "Industry", body: "How the industry is structured, who competes, and how those macro forces hit the sector." },
+              { title: "Company", body: "Qualitative and quantitative analysis, catalysts, and risks: why this business wins or loses." },
+            ],
           },
-          { title: "Value", body: "DCF and comparable companies, plus precedent transactions where M&A is relevant. Bull, base, and bear cases." },
-          { title: "Write", body: "A full written thesis in the DSYS report template." },
-          { title: "Review", body: "Pitched to the team and peer-reviewed: approved, sent back, or dropped." },
-          { title: "Monitor", body: "Tracked on this site and revisited after every major catalyst." },
+          {
+            title: "Value",
+            body: "What the business is worth.",
+            detail: "A discounted cash flow model and comparable company analysis, plus precedent transactions where M&A is relevant. Bull, base, and bear cases are summarized in a football field, with the inputs that drive them disclosed.",
+          },
+          {
+            title: "Write",
+            body: "The thesis, on the record.",
+            detail: "A written report in the DSYS template. Every figure is sourced, facts are kept separate from opinion, and every estimate is labelled as an estimate.",
+          },
+          {
+            title: "Review",
+            body: "Tested before it's published.",
+            detail: "The analyst pitches the idea to the team, and at least one other analyst reviews the report. The idea is approved, sent back for more work, or dropped.",
+          },
+          {
+            title: "Monitor",
+            body: "Tracked in public.",
+            detail: "Published calls are dated with their entry price, price target, benchmark, and horizon, tracked on this site, and reviewed after any significant catalyst to the business.",
+          },
         ],
       },
       latest: {
