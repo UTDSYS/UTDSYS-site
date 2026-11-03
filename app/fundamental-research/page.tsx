@@ -28,7 +28,7 @@ function SectionTitle({ n, id, children, onDark = false }: { n: number; id: stri
       </span>
       <h2
         id={id}
-        className={`font-display mt-2 text-balance text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] sm:text-[2rem] ${
+        className={`font-display mt-2 scroll-mt-32 text-balance text-[1.75rem] font-semibold leading-tight tracking-[-0.01em] sm:text-[2rem] ${
           onDark ? "text-white" : "text-ink"
         }`}
       >
@@ -61,21 +61,21 @@ export default function FundamentalAboutPage() {
           className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-[linear-gradient(0deg,rgb(6_14_36/0.85),transparent)]"
         />
 
-        <div className="mx-auto flex min-h-[min(40rem,80vh)] max-w-7xl flex-col justify-center px-6 pb-20 pt-32 sm:pt-36">
-          <div className="max-w-2xl">
+        {/* a full-screen hero: fills the window, content centred, with a cue to scroll */}
+        <div className="relative mx-auto flex min-h-[100svh] max-w-7xl flex-col justify-center px-6 pb-28 pt-32 sm:pt-36">
+          <div className="max-w-3xl">
             <p className={`${label} text-[rgb(122_162_255)]`}>{hero.eyebrow}</p>
-            {/* same size as the Published Research title, so the two pages pair */}
             <h1
               id="hero"
-              className="font-display mt-4 text-balance text-[clamp(2.5rem,5.5vw,4.25rem)] font-semibold leading-[0.98] tracking-[-0.015em]"
+              className="font-display mt-5 text-balance text-[clamp(3.25rem,8.5vw,7rem)] font-semibold leading-[0.92] tracking-[-0.02em]"
             >
               {hero.title}
             </h1>
-            <div aria-hidden="true" className="mt-7 flex gap-1.5">
-              <span className="h-1.5 w-24 bg-white sm:w-32" />
-              <span className="h-1.5 w-10 bg-signal sm:w-14" />
+            <div aria-hidden="true" className="mt-8 flex gap-1.5">
+              <span className="h-1.5 w-24 bg-white sm:w-36" />
+              <span className="h-1.5 w-10 bg-signal sm:w-16" />
             </div>
-            <p className="mt-7 max-w-[34rem] text-lg leading-relaxed text-white/75 sm:text-xl">{hero.body}</p>
+            <p className="mt-8 max-w-[36rem] text-lg leading-relaxed text-white/75 sm:text-xl">{hero.body}</p>
             <div className="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
               <Button href={hero.primary.href} variant="signal">
                 {hero.primary.label}
@@ -88,6 +88,18 @@ export default function FundamentalAboutPage() {
               </Link>
             </div>
           </div>
+
+          {/* scroll cue: jumps to the first section */}
+          <a
+            href="#approach"
+            aria-label="Scroll to Investment Philosophy"
+            className="group absolute bottom-8 left-6 flex items-center gap-3 font-mono text-[0.7rem] uppercase tracking-[0.12em] text-white/50 transition hover:text-white"
+          >
+            <span className="relative block h-10 w-px overflow-hidden bg-white/20">
+              <span className="scroll-cue absolute inset-x-0 top-0 h-1/2 bg-white" />
+            </span>
+            Scroll
+          </a>
         </div>
       </section>
 
@@ -99,18 +111,18 @@ export default function FundamentalAboutPage() {
           </SectionTitle>
           <div>
             <p className="max-w-3xl text-lg leading-relaxed text-navy/75 sm:text-xl">{approach.intro}</p>
-            <ol className="mt-12 grid gap-4 md:grid-cols-3">
+            {/* the principles as a stacked list: title left, reasoning right */}
+            <ol className="mt-12 border-t border-navy/12">
               {approach.items.map((a, i) => (
                 <li
                   key={a.title}
-                  className="group rounded-sm border border-navy/12 bg-white p-7 transition hover:-translate-y-0.5 hover:border-navy/25 hover:shadow-[0_14px_40px_-22px_rgb(14_24_48/0.35)]"
+                  className="group grid grid-cols-1 gap-3 border-b border-navy/12 py-8 transition-colors hover:bg-white/70 sm:grid-cols-[3.5rem_14rem_minmax(0,1fr)] sm:gap-6 sm:px-2"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-mono text-xs tabular-nums text-signal-deep">{num(i)}</span>
-                    <span aria-hidden="true" className="h-[3px] w-6 bg-navy/15 transition-all group-hover:w-10 group-hover:bg-signal" />
-                  </div>
-                  <h3 className="font-display mt-5 text-xl font-semibold tracking-tight text-ink">{a.title}</h3>
-                  <p className="mt-3 text-[0.9375rem] leading-relaxed text-navy/70">{a.body}</p>
+                  <span className="font-mono text-sm tabular-nums text-signal-deep sm:pt-2">{num(i)}</span>
+                  <h3 className="font-display text-2xl font-semibold tracking-tight text-ink transition-colors group-hover:text-signal-deep sm:text-[1.75rem]">
+                    {a.title}
+                  </h3>
+                  <p className="max-w-2xl text-base leading-relaxed text-navy/70 sm:pt-1.5">{a.body}</p>
                 </li>
               ))}
             </ol>
@@ -122,15 +134,13 @@ export default function FundamentalAboutPage() {
           <SectionTitle n={1} id="coverage">
             {coverage.heading}
           </SectionTitle>
-          <ul className="grid gap-4 md:grid-cols-3">
+          {/* open columns split by rules, like a fact sheet; no boxes */}
+          <ul className="grid grid-cols-1 divide-y divide-navy/12 md:grid-cols-3 md:divide-x md:divide-y-0">
             {coverage.items.map((c) => (
-              <li
-                key={c.title}
-                className="flex flex-col rounded-sm border border-navy/12 bg-white p-7 transition hover:border-navy/25"
-              >
-                <span className={`${label} text-[0.7rem] text-signal-deep`}>{c.detail}</span>
-                <h3 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink">{c.title}</h3>
-                <p className="mt-3 text-[0.9375rem] leading-relaxed text-navy/70">{c.body}</p>
+              <li key={c.title} className="py-6 first:pt-0 md:px-8 md:py-0 md:first:pl-0 md:last:pr-0">
+                <h3 className="font-display text-3xl font-semibold tracking-tight text-ink">{c.title}</h3>
+                <p className={`${label} mt-3 text-[0.7rem] text-signal-deep`}>{c.detail}</p>
+                <p className="mt-4 text-[0.9375rem] leading-relaxed text-navy/70">{c.body}</p>
               </li>
             ))}
           </ul>
