@@ -65,6 +65,46 @@ export default function Nav() {
               >
                 {l.label}
               </Link>
+            ) : "children" in l ? (
+              // a section with sub-pages: hover (or keyboard focus) opens them
+              <div key={l.label} className="group relative">
+                <Link
+                  href={l.href}
+                  aria-haspopup="true"
+                  className={`flex items-center gap-1.5 font-mono text-[0.8rem] uppercase tracking-[0.08em] transition hover:text-signal ${
+                    inSection(l.href) ? "text-signal" : "text-navy/70"
+                  }`}
+                >
+                  {l.label}
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 10 10"
+                    aria-hidden="true"
+                    className="transition-transform duration-200 group-hover:rotate-180 group-focus-within:rotate-180"
+                  >
+                    <path d="M1.5 3.5 5 7l3.5-3.5" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </Link>
+                {/* pt bridges the gap so the pointer can travel into the panel */}
+                <div className="invisible absolute left-1/2 top-full z-40 -translate-x-1/2 pt-4 opacity-0 transition duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                  <ul className="min-w-[14rem] overflow-hidden rounded-lg border border-navy/10 bg-white py-2 shadow-[0_18px_40px_-16px_rgb(14_24_48/0.35)]">
+                    {l.children.map((c) => (
+                      <li key={c.href}>
+                        <Link
+                          href={c.href}
+                          aria-current={pathname === c.href ? "page" : undefined}
+                          className={`block px-5 py-2.5 font-mono text-[0.75rem] uppercase tracking-[0.08em] transition hover:bg-navy/[0.04] hover:text-signal ${
+                            pathname === c.href ? "text-signal" : "text-navy/75"
+                          }`}
+                        >
+                          {c.label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             ) : (
               <Link
                 key={l.label}
@@ -133,7 +173,7 @@ export default function Nav() {
           home ? "bg-offwhite min-[1440px]:hidden" : "lg:hidden"
         }`}
         style={{
-          maxHeight: open ? "24rem" : "0",
+          maxHeight: open ? "32rem" : "0",
           transition: "max-height 0.35s cubic-bezier(0.22,0.7,0.24,1)",
         }}
       >
@@ -148,6 +188,31 @@ export default function Nav() {
               >
                 {l.label}
               </Link>
+            ) : "children" in l ? (
+              // on phones the sub-pages sit indented under their section
+              <div key={l.label} className="border-b border-navy/5 py-3.5">
+                <span
+                  className={`font-mono text-xs uppercase tracking-[0.08em] ${
+                    inSection(l.href) ? "text-signal" : "text-navy/70"
+                  }`}
+                >
+                  {l.label}
+                </span>
+                <div className="mt-2 flex flex-col border-l border-navy/10 pl-4">
+                  {l.children.map((c) => (
+                    <Link
+                      key={c.href}
+                      href={c.href}
+                      onClick={() => setOpen(false)}
+                      className={`py-2 font-mono text-xs uppercase tracking-[0.08em] transition hover:text-signal ${
+                        pathname === c.href ? "text-signal" : "text-navy/55"
+                      }`}
+                    >
+                      {c.label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
             ) : (
               <Link
                 key={l.label}

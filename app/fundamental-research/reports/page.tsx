@@ -5,7 +5,6 @@ import ReportTile from "@/components/research/ReportTile";
 import Disclosures from "@/components/research/Disclosures";
 import Link from "next/link";
 import Crest from "@/components/Crest";
-import FundamentalTabs from "@/components/research/FundamentalTabs";
 
 export const metadata = {
   title: "Published Reports — UofT Decision Systems",
@@ -27,11 +26,9 @@ export default function PublishedReportsPage() {
 
   return (
     <main className="relative min-h-screen overflow-x-clip">
-      <div className="mx-auto max-w-7xl px-6 pt-24 sm:pt-28">
-        <FundamentalTabs active="/fundamental-research/reports" />
-
+      <div className="mx-auto max-w-7xl px-6 pt-28 sm:pt-36">
         {/* masthead */}
-        <header className="mt-10 grid gap-10 border-b border-navy/12 pb-12 md:grid-cols-[1fr_auto] md:items-center">
+        <header className="grid gap-10 border-b border-navy/12 pb-12 md:grid-cols-[1fr_auto] md:items-center">
           <div className="max-w-2xl">
             <h1 className="font-display text-balance text-[clamp(2.75rem,7vw,5.5rem)] font-semibold leading-[0.95] tracking-[-0.01em] text-ink">
               {heading}
@@ -83,7 +80,7 @@ export default function PublishedReportsPage() {
 
         {/* the full method lives on the Who we are tab */}
         <p className="mt-16 border-t border-navy/12 pt-8 text-[0.9375rem] leading-relaxed text-navy/70">
-          Every call goes through the same six-step process and is scored on our Q-value framework.{" "}
+          Every call goes through the same six-step process, from screen to monitor.{" "}
           <Link
             href="/fundamental-research#process"
             className="font-semibold text-signal-deep underline decoration-signal-deep/30 underline-offset-4 transition hover:decoration-signal-deep"
