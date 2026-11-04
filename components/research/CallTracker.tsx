@@ -3,7 +3,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { ResearchReport } from "@/lib/content";
 import type { PricePoint, Quote } from "@/lib/quotes";
-import { UP, formatPct, formatPrice, moveColor } from "@/lib/research";
+import { UP, callStatus, formatPct, formatPrice, moveColor } from "@/lib/research";
 
 const NAVY = "#1b2a4a";
 const INK = "#0e1830";
@@ -120,9 +120,16 @@ export default function CallTracker({
   }, [quote, range, callT]);
 
   const last = quote?.last ?? null;
+  // Has the call closed? Judged on the full history, whatever range is shown.
+  const status = useMemo(() => callStatus(report, quote?.points ?? []), [report, quote]);
+  const closed = status.state === "closed" ? status : null;
   const toTarget = last === null ? null : target / last - 1;
-  const priceProgress = last === null ? 0 : Math.min(1, Math.max(0, (last - call) / (target - call)));
-  const asOf = quote?.asOf ?? callT;
+  const priceProgress = closed
+    ? Math.min(1, Math.max(0, (closed.price - call) / (target - call)))
+    : last === null
+      ? 0
+      : Math.min(1, Math.max(0, (last - call) / (target - call)));
+  const asOf = closed ? closed.t : (quote?.asOf ?? callT);
   const timeProgress = Math.min(1, Math.max(0, (asOf - callT) / (horizonEnd - callT)));
   const dayN = Math.max(0, Math.floor((asOf - callT) / DAY));
 
@@ -222,6 +229,20 @@ export default function CallTracker({
 
   return (
     <section aria-labelledby="tracker" className="relative mt-6 rounded-sm border border-navy/12 bg-white p-5 md:p-10">
+      {/* once a call closes, say so first: its result no longer moves */}
+      {closed && (
+        <div className="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-sm border-l-4 border-signal-deep bg-signal/[0.06] px-4 py-3 text-sm text-navy/80">
+          <span className="font-mono text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-signal-deep">
+            Call closed · {closed.label}
+          </span>
+          <span>
+            Closed {dayFmt.format(closed.t)} at{" "}
+            <span className="font-semibold tabular-nums text-ink">{formatPrice(report.currency, closed.price)}</span>, a{" "}
+            <span className="font-semibold tabular-nums text-ink">{formatPct(closed.ret)}</span> return from the call. The
+            chart keeps running for reference.
+          </span>
+        </div>
+      )}
       <div className="relative flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 id="tracker" className="font-mono text-sm font-semibold uppercase tracking-[0.08em] text-ink">
@@ -406,6 +427,15 @@ export default function CallTracker({
               </g>
             )}
 
+            {/* the day the call closed, if it's in range */}
+            {closed && closed.t >= chart.t0 && (
+              <g transform={`translate(${chart.x(closed.t)}, ${chart.y(closed.price)})`}>
+                <line y1={-10} y2={-(chart.y(closed.price) - PAD.top)} stroke={TARGET} strokeOpacity="0.35" strokeDasharray="2 3" />
+                <circle r="9" fill={TARGET} fillOpacity="0.14" />
+                <circle r="4.5" fill={TARGET} stroke="white" strokeWidth="2" />
+              </g>
+            )}
+
             {/* now */}
             {lastPt && !hp && (
               <g transform={`translate(${chart.x(lastPt.t)}, ${chart.y(lastPt.close)})`}>
@@ -512,12 +542,21 @@ export default function CallTracker({
 
       {/* progress: price vs time */}
       <dl className="relative mt-8 grid gap-6 border-t border-navy/10 pt-6 font-mono text-[0.75rem] uppercase tracking-[0.08em] md:grid-cols-3">
-        <div>
-          <dt className="text-navy/45">To target</dt>
-          <dd className="font-display mt-1 text-2xl font-semibold normal-case tracking-tight text-ink">
-            {toTarget === null ? "—" : formatPct(toTarget)}
-          </dd>
-        </div>
+        {closed ? (
+          <div>
+            <dt className="text-navy/45">Return, locked at close</dt>
+            <dd className="font-display mt-1 text-2xl font-semibold normal-case tracking-tight text-ink">
+              {formatPct(closed.ret)}
+            </dd>
+          </div>
+        ) : (
+          <div>
+            <dt className="text-navy/45">To target</dt>
+            <dd className="font-display mt-1 text-2xl font-semibold normal-case tracking-tight text-ink">
+              {toTarget === null ? "—" : formatPct(toTarget)}
+            </dd>
+          </div>
+        )}
         <Rail
           label="Price, call → target"
           value={priceProgress}

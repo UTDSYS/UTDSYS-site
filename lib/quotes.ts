@@ -73,8 +73,15 @@ export function parseChart(json: unknown, now = Date.now()): Quote | null {
   };
 }
 
-export async function fetchQuote(symbol: string): Promise<Quote | null> {
-  const from = Math.floor(Date.now() / 1000) - LOOKBACK_DAYS * 86_400;
+/**
+ * Daily history plus the live price. `since` (an ISO day) reaches further
+ * back than the default year when a call is older, so its whole life,
+ * and whether it ever closed at its target, stays in view.
+ */
+export async function fetchQuote(symbol: string, since?: string): Promise<Quote | null> {
+  const lookback = Math.floor(Date.now() / 1000) - LOOKBACK_DAYS * 86_400;
+  const callStart = since ? Math.floor(Date.parse(`${since}T00:00:00Z`) / 1000) - 7 * 86_400 : lookback;
+  const from = Math.min(lookback, callStart);
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     symbol,
   )}?period1=${from}&period2=9999999999&interval=1d`;

@@ -2,6 +2,9 @@ export type TeamMember = {
   name: string;
   role: string;
   photo: string | null;
+  /** One or two sentences, shown with the analyst's name on their reports. */
+  bio?: string;
+  linkedin?: string;
 };
 
 export type Rating = "Buy" | "Hold" | "Sell";
@@ -39,6 +42,17 @@ export type ResearchReport = {
   };
   /** Placeholder entries are tagged so they can never pass as real coverage. */
   sample?: boolean;
+  /**
+   * Close a call by hand, e.g. on a downgrade. Leave it out and the site
+   * applies the rule in lib/research.ts: a call closes the first day it
+   * closes at its target, or at the end of its horizon.
+   */
+  closed?: { date: string; price: number; reason: string };
+  /**
+   * Every change made after publication, oldest first, e.g.
+   * { date: "2026-11-03", note: "Price target raised from US$78 to US$85 after Q3 results." }
+   */
+  revisions?: { date: string; note: string }[];
 };
 
 const content = {
@@ -68,7 +82,15 @@ const content = {
   nav: {
     links: [
       { label: "Quantitative Research", href: "/quantitative-research" },
-      { label: "Fundamental Research", href: "/fundamental-research" },
+      {
+        label: "Fundamental Research",
+        href: "/fundamental-research",
+        // shown as a dropdown on hover, and indented in the mobile menu
+        children: [
+          { label: "What We Do", href: "/fundamental-research" },
+          { label: "Published Research", href: "/fundamental-research/reports" },
+        ],
+      },
       { label: "Team", href: "/team" },
       // Rendered as the nav's call to action rather than a plain link.
       { label: "Get Involved", href: "/get-involved", cta: true },
@@ -152,52 +174,155 @@ const content = {
   // publish, add an entry to `reports` and put the PDF in public/research/.
   // Entries marked `sample` bring back the sample notice.
   fundamentalResearch: {
-    heading: "Fundamental research",
+    heading: "Fundamental Research",
+    reportsHeading: "Published Research",
+    // /fundamental-research: the division's landing page. Kept to a
+    // summary: the full method lives in the Research Handbook.
+    about: {
+      hero: {
+        eyebrow: "Fundamental Research",
+        title: "What We Do",
+        body: "We pair bottom-up company research with a top-down view of the economy to find durable businesses the market has mispriced. We work alongside UTDSYS Quantitative Research: their screens surface ideas, and our work informs their models.",
+        primary: { label: "View Published Research", href: "/fundamental-research/reports" },
+        secondary: { label: "Join the Team", href: "/get-involved" },
+        // public/fundamental-hero.jpg; swap the file to change the photo
+        image: "/fundamental-hero.jpg",
+      },
+      approach: {
+        heading: "Investment Philosophy",
+        intro:
+          "We look for quality businesses the market has mispriced, and hold every idea to the same standard of valuation discipline.",
+        items: [
+          {
+            title: "Focus",
+            body: "Compounders with durable moats and strong free cash flow, and growth businesses we can underwrite ahead of profitability.",
+          },
+          {
+            title: "Mispricing",
+            body: "Businesses whose price has moved away from their fundamentals, through short-term sentiment or growth the market has yet to recognise.",
+          },
+          {
+            title: "Variant View",
+            body: "Where we disagree with the market, we state exactly where and why. Where we don't, we still hold every call to the same valuation discipline.",
+          },
+        ],
+      },
+      coverage: {
+        heading: "Coverage",
+        items: [
+          {
+            title: "Equities",
+            detail: "NYSE · NASDAQ · TSX",
+            body: "Companies and ADRs, researched bottom-up on their own merits. Our portfolio is long-only equities.",
+          },
+          {
+            title: "Commodities",
+            detail: "Energy · Metals",
+            body: "The commodity drivers that matter most for the companies we cover, such as oil and silver, with occasional direct trades.",
+          },
+          {
+            title: "Macro",
+            detail: "Canada · United States",
+            body: "We don't trade macro, but it is the lens that ties our equity and commodity work together and shapes when we make a call.",
+          },
+        ],
+      },
+      process: {
+        heading: "Research Process",
+        intro: "Every idea goes through the same six steps, from the first screen to the call we track in public.",
+        // each step: a short line for the step list, and the fuller detail
+        // shown when the step is selected
+        steps: [
+          {
+            title: "Screen",
+            body: "Where ideas come from.",
+            detail: "Ideas come from our quality-and-valuation screen, earnings results, news flow, macro themes, and screens from the Quantitative Research division. We start bottom-up: a company earns its place on its own merits.",
+          },
+          {
+            title: "Research",
+            body: "From the economy down to the company.",
+            detail: "A strong business is worth researching in any macro environment, but the macro view shapes when we make the call and how we frame it. So every name is worked through three layers.",
+            layers: [
+              { title: "Macro", body: "Which forces matter for the company (rates, FX, commodity prices, the cycle) and which way they are moving." },
+              { title: "Industry", body: "How the industry is structured, who competes, and how those macro forces hit the sector." },
+              { title: "Company", body: "Qualitative and quantitative analysis, catalysts, and risks: why this business wins or loses." },
+            ],
+          },
+          {
+            title: "Value",
+            body: "What the business is worth.",
+            detail: "A discounted cash flow model and comparable company analysis, plus precedent transactions where M&A is relevant. Bull, base, and bear cases are summarized in a football field, with the inputs that drive them disclosed.",
+          },
+          {
+            title: "Write",
+            body: "The thesis, on the record.",
+            detail: "A written report in the DSYS template. Every figure is sourced, facts are kept separate from opinion, and every estimate is labelled as an estimate.",
+          },
+          {
+            title: "Review",
+            body: "Tested before it's published.",
+            detail: "The analyst pitches the idea to the team, and at least one other analyst reviews the report. The idea is approved, sent back for more work, or dropped.",
+          },
+          {
+            title: "Monitor",
+            body: "Tracked in public.",
+            detail: "Published calls are dated with their entry price, price target, benchmark, and horizon, tracked on this site, and reviewed after any significant catalyst to the business.",
+          },
+        ],
+      },
+      latest: {
+        heading: "Latest Research",
+        all: "All Published Research",
+      },
+      join: {
+        text: "Want to Research With Us?",
+        label: "Join the Team",
+        href: "/get-involved",
+      },
+    },
     sampleNotice:
       "Sample reports shown for layout. Companies and figures are fictitious; first published coverage is in progress.",
-    backLabel: "All research",
-    reportHeading: "Full report",
+    backLabel: "Published Research",
+    reportHeading: "Full Report",
     reportPending: "The full write-up is being finalised and will be published here.",
+    // the record kept under every report
+    record: {
+      analystHeading: "Analyst",
+      revisionsHeading: "Revision History",
+      published: "Published",
+      noRevisions: "No changes since publication.",
+    },
+    // the full method, for readers who want more than the summary
+    methodology: {
+      label: "Read our full methodology (PDF)",
+      file: "/research/dsys-fundamental-research-methodology.pdf",
+    },
     // shown when a call is published as its financial model rather than a write-up
     model: {
-      title: "Full financial model",
+      title: "Full Financial Model",
       body: "The complete DCF in Excel: income statement, balance sheet and cash flow projections, cost of capital, and the valuation.",
-      assumptionsHeading: "Key assumptions",
-      methodsHeading: "How the target is set",
+      assumptionsHeading: "Key Assumptions",
+      methodsHeading: "How the Target Is Set",
       blendLabel: "Blended DCF value",
-      download: "Download the model (.xlsx)",
+      download: "Download the Model (.xlsx)",
     },
     coverageHeading: "Coverage",
-    // the small-card list of every report, under the carousel
-    allHeading: "All reports",
-    process: {
-      heading: "How we cover a name",
-      steps: [
-        {
-          title: "Screen",
-          body: "Ideas start from a sector view or a mispricing we can articulate in one sentence.",
-        },
-        {
-          title: "Diligence",
-          body: "Filings, transcripts, industry data, and competitor work, until the business is understood end to end.",
-        },
-        {
-          title: "Model",
-          body: "A three-statement model and a valuation built from our own assumptions, cross-checked against comparables.",
-        },
-        {
-          title: "Defend",
-          body: "The thesis is pitched to the desk and stress-tested. Only what survives is published, then tracked.",
-        },
-      ],
-    },
+    // the sortable table of every call and how it has done since publication
+    allHeading: "Track Record",
+    reportsIntro:
+      "Every call we publish, dated, with its entry price and target, and tracked against its benchmark.",
+    trackNote:
+      "A call closes on the first day the stock closes at or beyond its target, or at the end of its horizon, and its return is locked at that close. Open calls are measured to the latest price. Price returns exclude dividends; benchmarks are the S&P 500 for US listings and the S&P/TSX Composite for Canadian listings.",
+    // relative to the call's benchmark, so a rating means the same thing
+    // whatever the call's horizon
     ratings: [
-      { rating: "Buy", definition: "Expected total return above 15% over the report's horizon." },
-      { rating: "Hold", definition: "Expected total return between -5% and 15% over the horizon." },
-      { rating: "Sell", definition: "Expected total return below -5% over the horizon." },
+      { rating: "Buy", definition: "We expect the stock to outperform its benchmark over the call's horizon." },
+      { rating: "Hold", definition: "We expect the stock to perform roughly in line with its benchmark." },
+      { rating: "Sell", definition: "We expect the stock to underperform its benchmark over the call's horizon." },
     ] as { rating: Rating; definition: string }[],
+    // from the Fundamental Research summary (October 2026), word for word
     disclaimer:
-      "Reports are produced by University of Toronto students for educational purposes only. They are not investment advice or a recommendation to buy or sell any security, and UTDSYS and its members may hold positions in the securities discussed.",
+      "DSYS periodically publishes research produced by our Fundamentals Team on this page. Nothing here constitutes investment advice, and any edits made after publication are disclosed publicly. We may buy or sell securities without notice and may or may not hold positions in the securities discussed here. This page exists to show the kind of research our Investment Team does and how we think about investing; it is not a recommendation. Because markets and businesses change, these reports can become outdated over time.",
     reports: [
       {
         slug: "futu",
@@ -239,11 +364,11 @@ const content = {
         quoteSymbol: "RBRK",
         headline: "More AI, more data, more to protect",
         summary:
-          "JPMorgan CEO Jamie Dimon says AI-driven cyber risk has “gone up 10-fold” since Anthropic’s Mythos, a model that can find software flaws faster than almost any human hacker and that reportedly breached real companies’ systems during safety testing. As these capabilities spread, breaches become a question of when, not if. Rubrik sells the recovery layer that brings companies back when defenses fail, and it trades ~23% below our DCF value.",
+          "AI is making cyberattacks faster and cheaper to launch, so for most companies a breach is a question of when, not if. Rubrik sells the recovery layer that restores a business when its defences fail, a need that grows with every attack, and the stock trades about 23% below our DCF value.",
         analysts: ["Bosco Yu"],
         metrics: [
-          { label: "Valuation", value: "DCF, 50/50 perpetuity / exit multiple" },
-          { label: "Implied EV / FY27E revenue", value: "9.9x (market 7.6x)" },
+          { label: "Valuation", value: "Blended DCF" },
+          { label: "EV / FY27E sales", value: "9.9x vs 7.6x mkt" },
           { label: "Expected IRR", value: "29%" },
           { label: "Holding period", value: "1 year" },
         ],

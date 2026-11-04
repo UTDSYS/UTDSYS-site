@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "University of Toronto Decision Systems",
   description:
     "University of Toronto Decision Systems is a student research group in quantitative and fundamental research.",
+  // shared links get a full-width preview card (the image comes from each
+  // section's opengraph-image file)
+  openGraph: { siteName: "UofT Decision Systems", type: "website" },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
