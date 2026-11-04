@@ -11,7 +11,7 @@ export const metadata = {
     "UofT Decision Systems Fundamental Research: bottom-up company research with a top-down view of the economy, focused on durable businesses the market has mispriced.",
 };
 
-const { about, reports } = content.fundamentalResearch;
+const { about, reports, methodology } = content.fundamentalResearch;
 const { hero, approach, coverage, process, latest, join } = about;
 
 // Small uppercase type is kept for the hero's eyebrow only; everything else
@@ -155,6 +155,18 @@ export default function FundamentalAboutPage() {
           <div className="mt-12">
             <ProcessExplorer steps={process.steps} label={process.heading} />
           </div>
+          {/* the full method, Q-value framework included, for readers who want it */}
+          <a
+            href={methodology.file}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group mt-8 inline-flex items-center gap-2 text-[0.9375rem] font-medium text-white/80 transition hover:text-white"
+          >
+            {methodology.label}
+            <span aria-hidden="true" className="transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+              ↗
+            </span>
+          </a>
         </div>
       </section>
 

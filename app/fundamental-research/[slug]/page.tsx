@@ -7,6 +7,7 @@ import { fetchQuote } from "@/lib/quotes";
 import RatingBadge from "@/components/research/RatingBadge";
 import CallTracker from "@/components/research/CallTracker";
 import Disclosures from "@/components/research/Disclosures";
+import ReportRecord from "@/components/research/ReportRecord";
 
 const { backLabel, reportHeading, reportPending, model, reports } =
   content.fundamentalResearch;
@@ -174,12 +175,14 @@ export default async function ReportPage({ params }: Props) {
                 PDF · {report.exchange}:{report.ticker}
               </span>
               <p className="font-display text-xl font-semibold tracking-tight text-ink">
-                Full report coming soon
+                Full Report Coming Soon
               </p>
               <p className="max-w-md text-sm text-navy/55">{reportPending}</p>
             </div>
           )}
         </section>
+
+        <ReportRecord report={report} />
 
         <Disclosures />
       </div>

@@ -2,6 +2,9 @@ export type TeamMember = {
   name: string;
   role: string;
   photo: string | null;
+  /** One or two sentences, shown with the analyst's name on their reports. */
+  bio?: string;
+  linkedin?: string;
 };
 
 export type Rating = "Buy" | "Hold" | "Sell";
@@ -45,6 +48,17 @@ export type ResearchReport = {
    * closes at its target, or at the end of its horizon.
    */
   closed?: { date: string; price: number; reason: string };
+  /**
+   * Every change made after publication, oldest first, e.g.
+   * { date: "2026-11-03", note: "Price target raised from US$78 to US$85 after Q3 results." }
+   */
+  revisions?: { date: string; note: string }[];
+  /**
+   * Whether the analysts personally hold the stock when the report is
+   * published: "long", "short", or "none". Leave it out until it's
+   * confirmed; the report then shows the certification without it.
+   */
+  analystPosition?: "long" | "short" | "none";
 };
 
 const content = {
@@ -277,6 +291,26 @@ const content = {
     backLabel: "Published Research",
     reportHeading: "Full Report",
     reportPending: "The full write-up is being finalised and will be published here.",
+    // the record kept under every report
+    record: {
+      analystHeading: "Analyst",
+      revisionsHeading: "Revision History",
+      published: "Published",
+      noRevisions: "No changes since publication.",
+      certificationHeading: "Analyst Certification",
+      certification:
+        "The views in this report accurately reflect the personal views of the analysts named about the company and its securities. Analysts are students and receive no compensation of any kind for this research.",
+      position: {
+        long: "At publication, the analysts held a long position in this stock.",
+        short: "At publication, the analysts held a short position in this stock.",
+        none: "At publication, the analysts held no position in this stock.",
+      },
+    },
+    // the full method, for readers who want more than the summary
+    methodology: {
+      label: "Read our full methodology (PDF)",
+      file: "/research/dsys-fundamental-research-methodology.pdf",
+    },
     // shown when a call is published as its financial model rather than a write-up
     model: {
       title: "Full Financial Model",
