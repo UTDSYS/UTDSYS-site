@@ -53,12 +53,6 @@ export type ResearchReport = {
    * { date: "2026-11-03", note: "Price target raised from US$78 to US$85 after Q3 results." }
    */
   revisions?: { date: string; note: string }[];
-  /**
-   * Whether the analysts personally hold the stock when the report is
-   * published: "long", "short", or "none". Leave it out until it's
-   * confirmed; the report then shows the certification without it.
-   */
-  analystPosition?: "long" | "short" | "none";
 };
 
 const content = {
@@ -300,11 +294,6 @@ const content = {
       certificationHeading: "Analyst Certification",
       certification:
         "The views in this report accurately reflect the personal views of the analysts named about the company and its securities. Analysts are students and receive no compensation of any kind for this research.",
-      position: {
-        long: "At publication, the analysts held a long position in this stock.",
-        short: "At publication, the analysts held a short position in this stock.",
-        none: "At publication, the analysts held no position in this stock.",
-      },
     },
     // the full method, for readers who want more than the summary
     methodology: {

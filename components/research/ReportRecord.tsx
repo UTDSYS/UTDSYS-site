@@ -65,13 +65,10 @@ export default function ReportRecord({ report }: { report: ResearchReport }) {
         </ol>
       </div>
 
-      {/* certification, and the analysts' own position once it's confirmed */}
+      {/* certification; holdings are covered by the disclosures below */}
       <div>
         <h2 className={heading}>{record.certificationHeading}</h2>
         <p className="mt-4 text-sm leading-relaxed text-navy/70">{record.certification}</p>
-        {report.analystPosition && (
-          <p className="mt-3 text-sm font-medium leading-relaxed text-ink">{record.position[report.analystPosition]}</p>
-        )}
       </div>
     </section>
   );
