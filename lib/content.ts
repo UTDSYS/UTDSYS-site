@@ -291,9 +291,6 @@ const content = {
       revisionsHeading: "Revision History",
       published: "Published",
       noRevisions: "No changes since publication.",
-      certificationHeading: "Analyst Certification",
-      certification:
-        "The views in this report accurately reflect the personal views of the analysts named about the company and its securities. Analysts are students and receive no compensation of any kind for this research.",
     },
     // the full method, for readers who want more than the summary
     methodology: {

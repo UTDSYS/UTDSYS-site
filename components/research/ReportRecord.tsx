@@ -7,8 +7,8 @@ const members = content.team.members;
 const heading = "font-display text-lg font-semibold tracking-tight text-ink";
 
 /**
- * The record kept under every report: who wrote it, every change since it
- * was published, and the analyst certification. The revision log is what
+ * The record kept under every report: who wrote it, and every change since
+ * it was published. The revision log is what
  * makes "edits are disclosed publicly" true.
  */
 export default function ReportRecord({ report }: { report: ResearchReport }) {
@@ -19,7 +19,7 @@ export default function ReportRecord({ report }: { report: ResearchReport }) {
   const revisions = report.revisions ?? [];
 
   return (
-    <section aria-label="Report record" className="mt-16 grid gap-10 border-t border-navy/12 pt-10 lg:grid-cols-3 lg:gap-12">
+    <section aria-label="Report record" className="mt-16 grid gap-10 border-t border-navy/12 pt-10 md:grid-cols-2 lg:gap-12">
       {/* who wrote it */}
       <div>
         <h2 className={heading}>{record.analystHeading}</h2>
@@ -63,12 +63,6 @@ export default function ReportRecord({ report }: { report: ResearchReport }) {
             {revisions.length === 0 && <p className="mt-1 text-sm text-navy/60">{record.noRevisions}</p>}
           </li>
         </ol>
-      </div>
-
-      {/* certification; holdings are covered by the disclosures below */}
-      <div>
-        <h2 className={heading}>{record.certificationHeading}</h2>
-        <p className="mt-4 text-sm leading-relaxed text-navy/70">{record.certification}</p>
       </div>
     </section>
   );
